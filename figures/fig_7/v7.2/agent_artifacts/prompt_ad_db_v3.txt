@@ -1,0 +1,431 @@
+# Prompt: Build AD gene database and bibliographies from overlap CSVs
+# Working directory: Code_for_figures/fig_7/v7.2/
+
+## Objective
+
+For each brain region (DFC, MTG), build an `ad_db` list in R containing genes
+that are confirmed present in the corresponding *_overlaps.csv file and have a
+documented association with Alzheimer's disease. Genes enter the list via one of
+two tracks:
+
+  1. **Literature-pipeline track** — genes not present in the prefilter database
+     that pass a three-agent PubMed literature review (Steps 3–3.5 below).
+  2. **Prefilter track** — genes present in the curated AD database
+     `ad_gene_databases_prefilter.csv`. These are included directly without a
+     literature search, with the database as their reference source.
+
+For the DFC region, only the literature-pipeline track applies (the prefilter
+database was not used to augment DFC results). For MTG, both tracks apply and
+their outputs are merged into a single final table.
+
+---
+
+## Step 1 — Extract unique genes per region
+
+Read dfc_overlaps.csv and mtg_overlaps.csv separately. Extract all unique values
+from the Gene column of each file. Maintain two distinct gene lists:
+  - genes_dfc: unique genes from dfc_overlaps.csv
+  - genes_mtg: unique genes from mtg_overlaps.csv
+
+Do not merge the lists. Each region is processed independently.
+
+---
+
+## Step 2 — Split MTG genes into two tracks using the prefilter database
+
+A pre-built curated AD gene database is available at:
+  Code_for_figures/fig_7/v7.2/ad_gene_databases_prefilter.csv
+
+Columns: Gene, Gene_name, In_OMIM, In_OpenTargets_Platform, OpenTargets_score,
+OpenTargets_sources, In_ClinVar, In_AlzForum, Databases.
+Sources: OMIM (362 genes), Open Targets Platform (1,913 genes), ClinVar (97 genes),
+AlzForum (6 genes). Total: 2,257 unique AD-associated genes.
+
+**For MTG only**, cross-reference genes_mtg against this file:
+  - genes_mtg_prefilter: genes in genes_mtg that ARE present in the prefilter CSV.
+    These proceed directly to Step 3.5 (no literature search required).
+  - genes_mtg_pipeline: genes in genes_mtg that are NOT present in the prefilter CSV.
+    These proceed to Step 3 (literature review).
+
+Record the split counts, e.g.:
+  "MTG: 544 input → 96 prefilter track, 448 pipeline track"
+
+**For DFC**, no split is performed. All genes_dfc proceed to Step 3 as the pipeline
+track. The prefilter database is not used for DFC.
+
+Do not query DisGeNET, OMIM, AlzGene, or any external database in this step. The
+prefilter database file is the sole reference.
+
+---
+
+## Step 3 — Three-agent literature review pipeline
+
+Run the full three-agent pipeline on:
+  - genes_dfc (all DFC genes)
+  - genes_mtg_pipeline (MTG genes NOT in prefilter database)
+
+Complete DFC first, then MTG pipeline track. Do not run both simultaneously.
+
+Any genes already present in the existing summary tables
+(ad_db_summary_table_dfc.csv or ad_db_summary_table_mtg.csv) should be skipped —
+they have already been reviewed in a prior run.
+
+### Agent 1: Literature search
+
+Search PubMed for each gene to identify AD associations. Only include genes with
+a direct link to at least one of the following mechanism categories, supported by
+at least one verified PMID:
+
+  - Amyloid precursor protein (APP) processing or trafficking
+  - Aβ generation, aggregation, or clearance
+  - Tau phosphorylation, dephosphorylation, or clearance
+  - Autophagy-lysosome pathway impairment
+  - Ubiquitin-proteasome system (UPS) dysfunction
+  - Mitochondrial dysfunction (fission/fusion, bioenergetics, mitophagy)
+  - Endosomal-lysosomal trafficking
+  - ER stress / unfolded protein response (UPR) / ERAD
+  - Axonal transport deficits
+  - Synaptic failure or loss
+  - Neuroinflammation (NF-κB, TLR signalling)
+  - Ca2+ dysregulation
+  - Implication in a genome-wide association study (GWAS) of AD
+
+Do not include a row for genes with no AD link or where no real PMID can be
+verified. Return a summary table with one row per AD-linked gene:
+  - Gene: gene symbol
+  - Region: region label ("DFC" or "MTG")
+  - N_papers: number of journal articles supporting AD involvement; report up to 5;
+    use "5+" if more exist
+  - AD_mechanism: one to two sentences (max ~50 words) describing the most directly
+    supported mechanistic link
+  - References: up to 5 PMIDs
+
+#### Agent 1 search rules
+
+  - Search PubMed only; restrict to 2000–present.
+  - One gene at a time; query: `"GENE"[TIAB] AND "Alzheimer"[TIAB]`
+  - Top 5 results by relevance; abstracts only (not full text).
+  - ~0.4 s delay between queries to respect NCBI rate limits.
+  - False-positive check: verify that the gene symbol uniquely identifies the gene
+    of interest. Common failure modes: gene abbreviations shared with non-gene
+    entities (e.g., protein complex subunits, drug targets), or gene symbols
+    matching unrelated proteins (e.g., OXR1 vs. orexin receptor OX-R1).
+
+#### Agent 1 batching
+
+Process genes in batches of 25. After each batch, write a checkpoint file
+(ad_db_agent1_<region>_batch_<n>.csv) before continuing. On interruption, resume
+from the last saved batch. Merge all batches into a single output when complete:
+  - DFC: Code_for_figures/fig_7/v7.2/ad_db_agent1_dfc.csv
+  - MTG: Code_for_figures/fig_7/v7.2/ad_db_agent1_mtg.csv
+
+Agent 2 reads only from the merged file, not individual batch files.
+
+#### Rate limit handling (all agents)
+
+Per-query retry:
+  1. Wait 10 s, retry. If fail: wait 30 s, retry once more.
+  2. Three or more consecutive failures → sustained rate limit (see below).
+
+Sustained rate limit:
+  1. Write current output to disk immediately (batch checkpoint for Agent 1,
+     partial file for Agents 2–3: ad_db_agent2_<region>_partial.csv, etc.).
+  2. Write resume_<region>.txt: agent, gene/batch at pause, timestamp.
+  3. Wait 5 min; attempt one test query. If fail: wait 10 more min, retry once.
+  4. On resume, reload last checkpoint and continue — do not reprocess.
+
+Persistent failure: log to rate_limit_errors_<region>.txt (gene, agent, timestamp)
+and skip. Skipped genes: References_verified = N, Agent3_resolution = "rate limit
+failure".
+
+### Agent 2: Verification
+
+For each gene in the Agent 1 output, independently verify all 5 PMIDs.
+
+  1. Look up each PMID and confirm it is real and discoverable. Check that authors,
+     title, journal, year, and PMID are correct from your own lookup — do not rely
+     on Agent 1's description.
+  2. Verify that the described AD involvement is accurate based on your reading.
+  3. If a PMID is unverifiable, attempt to find a valid replacement. If found,
+     substitute it, note the correction, and mark Y. Only mark N if no valid
+     replacement exists.
+
+Add two columns to the Agent 1 table:
+  - References_verified: Y (all checked), Y with note (correction made or
+    qualification), or N (unverifiable with no replacement found)
+  - AD_involvement_verified: Y, N, or qualified note
+
+Retain all original PMIDs in the References column (Agent 3 uses the full list).
+
+Write output immediately before Agent 3 begins:
+  - DFC: Code_for_figures/fig_7/v7.2/ad_db_agent2_dfc.csv
+  - MTG: Code_for_figures/fig_7/v7.2/ad_db_agent2_mtg.csv
+
+### Agent 3: Reconciliation
+
+Add a column Agent3_resolution to the Agent 2 table.
+
+For rows where References_verified = Y AND AD_involvement_verified = Y:
+  Write "Confirmed". Do not re-investigate.
+
+For rows where References_verified = N OR AD_involvement_verified ≠ Y:
+  Perform an independent investigation. Reuse Agent 2's findings for any PMID
+  already resolved. Attempt to find correct references or exclude the gene if no
+  verified evidence exists. Record findings in Agent3_resolution.
+
+Inclusion/exclusion rules (applied in order):
+  1. Include if at least two agents agree that AD involvement is supported by
+     verified evidence.
+  2. Exclude if two or more agents find references unverifiable or AD involvement
+     unsupported.
+  3. Tiebreaker: if at least one PMID has been confirmed real by any agent, include;
+     otherwise exclude.
+
+Write the reconciled table:
+  - DFC: Code_for_figures/fig_7/v7.2/ad_db_summary_table_dfc.csv
+  - MTG pipeline track only (prefilter genes not yet added):
+    Code_for_figures/fig_7/v7.2/ad_db_agent3_mtg_pipeline.csv
+
+#### Checkpointing
+
+Write each agent's output before the next begins:
+  ad_db_agent1_<region>.csv → ad_db_agent2_<region>.csv → (Agent 3 output)
+
+---
+
+## Step 3.5 — Append prefilter track genes to the MTG summary table (MTG only)
+
+After Agent 3 completes for MTG, build the final MTG summary table by merging:
+  1. The Agent 3 reconciled output (pipeline track genes, from ad_db_agent3_mtg_pipeline.csv)
+  2. All genes in genes_mtg_prefilter (prefilter track genes)
+
+For prefilter track genes, add one row per gene with:
+  - Gene: gene symbol
+  - Region: "MTG"
+  - N_papers: "NA" (no literature review performed)
+  - AD_mechanism: "[Gene_name]: identified as AD-associated gene in [Databases];
+    mechanism not curated by literature review pipeline". Include OpenTargets_sources
+    if present (e.g., "sources: gwas_credible_sets").
+  - References: database name(s) from the Databases column of the prefilter CSV,
+    with "|" replaced by "; " (e.g., "OMIM; OpenTargets_Platform")
+  - References_verified: "Prefilter DB ([database names])"
+  - AD_involvement_verified: "Y (prefilter DB)"
+  - Agent3_resolution: "Included via prefilter database entry ([database names])"
+
+Do not perform a literature search for prefilter track genes. Do not add prefilter
+track genes to the DFC summary table.
+
+Write the merged table to:
+  Code_for_figures/fig_7/v7.2/ad_db_summary_table_mtg.csv
+
+Before writing, check that no gene appears in both tracks (pipeline and prefilter).
+If a gene appears in both (i.e., it passed Agent 1 AND is in the prefilter DB),
+use the prefilter track row: replace the References, References_verified,
+AD_involvement_verified, and Agent3_resolution fields with prefilter database
+values. Keep the Agent 1 N_papers and AD_mechanism fields (they are more
+informative than the database entry). Backup the original pipeline-only rows to
+ad_db_summary_table_mtg_pipeline_only.csv before overwriting.
+
+---
+
+## Step 4 — Build the ad_db R list
+
+Build `ad_db_dfc` and `ad_db_mtg` from their respective summary tables and write
+to Code_for_figures/fig_7/v7.2/ad_db.R.
+
+### n and ref values
+
+**Literature-pipeline genes** (References contains PMIDs):
+  - n = N_papers value from the summary table (integer or "5+")
+  - ref = the most highly cited verified PMID linking the gene to AD (integer)
+
+**Prefilter-database genes** (N_papers = "NA"):
+  - n = 1
+  - ref = website string corresponding to the primary database source, chosen by
+    priority: omim.org > ncbi.nlm.nih.gov/clinvar > alzforum.org >
+    platform.opentargets.org
+    Example: ref = "omim.org"
+
+### File header comment
+
+Include at the top of ad_db.R:
+  # n = number of AD-linked papers (up to 5; "5+" if more);
+  #     n = 1 for genes sourced from a curated AD database (no literature review run)
+  # ref = PMID of most relevant verified reference (literature-pipeline genes);
+  #     ref = "website" for database-sourced genes (e.g., "omim.org", "platform.opentargets.org")
+
+### Formatting rules
+
+  - Only include genes confirmed present in the corresponding *_overlaps.csv.
+  - Genes in ad_db_dfc must be in dfc_overlaps.csv; genes in ad_db_mtg must be in
+    mtg_overlaps.csv. Flag and exclude any gene not in its overlap file.
+  - Group entries by AD mechanism category within each list object. Add a new
+    "# Prefilter database entries" section for prefilter-track genes, optionally
+    sub-grouped by source (OMIM, ClinVar, Open Targets Platform).
+  - Each entry: one line with a trailing comment noting the gene name and mechanism
+    or database source.
+  - For genes in both regions, use identical n, ref, and comment in both objects.
+
+Format:
+  ad_db_dfc <- list(
+    # APP processing / trafficking
+    GENE1 = list(n = 5, ref = 23348804),  # mechanism description
+    ...
+    # Prefilter database entries
+    # Source: OMIM
+    GENE2 = list(n = 1, ref = "omim.org"),  # gene_name; AD-associated in OMIM
+  )
+
+  ad_db_mtg <- list(
+    ...
+  )
+
+---
+
+## Step 4.5 — Annotate summary tables with PubMed total hit counts
+
+For each gene in the final summary tables (ad_db_summary_table_dfc.csv and
+ad_db_summary_table_mtg.csv), retrieve the total PubMed hit count using the
+same query as Agent 1:
+
+  Query: `"GENE"[TIAB] AND "Alzheimer"[TIAB]`
+  Date range: 2000–present
+  Endpoint: NCBI E-utilities esearch (retmax=0, retmode=json)
+  Delay: ~0.4 s between queries
+
+Add a column `Pubmed_total_hits` (integer) to each summary table recording the
+total hit count from the esearch `Count` field. For genes where all queries fail
+after retries, record -1.
+
+Write the updated tables in place (overwrite ad_db_summary_table_dfc.csv and
+ad_db_summary_table_mtg.csv).
+
+---
+
+## Step 4.6 — Annotate summary tables with OpenTargets AD association scores
+
+For each gene in the final summary tables, query the Open Targets Platform API
+(v4 GraphQL, https://api.platform.opentargets.org/api/v4/graphql) to retrieve
+the overall AD association score (disease: MONDO_0004975).
+
+### Procedure
+
+1. For each gene symbol, search the OpenTargets API to resolve the Ensembl gene
+   ID:
+     query: search(queryString: $symbol, entityNames: ["target"])
+     Match the hit whose approvedSymbol equals the gene symbol (case-insensitive).
+
+2. For each resolved Ensembl ID, query the AD association score:
+     target(ensemblId: $id) {
+       associatedDiseases(BFilter: "MONDO_0004975", page: {size: 1, index: 0}) {
+         rows { score }
+       }
+     }
+   Batch up to 20 genes per request using GraphQL aliases to stay within API limits.
+   Add a ~0.15 s delay between individual symbol lookups; ~0.3 s between batch
+   score requests.
+
+3. For genes with a score > 0, retrieve the datasource-level evidence breakdown:
+     target(ensemblId: $id) {
+       evidences(efoIds: ["MONDO_0004975"], size: 100) {
+         rows { datasourceId datatypeId score }
+       }
+     }
+   Aggregate by datasource, keeping the maximum score per datasource per gene.
+
+### Output — CSV column
+
+Add a column `OpenTargets_AD_score` (last column) to each summary table:
+  - Value: association score rounded to 4 decimal places (e.g., "0.2349")
+  - "NA" if no association exists in OpenTargets or the gene could not be resolved
+
+Write the updated tables in place (overwrite ad_db_summary_table_dfc.csv and
+ad_db_summary_table_mtg.csv).
+
+### Output — evidence sources txt file
+
+For each summary table, write a paired plain-text file listing the OpenTargets
+evidence sources for every gene that has a score. Name the file to pair with the
+CSV:
+  - ad_db_summary_table_dfc_opentargets_sources.txt
+  - ad_db_summary_table_mtg_opentargets_sources.txt
+
+File format:
+  - Header: disease name, data version, retrieval date, count of scored genes
+  - One block per scored gene (in CSV row order):
+      GENE  (overall score: X.XXXX)
+        [Datatype Label]  Datasource full name  (score: X.XXXX)
+        ...
+      [blank line]
+  - Datatype ordering: genetic_association, genetic_literature, somatic_mutation,
+    affected_pathway, literature, animal_model, rna_expression, clinical
+  - Within each datatype, sort datasources by score descending
+
+Datasource display names to use:
+  gwas_credible_sets   → GWAS credible sets (fine-mapped)
+  europepmc            → Europe PMC (literature text mining)
+  eva                  → ClinVar/EVA (germline variants)
+  eva_somatic          → ClinVar/EVA somatic variants
+  gene_burden          → Gene burden / rare variant collapsing studies
+  genomics_england     → Genomics England PanelApp
+  clingen              → ClinGen
+  gene2phenotype       → Gene2Phenotype
+  orphanet             → Orphanet
+  cancer_gene_census   → COSMIC Cancer Gene Census
+  intogen              → IntOGen
+  cancer_biomarkers    → Cancer Genome Interpreter (CGI)
+  reactome             → Reactome (pathway)
+  uniprot_literature   → UniProt curated literature
+  uniprot_variants     → UniProt curated variants
+  impc                 → IMPC (mouse knockouts)
+  expression_atlas     → Expression Atlas (RNA expression)
+  clinical_precedence  → ChEMBL (clinical/drug precedence)
+  crispr               → CRISPR viability screens (DepMap/Project Score)
+  crispr_screen        → Disease-specific CRISPR screens
+
+---
+
+## Step 5 — Verify consistency
+
+After writing ad_db.R, verify:
+  - Every gene in ad_db_dfc is present in dfc_overlaps.csv
+  - Every gene in ad_db_mtg is present in mtg_overlaps.csv
+  - Every gene in ad_db_summary_table_dfc.csv is present in ad_db_dfc
+  - Every gene in ad_db_summary_table_mtg.csv is present in ad_db_mtg
+  - Every gene in ad_db_dfc is present in ad_db_summary_table_dfc.csv
+  - Every gene in ad_db_mtg is present in ad_db_summary_table_mtg.csv
+  - For literature-pipeline genes: every ref in ad_db is an integer PMID verified
+    by Agent 2 or 3
+  - For prefilter-database genes: N_papers = "NA" in the summary table and
+    n = 1 with a string ref in ad_db.R
+
+---
+
+## File locations (all within v7.2/)
+
+  Input:
+    dfc_overlaps.csv
+    mtg_overlaps.csv
+    ad_gene_databases_prefilter.csv   (prefilter DB; already built)
+
+  Agent pipeline checkpoints:
+    ad_db_agent1_dfc.csv / ad_db_agent1_mtg.csv
+    ad_db_agent2_dfc.csv / ad_db_agent2_mtg.csv
+    ad_db_agent1_<region>_batch_<n>.csv
+
+  MTG Agent 3 pipeline-track output (before prefilter merge):
+    ad_db_agent3_mtg_pipeline.csv
+
+  Backup (pipeline-only rows before prefilter merge overwrites refs):
+    ad_db_summary_table_mtg_pipeline_only.csv
+
+  Final summary tables:
+    ad_db_summary_table_dfc.csv          (includes OpenTargets_AD_score column)
+    ad_db_summary_table_mtg.csv          (includes OpenTargets_AD_score column)
+
+  OpenTargets evidence source files (paired with summary tables):
+    ad_db_summary_table_dfc_opentargets_sources.txt
+    ad_db_summary_table_mtg_opentargets_sources.txt
+
+  R output:
+    ad_db.R

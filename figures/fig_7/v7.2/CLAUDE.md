@@ -15,8 +15,8 @@ Two brain regions are processed: **DFC** (dorsolateral prefrontal cortex) and **
 
 - `dfc_overlaps.csv` — 198 unique genes from DFC overlap analysis
 - `mtg_overlaps.csv` — 544 unique genes from MTG overlap analysis
-- `prompt_ad_db_v2.txt` — the prompt that drove the original pipeline
-- `prompt_ad_db_v3.txt` — revised prompt driving the v3 MTG run (see below)
+- `agent_artifacts/prompt_ad_db_v2.txt` — the prompt that drove the original pipeline
+- `agent_artifacts/prompt_ad_db_v3.txt` — revised prompt driving the v3 MTG run (see below)
 
 ---
 
@@ -59,7 +59,7 @@ Created 2026-04-27. Key differences from v2:
 ### Scope
 - 403 candidate genes: MTG overlap genes not in prefilter DB and not already in
   `ad_db_summary_table_mtg.csv`.
-- Candidate list saved to `mtg_v3_candidates.txt` (sorted alphabetically).
+- Candidate list saved to `agent_artifacts/mtg_v3_candidates.txt` (sorted alphabetically).
 - 17 batches of 25 (final batch: 5 genes).
 
 ### Agent 1 progress — COMPLETE
@@ -112,7 +112,7 @@ Qualified genes resolved with justification notes in Agent3_resolution column.
 
 | File | Contents |
 |---|---|
-| `mtg_v3_candidates.txt` | 403 MTG candidate genes for v3 run (sorted alphabetically) |
+| `agent_artifacts/mtg_v3_candidates.txt` | 403 MTG candidate genes for v3 run (sorted alphabetically) |
 | `ad_db_agent1_mtg_v3_batch_{1-17}.csv` | v3 Agent 1 batch checkpoints (all 17 batches complete) |
 | `ad_db_agent1_mtg_v3.csv` | v3 Agent 1 merged output: 82 novel AD-linked MTG genes |
 | `ad_db_agent2_mtg_v3.csv` | v3 Agent 2 verification: 82 genes, all verified Y (6 qualified) |
@@ -131,7 +131,7 @@ Qualified genes resolved with justification notes in Agent3_resolution column.
 | `ad_db_summary_table_mtg.csv` | Final MTG table (222 genes: 126 pipeline-only + 18 pipeline/prefilter overlap + 78 prefilter-only) |
 | `ad_db_summary_table_mtg_pipeline_only.csv` | Backup of 144-gene pipeline-only MTG table (PMID refs intact for the 18 overlap genes; CLDN11 removed) |
 | `ad_db.R` | Final R list objects: `ad_db_dfc` (77 genes) and `ad_db_mtg` (222 genes) |
-| `prompt_changes.txt` | Notes on prompt iterations |
+| `agent_artifacts/prompt_changes.txt` | Notes on prompt iterations |
 
 ---
 
@@ -190,7 +190,7 @@ Sources inaccessible: DisGeNET (API key required), AlzGene (defunct), GWAS Catal
 (download endpoints returning 404), AGORA (API not accessible), MalaCards/GeneCards
 (403 Forbidden), Ensembl BioMart (no results for AD queries).
 
-See `ad_gene_databases_citations.txt` for full APA citations.
+See `agent_artifacts/ad_gene_databases_citations.txt` for full APA citations.
 
 ### Prefilter coverage of overlap genes
 | Region | Overlap genes | In prefilter DB | Absent from DB |
@@ -241,10 +241,10 @@ Top MTG scorers: NDUFS1 (0.523), PIKFYVE (0.509), MTOR (0.494).
 |------|--------|
 | `ad_db_summary_table_mtg.csv` | `OpenTargets_AD_score` column added (last column) |
 | `ad_db_summary_table_dfc.csv` | `OpenTargets_AD_score` column added (last column) |
-| `ad_db_summary_table_mtg_opentargets_sources.txt` | New — datasource evidence per scored gene |
-| `ad_db_summary_table_dfc_opentargets_sources.txt` | New — datasource evidence per scored gene |
-| `opentargets_datasources.txt` | New — general descriptions of all 20 OpenTargets datasources |
-| `prompt_ad_db_v3.txt` | Step 4.6 added documenting the OpenTargets annotation procedure |
+| `agent_artifacts/ad_db_summary_table_mtg_opentargets_sources.txt` | New — datasource evidence per scored gene |
+| `agent_artifacts/ad_db_summary_table_dfc_opentargets_sources.txt` | New — datasource evidence per scored gene |
+| `agent_artifacts/opentargets_datasources.txt` | New — general descriptions of all 20 OpenTargets datasources |
+| `agent_artifacts/prompt_ad_db_v3.txt` | Step 4.6 added documenting the OpenTargets annotation procedure |
 
 ### Notes on interpretation
 - The overall score is a harmonic sum across datasource scores, capped at 1.
@@ -262,7 +262,7 @@ Top MTG scorers: NDUFS1 (0.523), PIKFYVE (0.509), MTOR (0.494).
 
 ## Cross-check: ranked classic AD genes vs pipeline outputs (2026-04-29)
 
-`alzheimers_genes_ranked.txt` contains 19 well-established AD risk genes across 4 tiers
+`agent_artifacts/alzheimers_genes_ranked.txt` contains 19 well-established AD risk genes across 4 tiers
 (APOE, PSEN1, APP, PSEN2, TREM2, SORL1, ABCA7, BIN1, CLU, PICALM, CR1, CD33, MS4A4A,
 MS4A6A, EPHA1, INPP5D, MEF2C, FERMT2, HLA-DRB1).
 
@@ -296,7 +296,7 @@ Mirrors the AD pipeline structure with the same three-agent review approach.
 ### Input
 
 - `dfc_overlaps.csv` — 119 pipeline-track candidate genes
-- `prompt_scz_db_v1.txt` — pipeline prompt
+- `agent_artifacts/prompt_scz_db_v1.txt` — pipeline prompt
 
 ### Prefilter database (`scz_gene_databases_prefilter.csv`)
 

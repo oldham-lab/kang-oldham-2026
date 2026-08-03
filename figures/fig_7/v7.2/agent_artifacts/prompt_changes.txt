@@ -1,0 +1,96 @@
+Here are concrete changes to make the prompt rate-limit-resilient:
+
+---
+
+### 1. Pre-filter with a known AD gene database (biggest win)
+
+Before running the 3-agent pipeline, add a Step 0 that cross-references the gene lists against a curated public resource (DisGeNET, AlzGene, OMIM, or similar). Only genes with a known AD entry proceed to the literature pipeline. This could reduce 742 genes down to ~50–100, cutting search volume by 80–90%.
+
+Add to the prompt before Step 2:
+
+```
+## Step 0 — Pre-filter using curated AD gene databases
+
+Before running the agent pipeline, cross-reference genes_dfc and genes_mtg
+against DisGeNET (disease ID: C0002395), OMIM, and/or the AlzGene database.
+
+Retain only genes that appear in at least one of these resources as associated
+with Alzheimer's disease. Discard genes with no entry — they will not proceed
+to Step 2.
+
+Save the filtered lists as genes_dfc_filtered and genes_mtg_filtered. Record
+the pre-filter and post-filter counts.
+```
+
+---
+
+### 2. Run DFC and MTG sequentially, not in parallel
+
+The prompt currently says "run in parallel for DFC and MTG." Change it to sequential:
+
+```
+## Step 2 — Three-agent pipeline (run DFC first, then MTG)
+
+Complete the full pipeline for genes_dfc_filtered before starting the MTG run.
+Do not run both regions simultaneously.
+```
+
+This halves peak concurrent API load.
+
+---
+
+### 3. Batch genes within each agent run
+
+Add a batching instruction inside Agent 1:
+
+```
+### Agent 1 batching
+
+Process genes in batches of 25. After each batch, write intermediate results
+to a temporary file (ad_db_agent1_<region>_batch_<n>.csv) before continuing
+to the next batch. If the run is interrupted, resume from the last saved batch
+rather than restarting.
+```
+
+This gives you resume-ability if a rate limit mid-run kills the agent.
+
+---
+
+### 4. Cap Agent 2 PMID verification
+
+The current prompt says "up to 10 PMIDs per gene." With 50–100 post-filter genes that's still 500–1000 fetches. Cap it:
+
+```
+Agent 2 should verify a maximum of 3 PMIDs per gene — the 3 most directly
+mechanistically relevant references from Agent 1's output. Verification of
+additional references is optional if the primary 3 are confirmed.
+```
+
+---
+
+### 5. Add explicit checkpointing
+
+Add to Step 2:
+
+```
+After each agent completes for a region, write its output table to disk
+immediately before the next agent begins. Use these filenames:
+  - ad_db_agent1_dfc.csv / ad_db_agent1_mtg.csv
+  - ad_db_agent2_dfc.csv / ad_db_agent2_mtg.csv
+
+If a later agent fails, the prior agents' work is preserved and the run can
+resume from the last saved checkpoint.
+```
+
+---
+
+### Summary of impact
+
+| Change | Estimated reduction in API calls |
+|---|---|
+| Step 0 pre-filter | ~80–90% fewer literature searches |
+| Sequential DFC → MTG | Halves peak concurrent load |
+| Batch size 25 + checkpointing | No reduction, but prevents total loss on failure |
+| Cap PMID verification at 3 | ~70% fewer verification fetches |
+
+The Step 0 pre-filter alone is likely enough to make this runnable without hitting limits.

@@ -1,0 +1,97 @@
+OpenTargets Platform — Datasource Descriptions
+Data version: 26.03
+Retrieved: 2026-05-21
+Total: 20 datasources across 8 datatypes
+================================================
+
+GENETIC ASSOCIATION
+-------------------
+gwas_credible_sets
+    GWAS fine-mapped credible sets from large studies (FinnGen, UK Biobank, GBMI, etc.).
+    Fine-mapping identifies the most probable causal variants at each GWAS locus.
+
+eva
+    ClinVar / European Variation Archive (EVA) — germline variant-disease associations.
+    Curated database of clinically interpreted genetic variants.
+
+gene_burden
+    Rare variant gene burden and collapsing studies.
+    Aggregates rare variants across a gene to test for disease association.
+
+genomics_england
+    Genomics England PanelApp — expert-curated gene-disease panels from the 100,000 Genomes Project.
+
+clingen
+    ClinGen — curated gene-disease validity classifications based on systematic evidence review.
+
+gene2phenotype
+    Gene2Phenotype — curated database linking genes to developmental disorders and disease mechanisms.
+
+orphanet
+    Orphanet — rare disease gene associations from the European rare disease database.
+
+
+SOMATIC MUTATION (cancer-relevant)
+------------------------------------
+eva_somatic
+    ClinVar somatic variants — clinically interpreted somatic mutations linked to disease.
+
+cancer_gene_census
+    COSMIC Cancer Gene Census — manually curated list of genes with causal roles in cancer.
+
+intogen
+    IntOGen — computationally identified cancer driver genes from tumour sequencing data.
+
+cancer_biomarkers
+    Cancer Genome Interpreter (CGI) — cancer biomarkers linked to drug response or resistance.
+
+
+AFFECTED PATHWAY
+----------------
+reactome
+    Reactome — pathway annotations linking genes to biological processes and disease mechanisms.
+
+
+LITERATURE
+----------
+europepmc
+    Europe PMC text mining — automated extraction of gene-disease co-mentions from published literature.
+    Scored by co-mention frequency and sentence context.
+
+uniprot_literature
+    UniProt curated literature — manually curated gene-disease associations from UniProt entries.
+
+
+GENETIC LITERATURE
+------------------
+uniprot_variants
+    UniProt manually curated variants — variant-level annotations from UniProt with disease links.
+
+
+ANIMAL MODEL
+------------
+impc
+    International Mouse Phenotyping Consortium (IMPC) — phenotypes from standardised mouse knockouts,
+    mapped to human diseases.
+
+
+RNA EXPRESSION
+--------------
+expression_atlas
+    Expression Atlas — differential gene expression across tissues, cell types, and disease conditions.
+
+
+CLINICAL
+--------
+clinical_precedence
+    ChEMBL — drugs in clinical trials or approved for a given indication, linking drug targets to disease.
+
+
+FUNCTIONAL GENOMICS
+-------------------
+crispr
+    CRISPR viability screens (Project Score / DepMap) — genome-wide loss-of-function screens
+    identifying essential genes in cancer cell lines.
+
+crispr_screen
+    Disease-specific CRISPR screens — targeted screens linking gene perturbations to disease-relevant phenotypes.

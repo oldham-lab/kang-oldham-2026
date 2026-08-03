@@ -7,7 +7,7 @@ Adapted from fig_7/v8/ad_db_pipeline/ncbi_prefetch.py (SCZ instead of AD; DFC li
 import json, os, sys, time, urllib.request, urllib.parse, xml.etree.ElementTree as ET
 
 HERE  = os.path.dirname(os.path.abspath(__file__))
-GENES = os.path.join(HERE, "literature_track.txt")
+GENES = os.path.join(HERE, "agent_artifacts", "literature_track.txt")
 CACHE = os.path.join(HERE, "ncbi_cache.json")
 BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
 COMMON = {"tool": "consensus_analysis_fig8", "email": "gugene.kang@ucsf.edu"}

@@ -29,7 +29,7 @@ def main():
     alias=load(os.path.join(HERE,"alias_cache.json")) if os.path.exists(os.path.join(HERE,"alias_cache.json")) else {}
     pcount=load(os.path.join(HERE,"prefilter_counts.json"))
     curator=load(os.path.join(HERE,"curator_genes.json")) if os.path.exists(os.path.join(HERE,"curator_genes.json")) else {}
-    overlap=[g.strip() for g in open(os.path.join(HERE,"dfc_candidates.txt")) if g.strip()]
+    overlap=[g.strip() for g in open(os.path.join(HERE,"agent_artifacts","dfc_candidates.txt")) if g.strip()]
     pref={r["Gene"]:r for r in csv.DictReader(open(PREFILTER_CSV))}
     prefilter_set=set(pref)
 

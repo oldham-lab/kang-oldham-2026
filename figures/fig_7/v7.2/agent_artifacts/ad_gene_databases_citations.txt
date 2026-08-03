@@ -1,0 +1,115 @@
+Citations for AD gene databases used in ad_gene_databases_prefilter.csv
+Generated: 2026-04-27
+========================================================================
+
+DATABASES SUCCESSFULLY QUERIED
+--------------------------------
+
+1. OMIM (Online Mendelian Inheritance in Man)
+   Column: In_OMIM
+   Access method: NCBI E-utilities (esearch + elink + esummary); Alzheimer's disease
+   search term returned 394 OMIM entries, linked to 362 human gene IDs.
+
+   McKusick-Nathans Institute of Genetic Medicine, Johns Hopkins University. (2025).
+   Online Mendelian Inheritance in Man (OMIM). Johns Hopkins University.
+   https://www.omim.org/
+
+   Amberger, J. S., Bocchini, C. A., Schiettecatte, F., Scott, A. F., & Hamosh, A.
+   (2015). OMIM.org: Online Mendelian Inheritance in Man (OMIM®), an online catalog
+   of human genes and genetic disorders. Nucleic Acids Research, 43(D1), D789–D798.
+   https://doi.org/10.1093/nar/gku1205
+
+2. Open Targets Platform (includes Open Targets Genetics, now merged)
+   Column: In_OpenTargets_Platform
+   Access method: GraphQL API (api.platform.opentargets.org); disease MONDO_0004975
+   (Alzheimer disease); filtered to curated evidence datasources only (ClinVar/EVA,
+   UniProt variants, UniProt literature, Orphanet, Genomics England PanelApp,
+   gene burden, GWAS credible sets, clinical precedence). Note: Open Targets Genetics
+   (formerly genetics.opentargets.org) has been merged into the Open Targets Platform
+   as of 2023; genetics-derived evidence is included in this query.
+
+   Ochoa, D., Hercules, A., Ring, C., Dessimoz, C., Alcantara, R., Goncalves, E.,
+   ... & Barrett, J. C. (2021). Open Targets Platform: supporting systematic drug-
+   target identification and prioritisation. Nucleic Acids Research, 49(D1),
+   D1302–D1310. https://doi.org/10.1093/nar/gkaa1027
+
+   Ghoussaini, M., Mountjoy, E., Carmona, M., Peat, G., Schmidt, E. M., Hercules, A.,
+   ... & Dunham, I. (2021). Open Targets Genetics: systematic identification of
+   trait-associated genes using large-scale genetics and functional genomics. Nucleic
+   Acids Research, 49(D1), D1311–D1320. https://doi.org/10.1093/nar/gkaa840
+
+3. ClinVar
+   Column: In_ClinVar
+   Access method: NCBI E-utilities (esearch + esummary); searched ClinVar for
+   Alzheimer's disease variants (1,177 variants retrieved); gene symbols extracted
+   from variant records (97 unique human genes).
+
+   Landrum, M. J., Lee, J. M., Benson, M., Brown, G. R., Chao, C., Chitipiralla, S.,
+   ... & Maglott, D. R. (2018). ClinVar: improving access to variant interpretations
+   and supporting evidence. Nucleic Acids Research, 46(D1), D1062–D1067.
+   https://doi.org/10.1093/nar/gkx1153
+
+4. AlzForum Genetics
+   Column: In_AlzForum
+   Access method: WebFetch of alzforum.org/genetics (partial — direct HTTP access
+   returned 403 Forbidden; 6 genes recovered via web rendering: APP, PSEN1, PSEN2,
+   APOE, MAPT, TREM2). This represents an incomplete extraction; the full AlzForum
+   genetics database contains additional candidate genes.
+
+   AlzForum. (2025). Genetics. Alzheimer Research Forum.
+   https://www.alzforum.org/genetics
+
+
+DATABASES ATTEMPTED BUT INACCESSIBLE
+--------------------------------------
+
+5. DisGeNET
+   Disease ID queried: C0002395 (Alzheimer's Disease, UMLS)
+   Outcome: API now requires authentication (API key); download files redirected to
+   login-gated pages. Not included in the table.
+
+   Piñero, J., Ramírez-Anguita, J. M., Saüch-Pitarch, J., Ronzano, F., Centeno, E.,
+   Sanz, F., & Furlong, L. I. (2020). The DisGeNET knowledge platform for disease
+   genomics: 2019 update. Nucleic Acids Research, 48(D1), D845–D855.
+   https://doi.org/10.1093/nar/gkz1021
+
+6. AlzGene
+   Outcome: Database defunct; alzgene.org is no longer accessible. Not included.
+
+   Bertram, L., McQueen, M. B., Mullin, K., Blacker, D., & Tanzi, R. E. (2007).
+   Systematic meta-analyses of Alzheimer disease genetic association studies: the
+   AlzGene database. Nature Genetics, 39(1), 17–23.
+   https://doi.org/10.1038/ng1934
+
+7. GWAS Catalog
+   Outcome: Download API returned 404 errors for trait-specific queries; study search
+   API returned 0 results for EFO_0000249. Not included.
+
+   Sollis, E., Mosaku, A., Abid, A., Buniello, A., Cerezo, M., Gil, L., ... &
+   Harris, L. H. (2023). The NHGRI-EBI GWAS Catalog: knowledgebase and deposition
+   resource. Nucleic Acids Research, 51(D1), D977–D985.
+   https://doi.org/10.1093/nar/gkac1010
+
+8. AGORA (Accelerating Medicines Partnership Alzheimer's Disease)
+   Outcome: API endpoints returned 404; Synapse REST API inaccessible from this
+   environment. Not included.
+
+   Agora: Alzheimer's Disease Target Explorer. Sage Bionetworks / AMP-AD Knowledge
+   Portal. https://agora.adknowledgeportal.org/
+
+9. MalaCards / GeneCards
+   Outcome: Both returned HTTP 403 Forbidden for programmatic access. Bulk gene
+   extraction requires a commercial licence. Not included.
+
+   Rappaport, N., Twik, M., Plaschkes, I., Nudel, R., Stein, T. I., Levitt, J.,
+   ... & Lancet, D. (2017). MalaCards: an amalgamated human disease compendium with
+   diverse clinical and genetic annotation and structured search. Nucleic Acids
+   Research, 45(D1), D877–D887. https://doi.org/10.1093/nar/gkw1012
+
+10. Ensembl / BioMart
+    Outcome: BioMart phenotype_description filter returned no results for any
+    Alzheimer's disease query variant. Not included.
+
+    Martin, F. J., Amode, M. R., Aneja, A., Austine-Orimoloye, O., Azov, A. G.,
+    Barnes, I., ... & Flicek, P. (2023). Ensembl 2023. Nucleic Acids Research,
+    51(D1), D933–D941. https://doi.org/10.1093/nar/gkac958

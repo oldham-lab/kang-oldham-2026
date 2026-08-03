@@ -1,0 +1,317 @@
+# Prompt: Build SCZ gene database and bibliographies from overlap CSVs
+# Working directory: Code_for_figures/fig_8/v1/
+
+## Objective
+
+For the DFC brain region, build a `scz_db` list in R containing genes that are
+confirmed present in dfc_overlaps.csv and have a documented association with
+schizophrenia (SCZ). Genes enter the list via one of two tracks:
+
+  1. **Literature-pipeline track** — genes not present in the prefilter database
+     that pass a three-agent PubMed literature review (Steps 3–3.5 below).
+  2. **Prefilter track** — genes present in the curated SCZ database
+     `scz_gene_databases_prefilter.csv`. These are included directly without a
+     literature search, with the database as their reference source.
+
+---
+
+## Step 1 — Extract unique genes for DFC
+
+Read dfc_overlaps.csv. Extract all unique values from the Gene column.
+Maintain the list as genes_dfc.
+
+---
+
+## Step 2 — Split DFC genes into two tracks using the prefilter database
+
+A pre-built curated SCZ gene database should be present at:
+  Code_for_figures/fig_8/v1/scz_gene_databases_prefilter.csv
+
+Columns: Gene, Gene_name, In_OMIM, In_OpenTargets_Platform, OpenTargets_score,
+OpenTargets_sources, In_ClinVar, In_SZDB, Databases.
+
+Recommended sources (query before running if the file does not yet exist):
+  - OMIM: schizophrenia genes (disease MIM 181500)
+  - Open Targets Platform: MONDO:0005090 (schizophrenia); curated datasources only
+  - ClinVar: schizophrenia variants (via NCBI E-utilities; disease term "schizophrenia")
+  - SZDB (http://www.szdb.org/): curated schizophrenia candidate gene database
+
+Cross-reference genes_dfc against this file:
+  - genes_dfc_prefilter: genes in genes_dfc that ARE present in the prefilter CSV.
+    These proceed directly to Step 3.5 (no literature search required).
+  - genes_dfc_pipeline: genes in genes_dfc that are NOT present in the prefilter CSV.
+    These proceed to Step 3 (literature review).
+
+Record the split counts, e.g.:
+  "DFC: 209 input → 30 prefilter track, 179 pipeline track"
+
+If scz_gene_databases_prefilter.csv does not exist, skip the split and run all
+genes_dfc through the pipeline track (Step 3).
+
+Do not query any external database in real time during this step. The prefilter
+database file is the sole reference.
+
+---
+
+## Step 3 — Three-agent literature review pipeline
+
+Run the full three-agent pipeline on genes_dfc_pipeline (DFC genes NOT in the
+prefilter database), skipping any genes already present in the existing summary
+table (scz_db_summary_table_dfc.csv) from a prior run.
+
+### Agent 1: Literature search
+
+Search PubMed for each gene to identify schizophrenia associations. Only include
+genes with a direct link to at least one of the following SCZ mechanism categories,
+supported by at least one verified PMID:
+
+  - Dopaminergic signaling dysfunction
+  - Glutamatergic / NMDA receptor hypofunction
+  - GABAergic interneuron dysfunction
+  - Synaptic vesicle cycling or neurotransmitter release
+  - Dendritic spine morphology or density
+  - Neurodevelopmental processes (neuronal migration, cortical organization,
+    differentiation, or axon guidance)
+  - Myelination and oligodendrocyte function
+  - Mitochondrial dysfunction
+  - Neuroinflammation / complement cascade / immune dysregulation
+  - Epigenetic regulation (histone modification, chromatin remodeling,
+    DNA methylation)
+  - RNA processing, splicing, or post-transcriptional regulation
+  - Implication in a genome-wide association study (GWAS) of schizophrenia
+
+Do not include a row for genes with no SCZ link or where no real PMID can be
+verified. Return a summary table with one row per SCZ-linked gene:
+  - Gene: gene symbol
+  - Region: "DFC"
+  - N_papers: number of journal articles supporting SCZ involvement; report up to 5;
+    use "5+" if more exist
+  - SCZ_mechanism: one to two sentences (max ~50 words) describing the most directly
+    supported mechanistic link to schizophrenia
+  - References: up to 5 PMIDs
+
+#### Agent 1 search rules
+
+  - Search PubMed only; restrict to 2000–present.
+  - One gene at a time; query: `"GENE"[TIAB] AND "schizophrenia"[TIAB]`
+  - Top 5 results by relevance; abstracts only (not full text).
+  - ~0.4 s delay between queries to respect NCBI rate limits.
+  - False-positive check: verify that the gene symbol uniquely identifies the gene
+    of interest. Common failure modes: gene abbreviations shared with non-gene
+    entities, or gene symbols matching unrelated proteins.
+
+#### Agent 1 batching
+
+Process genes in batches of 25. After each batch, write a checkpoint file
+(scz_db_agent1_dfc_batch_<n>.csv) before continuing. On interruption, resume
+from the last saved batch. Merge all batches into a single output when complete:
+  Code_for_figures/fig_8/v1/scz_db_agent1_dfc.csv
+
+Agent 2 reads only from the merged file, not individual batch files.
+
+#### Rate limit handling (all agents)
+
+Per-query retry:
+  1. Wait 10 s, retry. If fail: wait 30 s, retry once more.
+  2. Three or more consecutive failures → sustained rate limit (see below).
+
+Sustained rate limit:
+  1. Write current output to disk immediately (batch checkpoint for Agent 1,
+     partial file for Agents 2–3: scz_db_agent2_dfc_partial.csv, etc.).
+  2. Write resume_dfc.txt: agent, gene/batch at pause, timestamp.
+  3. Wait 5 min; attempt one test query. If fail: wait 10 more min, retry once.
+  4. On resume, reload last checkpoint and continue — do not reprocess.
+
+Persistent failure: log to rate_limit_errors_dfc.txt (gene, agent, timestamp)
+and skip. Skipped genes: References_verified = N, Agent3_resolution = "rate limit
+failure".
+
+### Agent 2: Verification
+
+For each gene in the Agent 1 output, independently verify all 5 PMIDs.
+
+  1. Look up each PMID and confirm it is real and discoverable. Check that authors,
+     title, journal, year, and PMID are correct from your own lookup — do not rely
+     on Agent 1's description.
+  2. Verify that the described SCZ involvement is accurate based on your reading.
+  3. If a PMID is unverifiable, attempt to find a valid replacement. If found,
+     substitute it, note the correction, and mark Y. Only mark N if no valid
+     replacement exists.
+
+Add two columns to the Agent 1 table:
+  - References_verified: Y (all checked), Y with note (correction made or
+    qualification), or N (unverifiable with no replacement found)
+  - SCZ_involvement_verified: Y, N, or qualified note
+
+Retain all original PMIDs in the References column (Agent 3 uses the full list).
+
+Write output immediately before Agent 3 begins:
+  Code_for_figures/fig_8/v1/scz_db_agent2_dfc.csv
+
+### Agent 3: Reconciliation
+
+Add a column Agent3_resolution to the Agent 2 table.
+
+For rows where References_verified = Y AND SCZ_involvement_verified = Y:
+  Write "Confirmed". Do not re-investigate.
+
+For rows where References_verified = N OR SCZ_involvement_verified ≠ Y:
+  Perform an independent investigation. Reuse Agent 2's findings for any PMID
+  already resolved. Attempt to find correct references or exclude the gene if no
+  verified evidence exists. Record findings in Agent3_resolution.
+
+Inclusion/exclusion rules (applied in order):
+  1. Include if at least two agents agree that SCZ involvement is supported by
+     verified evidence.
+  2. Exclude if two or more agents find references unverifiable or SCZ involvement
+     unsupported.
+  3. Tiebreaker: if at least one PMID has been confirmed real by any agent, include;
+     otherwise exclude.
+
+Write the reconciled table (pipeline track only; prefilter genes not yet added):
+  Code_for_figures/fig_8/v1/scz_db_agent3_dfc_pipeline.csv
+
+#### Checkpointing
+
+Write each agent's output before the next begins:
+  scz_db_agent1_dfc.csv → scz_db_agent2_dfc.csv → scz_db_agent3_dfc_pipeline.csv
+
+---
+
+## Step 3.5 — Append prefilter track genes to the DFC summary table
+
+After Agent 3 completes, build the final DFC summary table by merging:
+  1. The Agent 3 reconciled output (pipeline track, from scz_db_agent3_dfc_pipeline.csv)
+  2. All genes in genes_dfc_prefilter (prefilter track)
+
+For prefilter track genes, add one row per gene with:
+  - Gene: gene symbol
+  - Region: "DFC"
+  - N_papers: "NA" (no literature review performed)
+  - SCZ_mechanism: "[Gene_name]: identified as SCZ-associated gene in [Databases];
+    mechanism not curated by literature review pipeline". Include OpenTargets_sources
+    if present (e.g., "sources: gwas_credible_sets").
+  - References: database name(s) from the Databases column of the prefilter CSV,
+    with "|" replaced by "; " (e.g., "OMIM; OpenTargets_Platform")
+  - References_verified: "Prefilter DB ([database names])"
+  - SCZ_involvement_verified: "Y (prefilter DB)"
+  - Agent3_resolution: "Included via prefilter database entry ([database names])"
+
+Do not perform a literature search for prefilter track genes.
+
+Write the merged table to:
+  Code_for_figures/fig_8/v1/scz_db_summary_table_dfc.csv
+
+Before writing, check that no gene appears in both tracks. If a gene passed Agent 1
+AND is in the prefilter DB, use the prefilter track row: replace the References,
+References_verified, SCZ_involvement_verified, and Agent3_resolution fields with
+prefilter database values; keep the Agent 1 N_papers and SCZ_mechanism fields.
+Backup the pipeline-only rows to scz_db_summary_table_dfc_pipeline_only.csv before
+overwriting.
+
+---
+
+## Step 4 — Build the scz_db R list
+
+Build `scz_db_dfc` from scz_db_summary_table_dfc.csv and write to:
+  Code_for_figures/fig_8/v1/scz_db.R
+
+### n and ref values
+
+**Literature-pipeline genes** (References contains PMIDs):
+  - n = N_papers value from the summary table (integer or "5+")
+  - ref = the most highly cited verified PMID linking the gene to SCZ (integer)
+
+**Prefilter-database genes** (N_papers = "NA"):
+  - n = 1
+  - ref = website string corresponding to the primary database source, chosen by
+    priority: omim.org > ncbi.nlm.nih.gov/clinvar > szdb.org >
+    platform.opentargets.org
+    Example: ref = "omim.org"
+
+### File header comment
+
+Include at the top of scz_db.R:
+  # scz_db: Schizophrenia gene database for DFC brain region
+  # Built from dfc_overlaps.csv via three-agent literature pipeline
+  # n = number of SCZ-linked papers (up to 5; "5+" if more);
+  #     n = 1 for genes sourced from a curated SCZ database (no literature review run)
+  # ref = PMID of most relevant verified reference (literature-pipeline genes);
+  #     ref = "website" for database-sourced genes (e.g., "omim.org", "platform.opentargets.org")
+
+### Formatting rules
+
+  - Only include genes confirmed present in dfc_overlaps.csv. Flag and exclude any
+    gene not in the overlap file.
+  - Group entries by SCZ mechanism category. Add a "# Prefilter database entries"
+    section for prefilter-track genes, optionally sub-grouped by source (OMIM,
+    ClinVar, SZDB, Open Targets Platform).
+  - Each entry: one line with a trailing comment noting the gene name and mechanism
+    or database source.
+
+Format:
+  scz_db_dfc <- list(
+
+    # Dopaminergic signaling dysfunction
+    GENE1 = list(n = 3, ref = 12345678),  # mechanism description
+
+    # Prefilter database entries
+    # Source: OMIM
+    GENE2 = list(n = 1, ref = "omim.org"),  # gene_name; SCZ-associated in OMIM
+  )
+
+---
+
+## Step 4.5 — Annotate summary table with PubMed total hit counts
+
+For each gene in scz_db_summary_table_dfc.csv, retrieve the total PubMed hit
+count using the same query as Agent 1:
+
+  Query: `"GENE"[TIAB] AND "schizophrenia"[TIAB]`
+  Date range: 2000–present
+  Endpoint: NCBI E-utilities esearch (retmax=0, retmode=json)
+  Delay: ~0.4 s between queries
+
+Add a column `Pubmed_total_hits` (integer) recording the total hit count from
+the esearch `Count` field. For genes where all queries fail after retries,
+record -1.
+
+Write the updated table in place (overwrite scz_db_summary_table_dfc.csv).
+
+---
+
+## Step 5 — Verify consistency
+
+After writing scz_db.R, verify:
+  - Every gene in scz_db_dfc is present in dfc_overlaps.csv
+  - Every gene in scz_db_summary_table_dfc.csv is present in scz_db_dfc
+  - Every gene in scz_db_dfc is present in scz_db_summary_table_dfc.csv
+  - For literature-pipeline genes: every ref is an integer PMID verified by Agent 2
+    or 3
+  - For prefilter-database genes: N_papers = "NA" in the summary table and n = 1
+    with a string ref in scz_db.R
+
+---
+
+## File locations (all within fig_8/v1/)
+
+  Input:
+    dfc_overlaps.csv
+    scz_gene_databases_prefilter.csv   (prefilter DB; build if not yet present)
+
+  Agent pipeline checkpoints:
+    scz_db_agent1_dfc.csv
+    scz_db_agent2_dfc.csv
+    scz_db_agent1_dfc_batch_<n>.csv
+
+  Agent 3 pipeline-track output (before prefilter merge):
+    scz_db_agent3_dfc_pipeline.csv
+
+  Backup (pipeline-only rows before prefilter merge overwrites refs):
+    scz_db_summary_table_dfc_pipeline_only.csv
+
+  Final summary table:
+    scz_db_summary_table_dfc.csv
+
+  R output:
+    scz_db.R

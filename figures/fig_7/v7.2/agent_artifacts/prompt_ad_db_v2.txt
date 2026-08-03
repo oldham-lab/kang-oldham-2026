@@ -1,0 +1,308 @@
+# Prompt: Build AD gene database and bibliographies from overlap CSVs
+# Working directory: Code_for_figures/fig_7/v7.2/
+
+## Objective
+
+For each brain region (DFC, MTG), build an `ad_db` list in R containing only genes
+that are:
+  1. Confirmed present in the corresponding *_overlaps.csv file (dfc_overlaps.csv or
+     mtg_overlaps.csv), AND
+  2. Have a documented association with Alzheimer's disease pathology in the published
+     literature (with a real PMID).
+
+This task uses a three-agent pipeline run sequentially for each region (DFC first,
+then MTG) to ensure accuracy, manage API load, and resolve any disagreements before
+producing final outputs.
+
+---
+
+## Step 1 — Extract unique genes per region
+
+Read dfc_overlaps.csv and mtg_overlaps.csv separately. Extract all unique values from
+the Gene column of each file. Maintain two distinct gene lists:
+  - genes_dfc: unique genes from dfc_overlaps.csv
+  - genes_mtg: unique genes from mtg_overlaps.csv
+
+Do not merge the lists. Each region is processed independently through the pipeline below.
+
+---
+
+## Step 2 — Pre-filter using curated AD gene databases
+
+Before running the agent pipeline, cross-reference genes_dfc and genes_mtg
+against DisGeNET (disease ID: C0002395), OMIM, and/or the AlzGene database.
+
+Retain only genes that appear in at least one of these resources as associated
+with Alzheimer's disease. Discard genes with no entry — they will not proceed
+to Step 3.
+
+### Bulk query instructions
+
+Submit gene lists as bulk queries rather than one gene at a time:
+  - DisGeNET: use the /gene/disease bulk endpoint, submitting all gene symbols
+    in a single POST request. Documentation: https://www.disgenet.org/api/
+  - OMIM: use the OMIM API search endpoint with multiple gene symbols joined
+    as a single query string (e.g., ?search=GENE1+GENE2+...).
+  - If a bulk endpoint is unavailable or returns an error, fall back to batches
+    of 50 genes per request — never query one gene at a time.
+
+Submit genes_dfc and genes_mtg as separate bulk queries (do not merge the lists).
+Query DFC first; only begin the MTG bulk queries after the DFC pre-filter is
+complete and genes_dfc_filtered has been saved. The combined DFC + MTG pre-filter
+should require no more than ~10–20 total requests regardless of gene list size.
+
+Save the filtered lists as genes_dfc_filtered and genes_mtg_filtered. Record
+the pre-filter and post-filter counts (e.g., "DFC: 198 input -> 42 retained").
+
+---
+
+## Step 3 — Three-agent literature review pipeline (run DFC first, then MTG)
+
+Complete the full three-agent pipeline for genes_dfc_filtered (produced in Step 2)
+before starting the MTG run. Do not run both regions simultaneously.
+
+Each run operates independently and produces its own outputs.
+
+### Agent 1: Literature search
+
+Take the gene list for the region and search the peer-reviewed biomedical
+literature to identify any genes that have been implicated in Alzheimer's disease.
+
+Apply the following AD mechanism categories (only include genes with direct links):
+  - Amyloid precursor protein (APP) processing or trafficking
+  - Aβ generation, aggregation, or clearance
+  - Tau phosphorylation, dephosphorylation, or clearance
+  - Autophagy-lysosome pathway impairment
+  - Ubiquitin-proteasome system (UPS) dysfunction
+  - Mitochondrial dysfunction (fission/fusion, bioenergetics, mitophagy)
+  - Endosomal-lysosomal trafficking
+  - ER stress / unfolded protein response (UPR) / ERAD
+  - Axonal transport deficits
+  - Synaptic failure or loss
+  - Neuroinflammation (NF-κB, TLR signalling)
+  - Ca2+ dysregulation
+
+Only include genes for which AD involvement can be supported by at least one verified
+PMID and a direct link to one of the mechanism categories above. Do not include a row
+for genes with no AD link or for genes where no real PMID can be verified.
+
+Return a summary table with one row per AD-linked gene, containing:
+  - Gene: gene symbol
+  - Region: region label ("DFC" or "MTG") for the pipeline run
+  - N_papers: number of scientific journal articles supporting AD involvement (report
+    up to 10; if more exist, note "10+" in this field)
+  - AD_mechanism: brief description of how the gene impacts AD (one to two sentences,
+    max ~50 words; focus on the most directly supported mechanistic link)
+  - References: list of up to 10 PMIDs supporting the above
+
+#### Agent 1 search limits
+
+  - Search PubMed as the primary database.
+  - Restrict results to articles published from 2000 onwards.
+  - Retrieve a maximum of 10 papers per gene.
+  - Use multi-gene PubMed queries where possible: submit genes in groups of up to
+    5 using OR logic (e.g., "(GENE1 OR GENE2 OR GENE3) AND Alzheimer's disease"),
+    then assign results to the correct gene. This reduces total queries from N to
+    approximately N/5.
+
+#### Agent 1 batching
+
+Process genes in batches of 25 (for output tracking purposes). After each batch,
+write intermediate results to a temporary file
+(ad_db_agent1_<region>_batch_<n>.csv) before continuing to the next batch. If the
+run is interrupted, resume from the last saved batch rather than restarting.
+
+Once all batches are complete, merge the batch files into a single consolidated
+output file:
+  - DFC run: Code_for_figures/fig_7/v7.2/ad_db_agent1_dfc.csv
+  - MTG run: Code_for_figures/fig_7/v7.2/ad_db_agent1_mtg.csv
+
+The batch files are retained for recovery purposes only. Agent 2 reads exclusively
+from the merged file, not the individual batch files.
+
+#### Rate limit handling (all agents)
+
+Apply the following procedure whenever any external query returns a rate limit
+error (HTTP 429 or equivalent):
+
+**Per-query retry (transient errors):**
+  1. Wait 10 seconds, then retry the query.
+  2. If the retry fails, wait 30 seconds, then retry once more.
+  3. If the second retry fails, the error is treated as sustained (see below).
+
+**Sustained rate limit (run-level pause):**
+If 3 or more consecutive queries fail with rate limit errors, treat this as a
+sustained rate limit on the API and pause the entire run:
+  1. Write the current agent's in-progress output to disk immediately, including
+     all genes processed so far. Use the batch checkpoint files for Agent 1
+     (ad_db_agent1_<region>_batch_<n>.csv), or a partial output file for Agents
+     2 and 3 (ad_db_agent2_<region>_partial.csv /
+     ad_db_agent3_<region>_partial.csv).
+  2. Write a resume state file named resume_<region>.txt containing:
+       - Which agent was running (Agent 1 / 2 / 3)
+       - Which gene or batch was being processed when the pause occurred
+       - Timestamp of the pause
+  3. Wait 5 minutes, then attempt a single test query. If it succeeds, resume
+     from the last saved checkpoint. If it fails, wait a further 10 minutes and
+     retry the test query once more before resuming.
+  4. On resume, reload the last checkpoint file and continue from where the run
+     paused — do not reprocess genes already written to disk.
+
+**Persistent failures:**
+If a single gene fails all retries after a sustained-rate-limit resume, log it
+to rate_limit_errors_<region>.txt (gene symbol, agent, timestamp) and skip it.
+Skipped genes receive References_verified = N and a note "rate limit failure"
+in Agent3_resolution.
+
+### Agent 2: Verification
+
+Take the table produced by Agent 1. For each gene, verify a maximum of 3 PMIDs —
+the 3 most highly cited references from Agent 1's output.
+Verification of additional references is optional if the primary 3 are confirmed.
+
+For each gene:
+  1. Look up each selected PMID independently and verify that it is real and
+     discoverable. Check that the full reference metadata (authors, title, journal,
+     year, PMID) are correct based on your own lookup — do not rely solely on Agent
+     1's description.
+  2. Verify that the described AD involvement is accurate based on your reading of
+     those references.
+
+Add two columns to the Agent 1 table:
+  - References_verified: Y if all checked references check out, N if any are
+    incorrect or unverifiable. If a reference is unverifiable, first attempt to find
+    a valid replacement; if found, substitute it, note the correction, and mark Y.
+    Only mark N if no valid replacement can be found.
+  - AD_involvement_verified: Y/N, or a more detailed note if the description is
+    partially correct or requires qualification
+
+Do not remove unverified PMIDs from the References column. Retain all PMIDs
+from Agent 1's output so that Agent 3 has the full reference list available
+for independent investigation. The References_verified column records the
+verification status; Agent 3 will use the full References list to resolve
+any discrepancies.
+
+After completing Agent 2 verification, write the output table to disk immediately
+before Agent 3 begins:
+  - DFC run: Code_for_figures/fig_7/v7.2/ad_db_agent2_dfc.csv
+  - MTG run: Code_for_figures/fig_7/v7.2/ad_db_agent2_mtg.csv
+
+### Agent 3: Reconciliation
+
+Add a column Agent3_resolution to the Agent 2 table.
+
+For rows where References_verified = Y AND AD_involvement_verified = Y:
+  - Write "Confirmed" in Agent3_resolution. Do not re-investigate these rows.
+
+For rows where References_verified = N OR AD_involvement_verified ≠ Y:
+  - Perform an independent investigation of only those rows.
+  - Before querying any PMID, check whether it was already looked up by Agent 2
+    (i.e., present in the Agent 2 output). Do not re-fetch PMIDs that Agent 2
+    already resolved — reuse Agent 2's findings for those.
+  - Attempt to resolve the discrepancy (find correct references, correct the
+    mechanism description, or exclude the gene if no verified evidence exists).
+  - If your investigation identifies a valid reference not found by Agent 1, add it
+    to the References field and update N_papers accordingly.
+  - Record your findings and any corrections in Agent3_resolution.
+
+Inclusion/exclusion rules, applied in order:
+  1. A gene proceeds if at least two agents agree that AD involvement is supported
+     by verified evidence.
+  2. A gene is excluded if two or more agents find that its references are
+     unverifiable or that its AD involvement is not supported.
+  3. If rules 1 and 2 both apply to the same gene (e.g., two agents support the
+     AD link conceptually but two agents cannot verify the specific PMIDs), the
+     tiebreaker is the presence of at least one verified reference: if at least
+     one PMID in the References column has been confirmed as real and discoverable
+     by any agent, the gene proceeds; otherwise it is excluded.
+
+Save the final reconciled table (all columns from Agents 1, 2, and 3) to the working
+directory as:
+  - DFC run: Code_for_figures/fig_7/v7.2/ad_db_summary_table_dfc.csv
+  - MTG run: Code_for_figures/fig_7/v7.2/ad_db_summary_table_mtg.csv
+
+#### Checkpointing
+
+After each agent completes for a region, write its output table to disk immediately
+before the next agent begins. Use these filenames:
+  - ad_db_agent1_dfc.csv / ad_db_agent1_mtg.csv
+  - ad_db_agent2_dfc.csv / ad_db_agent2_mtg.csv
+
+If a later agent fails, the prior agents' work is preserved and the run can resume
+from the last saved checkpoint.
+
+---
+
+## Step 4 — Build the ad_db R list
+
+Using the reconciled tables from Step 3, write the `ad_db` list objects and save them
+to a new file named `ad_db.R` in the working directory (Code_for_figures/fig_7/v7.2/).
+
+The file should contain both regional ad_db objects, named `ad_db_dfc` and `ad_db_mtg`,
+built from their respective reconciled tables.
+
+The `n` value for each gene should reflect the N_papers count from the reconciled
+agent pipeline table (Step 3). If N_papers is "10+", store `n` as the string "10+".
+The `ref` value should be the PMID of the most highly cited verified reference
+linking the gene to AD.
+
+Format:
+  ad_db_dfc <- list(
+    # Brief mechanistic label
+    GENE1 = list(n = <n_papers_from_agent_table>, ref = <PMID>),
+    ...
+  )
+
+  ad_db_mtg <- list(
+    # Brief mechanistic label
+    GENE1 = list(n = <n_papers_from_agent_table>, ref = <PMID>),
+    ...
+  )
+
+Rules:
+  - Only include genes confirmed present in the corresponding *_overlaps.csv
+  - Only include genes that passed verification in the agent pipeline (Step 3)
+  - The `ref` PMID must be a verified, real reference from the agent pipeline table
+  - Choose the most highly cited verified reference as the representative ref
+  - For each gene, add a comment on the same line recording the citation count and
+    the AD mechanism it supports, e.g.:
+      GENE1 = list(n = 5, ref = 23348804),  # highest cited; GENE1 drives Aβ clearance
+  - If a gene is present in both dfc_overlaps.csv and mtg_overlaps.csv, it receives
+    an identical entry in both ad_db_dfc and ad_db_mtg (same n, ref, and rationale)
+  - List genes alphabetically within each mechanistic comment block
+  - Do not include genes not present in the corresponding overlap CSV
+
+---
+
+## Step 5 — Verify consistency
+
+After writing ad_db.R, verify:
+  - Every gene in ad_db_dfc is present in dfc_overlaps.csv (grep check)
+  - Every gene in ad_db_mtg is present in mtg_overlaps.csv (grep check)
+  - Every ref PMID in ad_db was verified by the agent pipeline (Step 3)
+  - Every gene in ad_db_summary_table_dfc.csv is present in ad_db_dfc
+  - Every gene in ad_db_summary_table_mtg.csv is present in ad_db_mtg
+  - Every gene in ad_db_dfc is present in ad_db_summary_table_dfc.csv
+  - Every gene in ad_db_mtg is present in ad_db_summary_table_mtg.csv
+
+---
+
+## File locations (all within v7.2/)
+
+  Input CSVs:
+    Code_for_figures/fig_7/v7.2/dfc_overlaps.csv
+    Code_for_figures/fig_7/v7.2/mtg_overlaps.csv
+
+  Checkpoint outputs (intermediate):
+    Code_for_figures/fig_7/v7.2/ad_db_agent1_dfc.csv
+    Code_for_figures/fig_7/v7.2/ad_db_agent1_mtg.csv
+    Code_for_figures/fig_7/v7.2/ad_db_agent2_dfc.csv
+    Code_for_figures/fig_7/v7.2/ad_db_agent2_mtg.csv
+    Code_for_figures/fig_7/v7.2/ad_db_agent1_<region>_batch_<n>.csv  (batch intermediates)
+
+  Summary table outputs (new files):
+    Code_for_figures/fig_7/v7.2/ad_db_summary_table_dfc.csv
+    Code_for_figures/fig_7/v7.2/ad_db_summary_table_mtg.csv
+
+  ad_db output (new file):
+    Code_for_figures/fig_7/v7.2/ad_db.R

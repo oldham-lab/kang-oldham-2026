@@ -10,8 +10,8 @@ dCoPA gene lists were built. **One pipeline** produces both:
 
 The two runs share the identical procedure and differ only in the disease query term, the
 mechanism-category set, the curated prefilter database, and the input gene lists. This
-supersedes the earlier three-agent procedure (`prompt_ad_db_v3.txt` for AD,
-`prompt_scz_db_v1.txt` for SCZ).
+supersedes the earlier three-agent procedure (`agent_artifacts/prompt_ad_db_v3.txt` for AD,
+`agent_artifacts/prompt_scz_db_v1.txt` for SCZ).
 
 **Disease-specific parameters**
 

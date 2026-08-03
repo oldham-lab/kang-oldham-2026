@@ -38,5 +38,11 @@ figures/shiny_code/shiny_snapshots/
 !figures/fig_8/v1/scz_*.csv
 !figures/fig_8/v1/scz_genes.txt
 
+# Exceptions: LLM-curation prompts, gene tracks and evidence tables. These are
+# non-deterministic pipeline products — primary records, not regenerable output.
+# Each agent_artifacts/ folder carries a README describing its provenance.
+!figures/**/agent_artifacts/
+!figures/**/agent_artifacts/**
+
 # Large generated caches under analyses
 analyses/Projection_analyses/related_analyses/rand_mod_analysis/

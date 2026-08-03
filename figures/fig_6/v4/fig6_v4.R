@@ -344,7 +344,7 @@ dmod_liu <- fread(data.table=F, file="/home/gugene/bdata/@shared/scsn.expr_data/
            Consistency %in% c(0, 1)) |>
     dplyr::select(c(mod, Celltype, Direction, Consistency))
 
-# Create vector of most relevant AD genes (via chatgpt - /home/gugene/code/git/Consensus-analysis/Code_for_figures/fig_7/v7.2/alzheimers_genes_ranked.txt)
+# Create vector of most relevant AD genes (via chatgpt - /home/gugene/code/git/Consensus-analysis/Code_for_figures/fig_7/v7.2/agent_artifacts/alzheimers_genes_ranked.txt)
 cg <- c("APOE","PSEN1", "APP", "PSEN2", "TREM2", "SORL1", "ABCA7", "BIN1", "CLU", "PICALM", "CR1", "CD33", "MS4A4A", "MS4A6A", "EPHA1", "INPP5D", "MEF2C", "FERMT2", "HLA-DRB1") 
 
 # Check which mods have most highly relevant AD genes

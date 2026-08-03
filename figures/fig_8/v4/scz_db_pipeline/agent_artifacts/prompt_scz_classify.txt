@@ -1,0 +1,52 @@
+SCZ gene-database classification — fig_8 panel e (DFC). Sonnet-5, deterministic-prefetch pipeline.
+
+You are classifying whether each gene has a DIRECT, mechanistically-supported link to
+schizophrenia (SCZ), judged ONLY from the real PubMed abstracts provided to you. Every
+abstract and PMID was fetched directly from NCBI for the query
+`"SYMBOL"[TIAB] AND "Schizophrenia"[TIAB]` (2000-present); you must cite ONLY PMIDs from
+the provided set for that gene. Do not use outside knowledge to supply citations.
+
+INCLUDE a gene only if at least one provided abstract establishes a DIRECT link between
+that gene (or its protein) and schizophrenia via one of these 14 mechanism categories:
+
+  1  Dopaminergic signaling dysfunction
+  2  Glutamatergic / NMDA receptor hypofunction
+  3  GABAergic interneuron dysfunction
+  4  Synaptic vesicle cycling / neurotransmitter release
+  5  Dendritic spine morphology or density
+  6  Neurodevelopmental processes (neuronal migration, cortical organization, differentiation, axon guidance)
+  7  Myelination / oligodendrocyte function
+  8  Mitochondrial dysfunction
+  9  Neuroinflammation / complement cascade / immune dysregulation
+  10 Epigenetic regulation (histone modification, chromatin remodeling, DNA methylation)
+  11 RNA processing / splicing / post-transcriptional regulation
+  12 Schizophrenia GWAS (common-variant association)
+  13 Calcium-channel signaling
+  14 Rare coding / CNV variant burden (exome or copy-number, e.g. SETD1A, NRXN1/22q11)
+
+EXCLUSION rules (be strict):
+  - Co-mention only (gene and SCZ appear in the same abstract without a mechanistic/genetic
+    link to SCZ) -> EXCLUDE.
+  - Gene-symbol HOMONYM: the abstract's token is not the gene (e.g. an acronym, method, or
+    unrelated entity that happens to share the symbol) -> EXCLUDE. Check the abstract text.
+  - Evidence is only "expressed in brain", "differentially expressed" without a SCZ-specific
+    mechanism/genetic finding, or is about a different disease -> EXCLUDE.
+  - Wrong-gene alias (the abstract is really about a different gene sharing a name) -> EXCLUDE.
+
+For each INCLUDED gene, pick the SINGLE most-directly-supported category. Choose supporting
+PMIDs ONLY from the provided real set (up to 5). n_papers = number of provided abstracts that
+support the SCZ link (report the integer; if it is 5 and the gene's total hit count exceeds 5,
+you may report "5+").
+
+OUTPUT: a single JSON object mapping every gene you were given to its verdict. Schema:
+{
+  "GENE": {
+    "scz_linked": true|false,
+    "category": <int 1-14, or null if not linked>,
+    "mechanism": "<one to two sentences, <=50 words, the most directly supported SCZ mechanism; empty if not linked>",
+    "n_papers": <int or "5+", 0 if not linked>,
+    "refs": [<supporting PMID strings from the provided set; [] if not linked>]
+  },
+  ...
+}
+Return ONLY the JSON object, no prose. Include EVERY input gene (linked or not).

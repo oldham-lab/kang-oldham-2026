@@ -58,7 +58,7 @@ def efetch(pmids):
             "abstract":" ".join("".join(a.itertext()) for a in art.findall(".//Abstract/AbstractText")).strip()})
     return recs
 def main():
-    genes=[g.strip() for g in open(os.path.join(HERE,"literature_track.txt")) if g.strip()]
+    genes=[g.strip() for g in open(os.path.join(HERE,"agent_artifacts","literature_track.txt")) if g.strip()]
     orig=json.load(open(os.path.join(HERE,"ncbi_cache.json")))
     merged=json.load(open(os.path.join(HERE,"scz_classification.json")))
     included=set(g for g,r in merged.items() if r.get("scz_linked"))

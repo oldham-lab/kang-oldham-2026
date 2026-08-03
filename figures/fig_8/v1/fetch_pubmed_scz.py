@@ -10,7 +10,7 @@ import json
 import time
 import requests
 
-GENES_FILE = os.path.join(os.environ.get("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_8/v1/dfc_pipeline_track.txt")
+GENES_FILE = os.path.join(os.environ.get("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_8/v1/agent_artifacts/dfc_pipeline_track.txt")
 OUT_FILE   = os.path.join(os.environ.get("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_8/v1/pubmed_scz_raw.json")
 BASE_URL   = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
 

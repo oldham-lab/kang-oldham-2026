@@ -1,0 +1,53 @@
+Ranked Alzheimer’s Disease Genes (by strength of evidence)
+
+Tier 1 — Definitive / Causal (highest confidence)
+1. APOE (ε4 allele)
+   - Strongest genetic risk factor for late-onset AD
+   - Dose-dependent effect (ε4/ε4 >> ε3/ε4)
+   - Replicated across all major cohorts
+
+2. PSEN1 (Presenilin 1)
+   - Most common cause of autosomal-dominant early-onset AD
+   - Near-complete penetrance
+
+3. APP (Amyloid precursor protein)
+   - Mutations and duplications cause familial AD
+   - Central to amyloid hypothesis
+
+4. PSEN2 (Presenilin 2)
+   - Less common than PSEN1 but clearly causal
+
+
+Tier 2 — Strong risk genes (rare variants, large effects)
+5. TREM2
+   - Rare variants (e.g., R47H) increase risk ~2–4×
+
+6. SORL1
+   - Loss-of-function variants linked to AD
+
+7. ABCA7
+   - Both common and rare variants
+
+
+Tier 3 — Robust GWAS genes (common variants, modest effects)
+8. BIN1
+9. CLU (Clusterin / APOJ)
+10. PICALM
+11. CR1
+12. CD33
+13. MS4A gene cluster (MS4A4A, MS4A6A)
+
+
+Tier 4 — Additional replicated but lower-effect loci
+14. EPHA1
+15. INPP5D
+16. MEF2C
+17. FERMT2
+18. HLA-DRB1 / HLA region
+
+
+Key Takeaways
+- APOE dominates late-onset AD genetics
+- APP / PSEN1 / PSEN2 are deterministic
+- Many genes implicate immune/microglial pathways
+- Effect sizes drop after the top genes

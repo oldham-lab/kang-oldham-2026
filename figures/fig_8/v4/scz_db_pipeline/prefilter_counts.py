@@ -20,7 +20,7 @@ def count(g):
     txt=get(f"{EUT}/esearch.fcgi?{q}")
     try: return int(json.loads(txt)["esearchresult"]["count"])
     except Exception: return -1
-genes=[g.strip() for g in open(os.path.join(HERE,"prefilter_track.txt")) if g.strip()]
+genes=[g.strip() for g in open(os.path.join(HERE,"agent_artifacts","prefilter_track.txt")) if g.strip()]
 out={}
 for g in genes:
     out[g]=count(g); time.sleep(0.4)
