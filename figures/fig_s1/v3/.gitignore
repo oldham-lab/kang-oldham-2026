@@ -1,0 +1,4 @@
+# Ignore all generated outputs in this folder; track only the script.
+*
+!.gitignore
+!assemble_figure.py

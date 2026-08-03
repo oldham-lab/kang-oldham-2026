@@ -1,0 +1,4 @@
+# Ignore all generated outputs in this folder; track only the R scripts.
+*
+!.gitignore
+!*.R

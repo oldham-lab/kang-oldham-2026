@@ -1,0 +1,146 @@
+{
+  "ANKRD17": {
+    "scz_linked": false,
+    "category": null,
+    "mechanism": "",
+    "n_papers": 0,
+    "refs": [],
+    "alias_note": "Alias 'CAGS' matched only as the plural of 'CAG' trinucleotide-repeat units ('11 CAGs', '14-17 CAGs') in a CTG18.1/SEF2-1 (TCF4) repeat-length study, not the ANKRD17 gene; study also found no significant SCZ association (P=0.26)."
+  },
+  "APPBP2": {
+    "scz_linked": false,
+    "category": null,
+    "mechanism": "",
+    "n_papers": 0,
+    "refs": [],
+    "alias_note": "Alias 'PAT1' in the abstract is explicitly the distinct gene SLC36A1 (proton-coupled amino-acid transporter PAT1), not APPBP2; schizophrenia appears only in a generic drug-bioavailability list, not as a mechanistic link."
+  },
+  "FAM155A": {
+    "scz_linked": false,
+    "category": null,
+    "mechanism": "",
+    "n_papers": 0,
+    "refs": [],
+    "alias_note": ""
+  },
+  "HEATR5B": {
+    "scz_linked": false,
+    "category": null,
+    "mechanism": "",
+    "n_papers": 0,
+    "refs": [],
+    "alias_note": "Aliases 'p200'/'p200a' are homonyms of the P200 auditory event-related-potential (ERP) component; all recovered abstracts concern P50/N100/P200 sensory-gating electrophysiology or an unrelated conference-proceedings compilation, none about the HEATR5B protein."
+  },
+  "IARS1": {
+    "scz_linked": false,
+    "category": null,
+    "mechanism": "",
+    "n_papers": 0,
+    "refs": [],
+    "alias_note": "Alias 'IRS' is a homonym for the 'Immune-inflammatory Response System' (IRS/CIRS) construct used in psychoneuroimmunology papers on treatment-resistant schizophrenia, and one abstract (quetiapine/diabetes) has no textual link at all; none concern IARS1 (isoleucyl-tRNA synthetase 1)."
+  },
+  "MAP9": {
+    "scz_linked": false,
+    "category": null,
+    "mechanism": "",
+    "n_papers": 0,
+    "refs": [],
+    "alias_note": "Alias 'ASAP' is a homonym for the 'Assaulted Staff Action Program', a psychiatric-ward violence-management/research program; all 5 abstracts describe assaultive-patient characteristics under this program, none concern the MAP9 gene."
+  },
+  "METAP1": {
+    "scz_linked": false,
+    "category": null,
+    "mechanism": "",
+    "n_papers": 0,
+    "refs": [],
+    "alias_note": "Alias 'MAP1A' is shared with the distinct, independent gene MAP1A (microtubule-associated protein 1A, a DISC1-interacting partner implicated in SCZ/CNV/rare-variant studies); all abstracts explicitly concern that gene (e.g. 'MAP1A, encoding microtubule-associated protein 1A'), not METAP1 (methionyl aminopeptidase 1)."
+  },
+  "PIK3CB": {
+    "scz_linked": false,
+    "category": null,
+    "mechanism": "",
+    "n_papers": 0,
+    "refs": [],
+    "alias_note": "Alias 'PI3K' refers to the generic phosphoinositide 3-kinase pathway/enzyme family (multiple catalytic isoforms PIK3CA/B/D/G); every abstract discusses 'PI3K/AKT(/mTOR)' signaling generically (Pten loss, ErbB4-NRG1, exome-hit pathway enrichment, endothelial dysfunction) without identifying PIK3CB specifically."
+  },
+  "PRKAA2": {
+    "scz_linked": false,
+    "category": null,
+    "mechanism": "",
+    "n_papers": 0,
+    "refs": [],
+    "alias_note": "Alias 'AMPK' refers to the generic heterotrimeric AMPK complex (catalytic alpha1/PRKAA1 or alpha2/PRKAA2, beta, gamma subunits); abstracts discuss antipsychotic-induced 'AMPK' or 'AMPKalpha1' signaling generically, never isolating the PRKAA2 (alpha2) subunit specifically."
+  },
+  "RAPGEF5": {
+    "scz_linked": false,
+    "category": null,
+    "mechanism": "",
+    "n_papers": 0,
+    "refs": [],
+    "alias_note": "Alias 'GFR' is a homonym for 'general fertility rate' (fertility-in-psychosis study) and 'Global Functioning: Role' scale (GFR/GFS, used alongside auditory-cortex dynamic-range studies); none concern the RAPGEF5 gene."
+  },
+  "RPS12": {
+    "scz_linked": false,
+    "category": null,
+    "mechanism": "",
+    "n_papers": 0,
+    "refs": [],
+    "alias_note": "Alias 'S12' matches incidentally, e.g. a journal citation fragment ('Schizophr. Bull. 32(1): S12-23') and unrelated GluK5/SHARP1-2/PET-tracer/social-skills-training studies; no abstract concerns the ribosomal protein RPS12."
+  },
+  "RPS25": {
+    "scz_linked": false,
+    "category": null,
+    "mechanism": "",
+    "n_papers": 0,
+    "refs": [],
+    "alias_note": "Alias 'S25' is a homonym for 'f-S25' (a calpain-cleaved SNAP25 fragment, distinct gene SNAP25) and 'S-25 OH D' (serum 25-hydroxyvitamin D); neither abstract concerns the ribosomal protein RPS25."
+  },
+  "RPS29": {
+    "scz_linked": false,
+    "category": null,
+    "mechanism": "",
+    "n_papers": 0,
+    "refs": [],
+    "alias_note": "Alias 'S29' is a homonym for SNP label 'S29' (rs187269) within the unrelated gene GABRB2 (GABA-A receptor beta2 subunit); both abstracts concern GABRB2 haplotypes, not RPS29."
+  },
+  "SETBP1": {
+    "scz_linked": false,
+    "category": null,
+    "mechanism": "",
+    "n_papers": 0,
+    "refs": [],
+    "alias_note": "Alias 'SEB' is a homonym for the 'Rating Scale for Emotional Blunting' (SEB) in one abstract and 'Staphylococcal Enterotoxin B' (SEB, maternal-immune-activation model) in the other; neither concerns the SETBP1 gene."
+  },
+  "SLC38A1": {
+    "scz_linked": false,
+    "category": null,
+    "mechanism": "",
+    "n_papers": 0,
+    "refs": [],
+    "alias_note": "All 5 abstracts concern the distinct genes SAT1 (spermidine/spermine N1-acetyltransferase 1, e.g. explicit 'SAT-1 ... coding gene') or NAT2 (N-acetyltransferase 2, chromosome 8p22), which share the aliases 'SAT1'/'NAT2' with SLC38A1's alias list; none concern SLC38A1 (SNAT1) itself."
+  },
+  "SLK": {
+    "scz_linked": false,
+    "category": null,
+    "mechanism": "",
+    "n_papers": 0,
+    "refs": [],
+    "alias_note": "Aliases 'SYN'/'p59-FYN' are homonyms: abstracts use 'SYN' as a synaptophysin/synapsin western-blot marker or 'alpha-syn' (alpha-synuclein), and one explicitly discusses 'Fyn kinase' (the distinct gene FYN, of which p59-fyn is an alternate name); none concern SLK (STE20-like kinase)."
+  },
+  "WDHD1": {
+    "scz_linked": false,
+    "category": null,
+    "mechanism": "",
+    "n_papers": 0,
+    "refs": [],
+    "alias_note": "Alias 'AND-1'/'AND1' collides with the common English word 'and'/generic text (alias_total_hits=1571 confirms genericity); none of the 5 recovered abstracts (cognitive battery, brain heterogeneity, sleep, Z-drug, clozapine/COVID) mention WDHD1 or its gene products at all."
+  },
+  "ZFYVE9": {
+    "scz_linked": false,
+    "category": null,
+    "mechanism": "",
+    "n_papers": 0,
+    "refs": [],
+    "alias_note": "Alias 'NSP' is a homonym for the 'Neuregulin Signaling Pathway' (NRG1/NRG3/ERBB4 gene set) and separately for 'neural stem cell proliferation' in a third abstract; two additional hits are irrelevant large conference-proceedings compilations. None concern ZFYVE9/SARA (SMAD anchor for receptor activation)."
+  }
+}

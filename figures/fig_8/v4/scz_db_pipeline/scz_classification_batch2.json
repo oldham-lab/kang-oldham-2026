@@ -1,0 +1,23 @@
+{
+"OCRL": {"scz_linked": false, "category": null, "mechanism": "", "n_papers": 0, "refs": []},
+"PAFAH1B1": {"scz_linked": true, "category": 6, "mechanism": "LIS1/PAFAH1B1, a DISC1-interacting protein important for neuronal migration, shows reduced protein expression in schizophrenia postmortem brain, with expression associated with high-risk DISC1 polymorphisms, implicating the DISC1-LIS1 neurodevelopmental pathway in schizophrenia.", "n_papers": 1, "refs": ["16510495"]},
+"PCDH7": {"scz_linked": true, "category": 12, "mechanism": "PCDH7 SNPs show genome-wide-significant association with antipsychotic treatment response in schizophrenia and colocalize with schizophrenia GWAS risk signal, identifying PCDH7 as a schizophrenia-associated common-variant locus linked to synaptic/neurotransmitter pathways.", "n_papers": 3, "refs": ["29503163", "36876478", "30883267"]},
+"PLCH1": {"scz_linked": false, "category": null, "mechanism": "", "n_papers": 0, "refs": []},
+"PPM1E": {"scz_linked": true, "category": 10, "mechanism": "Promoter histone H3K9K14 acetylation at PPM1E is significantly reduced (hypoacetylated) in prefrontal cortex of young schizophrenia patients versus age-matched controls, linking epigenetic chromatin regulation at this gene to schizophrenia pathophysiology.", "n_papers": 1, "refs": ["22832356"]},
+"PRKAA2": {"scz_linked": false, "category": null, "mechanism": "", "n_papers": 0, "refs": []},
+"RAPGEF5": {"scz_linked": false, "category": null, "mechanism": "", "n_papers": 0, "refs": []},
+"RIMS2": {"scz_linked": true, "category": 4, "mechanism": "RIMS2, a cytomatrix active-zone protein regulating synaptic vesicle release, shows increased protein expression in the amygdala of schizophrenia patients, independent of antipsychotic treatment, implicating dysregulated vesicle-release machinery in schizophrenia neurobiology.", "n_papers": 1, "refs": ["18490030"]},
+"ROCK2": {"scz_linked": true, "category": 5, "mechanism": "ROCK2 hyperactivation drives dendritic spine loss and synaptic ultrastructural defects in schizophrenia models; a selective ROCK2 inhibitor rescues prefrontal spine density and produces antipsychotic-like effects in genetic and pharmacological schizophrenia mouse models.", "n_papers": 3, "refs": ["41168987", "41922796", "27054047"]},
+"RPS21": {"scz_linked": false, "category": null, "mechanism": "", "n_papers": 0, "refs": []},
+"RPS29": {"scz_linked": false, "category": null, "mechanism": "", "n_papers": 0, "refs": []},
+"SBNO1": {"scz_linked": true, "category": 6, "mechanism": "SBNO1 is expressed in the developing cortical plate and required for neurite/axon-dendrite outgrowth in cortical neurons; human genetic studies implicate SBNO1 mutations and cortical-morphology-linked genetic-epigenetic interactions as schizophrenia risk factors.", "n_papers": 2, "refs": ["36057539", "37269009"]},
+"SERTAD4": {"scz_linked": false, "category": null, "mechanism": "", "n_papers": 0, "refs": []},
+"SGIP1": {"scz_linked": false, "category": null, "mechanism": "", "n_papers": 0, "refs": []},
+"SHOC2": {"scz_linked": false, "category": null, "mechanism": "", "n_papers": 0, "refs": []},
+"SLC35B4": {"scz_linked": false, "category": null, "mechanism": "", "n_papers": 0, "refs": []},
+"SORL1": {"scz_linked": false, "category": null, "mechanism": "", "n_papers": 0, "refs": []},
+"UBE2K": {"scz_linked": true, "category": 11, "mechanism": "UBE2K shows elevated blood and brain protein/mRNA levels correlating with positive psychotic symptom severity in schizophrenia, and is targeted by a circRNA-miRNA-mRNA (ceRNA) post-transcriptional regulatory axis implicated in schizophrenia pathophysiology.", "n_papers": 3, "refs": ["30901725", "35543802", "20552680"]},
+"UBE2N": {"scz_linked": false, "category": null, "mechanism": "", "n_papers": 0, "refs": []},
+"UNC13C": {"scz_linked": false, "category": null, "mechanism": "", "n_papers": 0, "refs": []},
+"VAPB": {"scz_linked": false, "category": null, "mechanism": "", "n_papers": 0, "refs": []}
+}

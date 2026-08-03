@@ -1,0 +1,5 @@
+# Ignore all generated outputs in this folder; track only the script.
+*
+!.gitignore
+!figs2_v5.R
+!assemble_figure.py

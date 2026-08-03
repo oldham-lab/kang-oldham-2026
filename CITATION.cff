@@ -1,0 +1,40 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the paper and this software release."
+title: "kang-oldham-2026: analysis code for consensus co-expression module projection in AD and SCZ"
+abstract: >-
+  Analysis code reproducing the figures and tables of Kang, Oldham, et al.:
+  derivation of consensus co-expression modules from a batch-corrected bulk
+  human-cortex RNA-seq megaset and their projection (via the CoPA method) onto
+  single-nucleus datasets to identify disease-associated and conserved modules
+  in Alzheimer's disease and schizophrenia.
+type: software
+version: 0.1.0
+license: GPL-3.0-only
+repository-code: "https://github.com/oldham-lab/kang-oldham-2026"  # TODO: confirm final repo URL
+# doi: 10.5281/zenodo.XXXXXXX                                       # TODO: add Zenodo DOI on release
+# date-released: 2026-XX-XX                                         # TODO: set at release
+authors:
+  # TODO: confirm author list, order, ORCIDs, affiliations
+  - family-names: Kang
+    given-names: Eugene
+    email: gugene.kang@ucsf.edu
+    affiliation: "University of California, San Francisco"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"
+  - family-names: Oldham
+    given-names: Michael
+    affiliation: "University of California, San Francisco"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"
+# TODO: copyright holder likely The Regents of the University of California — confirm with UCSF OTM.
+keywords:
+  - co-expression
+  - RNA-seq
+  - single-nucleus
+  - Alzheimer's disease
+  - schizophrenia
+  - gene modules
+references:
+  - type: software
+    title: "CoPA: Co-expression Projection Analysis"
+    notes: "Method package used by this analysis."
+    repository-code: "https://github.com/oldham-lab/CoPA"   # TODO: confirm
+# TODO: add the paper itself as a preferred-citation (doi/journal) once available.

@@ -1,0 +1,7 @@
+# Ignore all generated outputs in this folder; track only the scripts.
+*
+!.gitignore
+!de_comparison_jorstad_DFC.R
+!de_comparison_jorstad_MTG.R
+!de_comparison_MTG_jorstadVsSEA.R
+!de_comparison_SEA_old.R

@@ -1,0 +1,347 @@
+{
+ "ACTR2": {
+  "scz_linked": true,
+  "category": 6,
+  "mechanism": "Genetic analysis found an epistatic interaction between CYFIP1 (15q11.2 CNV locus) and WAVE-complex mediator ACTR2 conferring schizophrenia risk; CYFIP1/WAVE-ACTR2 signaling regulates radial glial cell polarity and neural stem cell/cortical development.",
+  "n_papers": 1,
+  "refs": [
+   "24996170"
+  ]
+ },
+ "AJAP1": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ },
+ "AKAP9": {
+  "scz_linked": true,
+  "category": 14,
+  "mechanism": "Case-only resequencing identified a rare damaging missense variant (K873R) in AKAP9 associated with schizophrenia risk; AKAP9 is also a leading-edge DISC1-interactome gene overrepresented in genome-wide missense-SNP enrichment analysis of schizophrenia.",
+  "n_papers": 2,
+  "refs": [
+   "25943950",
+   "23909765"
+  ]
+ },
+ "ARID4A": {
+  "scz_linked": true,
+  "category": 14,
+  "mechanism": "Whole-exome sequencing in Han Chinese schizophrenia-affected sibling families identified a novel heterozygous ARID4A missense variant (p.His411Asp) that weakens DNA-binding and disrupts cell-cycle arrest, implicating ARID4A as a rare-variant schizophrenia susceptibility gene.",
+  "n_papers": 1,
+  "refs": [
+   "35365808"
+  ]
+ },
+ "ATP2B1": {
+  "scz_linked": true,
+  "category": 13,
+  "mechanism": "Cross-trait GWAS pleiotropy analysis identified ATP2B1 as a schizophrenia risk locus involved in voltage-dependent calcium-channel activity/calcium influx regulation; a calcium-pathway polygenic risk score for schizophrenia was associated with prolonged QTc interval.",
+  "n_papers": 1,
+  "refs": [
+   "42436150"
+  ]
+ },
+ "CLTC": {
+  "scz_linked": true,
+  "category": 14,
+  "mechanism": "Diagnostic clinical exome sequencing of childhood-onset schizophrenia families identified a clinically significant rare variant in CLTC among genes implicated in this early-onset schizophrenia cohort.",
+  "n_papers": 1,
+  "refs": [
+   "36645932"
+  ]
+ },
+ "CNTNAP5": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ },
+ "COPS4": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ },
+ "CRTAC1": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ },
+ "DNM3": {
+  "scz_linked": true,
+  "category": 14,
+  "mechanism": "Postmortem brain copy-number analysis in schizophrenia patients identified a gene-dosage-altered candidate CNV region containing DNM3, a gene associated with schizophrenia and other psychiatric diseases.",
+  "n_papers": 1,
+  "refs": [
+   "26136833"
+  ]
+ },
+ "DYNC1I1": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ },
+ "EEA1": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ },
+ "ENTPD4": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ },
+ "GK": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ },
+ "GPR12": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ },
+ "IPO5": {
+  "scz_linked": true,
+  "category": 11,
+  "mechanism": "Combined family/case-control genetic study found weak association of IPO5 with schizophrenia in a Chinese population; abnormal expression and alternative splicing of IPO5 may contribute to schizophrenia pathophysiology.",
+  "n_papers": 1,
+  "refs": [
+   "20542336"
+  ]
+ },
+ "KPNA1": {
+  "scz_linked": true,
+  "category": 14,
+  "mechanism": "A de novo KPNA1 (importin alpha5) mutation has been linked to schizophrenia; KPNA1 regulates neuronal differentiation and synaptic function, and a schizophrenia-associated truncating mutation (E448X) disrupts its normal axonal transport/nucleocytoplasmic shuttling dynamics.",
+  "n_papers": 3,
+  "refs": [
+   "34767585",
+   "38336912",
+   "40010609"
+  ]
+ },
+ "LRRTM3": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ },
+ "NLGN1": {
+  "scz_linked": true,
+  "category": 12,
+  "mechanism": "Case-control genetic association study found NLGN1 polymorphisms (cell-adhesion-molecule pathway) significantly associated with schizophrenia in a Chinese Han population; disrupting NRXN1alpha-NLGN1 interaction via autoantibodies reduces dendritic spines/synapses and induces schizophrenia-related behaviors in mice.",
+  "n_papers": 3,
+  "refs": [
+   "26674772",
+   "37004758",
+   "41097092"
+  ]
+ },
+ "NSD2": {
+  "scz_linked": true,
+  "category": 10,
+  "mechanism": "Genetic interaction between histone-modification genes H3F3B and NSD2 (an H3K36 methyltransferase) increases schizophrenia susceptibility in a Chinese population, implicating altered histone methylation in schizophrenia pathogenesis.",
+  "n_papers": 1,
+  "refs": [
+   "32169559"
+  ]
+ },
+ "NTRK3": {
+  "scz_linked": true,
+  "category": 12,
+  "mechanism": "Multiple studies associate common NTRK3 (neurotrophin receptor) variants with schizophrenia risk and hippocampal function; NTRK3 is a MIR185 target gene showing gene-based association with schizophrenia, with altered hippocampal expression in an immune-activation mouse model.",
+  "n_papers": 4,
+  "refs": [
+   "19344762",
+   "34412503",
+   "24936775",
+   "23402795"
+  ]
+ },
+ "OCRL": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ },
+ "PAFAH1B1": {
+  "scz_linked": true,
+  "category": 6,
+  "mechanism": "LIS1/PAFAH1B1, a DISC1-interacting protein important for neuronal migration, shows reduced protein expression in schizophrenia postmortem brain, with expression associated with high-risk DISC1 polymorphisms, implicating the DISC1-LIS1 neurodevelopmental pathway in schizophrenia.",
+  "n_papers": 1,
+  "refs": [
+   "16510495"
+  ]
+ },
+ "PCDH7": {
+  "scz_linked": true,
+  "category": 12,
+  "mechanism": "PCDH7 SNPs show genome-wide-significant association with antipsychotic treatment response in schizophrenia and colocalize with schizophrenia GWAS risk signal, identifying PCDH7 as a schizophrenia-associated common-variant locus linked to synaptic/neurotransmitter pathways.",
+  "n_papers": 3,
+  "refs": [
+   "29503163",
+   "36876478",
+   "30883267"
+  ]
+ },
+ "PLCH1": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ },
+ "PPM1E": {
+  "scz_linked": true,
+  "category": 10,
+  "mechanism": "Promoter histone H3K9K14 acetylation at PPM1E is significantly reduced (hypoacetylated) in prefrontal cortex of young schizophrenia patients versus age-matched controls, linking epigenetic chromatin regulation at this gene to schizophrenia pathophysiology.",
+  "n_papers": 1,
+  "refs": [
+   "22832356"
+  ]
+ },
+ "PRKAA2": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ },
+ "RAPGEF5": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ },
+ "RIMS2": {
+  "scz_linked": true,
+  "category": 4,
+  "mechanism": "RIMS2, a cytomatrix active-zone protein regulating synaptic vesicle release, shows increased protein expression in the amygdala of schizophrenia patients, independent of antipsychotic treatment, implicating dysregulated vesicle-release machinery in schizophrenia neurobiology.",
+  "n_papers": 1,
+  "refs": [
+   "18490030"
+  ]
+ },
+ "ROCK2": {
+  "scz_linked": true,
+  "category": 5,
+  "mechanism": "ROCK2 hyperactivation drives dendritic spine loss and synaptic ultrastructural defects in schizophrenia models; a selective ROCK2 inhibitor rescues prefrontal spine density and produces antipsychotic-like effects in genetic and pharmacological schizophrenia mouse models.",
+  "n_papers": 3,
+  "refs": [
+   "41168987",
+   "41922796",
+   "27054047"
+  ]
+ },
+ "RPS21": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ },
+ "RPS29": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ },
+ "SBNO1": {
+  "scz_linked": true,
+  "category": 6,
+  "mechanism": "SBNO1 is expressed in the developing cortical plate and required for neurite/axon-dendrite outgrowth in cortical neurons; human genetic studies implicate SBNO1 mutations and cortical-morphology-linked genetic-epigenetic interactions as schizophrenia risk factors.",
+  "n_papers": 2,
+  "refs": [
+   "36057539",
+   "37269009"
+  ]
+ },
+ "SERTAD4": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ },
+ "SGIP1": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ },
+ "SHOC2": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ },
+ "SLC35B4": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ },
+ "SORL1": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ },
+ "UBE2K": {
+  "scz_linked": true,
+  "category": 11,
+  "mechanism": "UBE2K shows elevated blood and brain protein/mRNA levels correlating with positive psychotic symptom severity in schizophrenia, and is targeted by a circRNA-miRNA-mRNA (ceRNA) post-transcriptional regulatory axis implicated in schizophrenia pathophysiology.",
+  "n_papers": 3,
+  "refs": [
+   "30901725",
+   "35543802",
+   "20552680"
+  ]
+ },
+ "UBE2N": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ },
+ "UNC13C": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ },
+ "VAPB": {
+  "scz_linked": false,
+  "category": null,
+  "mechanism": "",
+  "n_papers": 0,
+  "refs": []
+ }
+}

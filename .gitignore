@@ -1,0 +1,42 @@
+# R session cruft
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Local config / secrets (never commit)
+.Renviron
+.claude/settings.local.json
+
+# Large data — not distributed with the repo (see DATA.md)
+data/
+
+# Generated figure/table OUTPUTS (code .R/.r/.py/.sh and .xlsx stay tracked)
+figures/**/*.pdf
+figures/**/*.svg
+figures/**/*.png
+figures/**/*.csv
+figures/**/*.qs
+figures/**/*.RDS
+figures/**/*.rds
+figures/**/*.html
+figures/**/*.docx
+figures/**/*.log
+figures/**/*.txt
+figures/**/*.gz
+figures/**/*_clustering
+figures/shiny_code/shiny_snapshots/
+*.pptx
+
+# Exceptions: curated SCZ gene-DB inputs for fig_8 (agent-pipeline products,
+# not cheaply regenerable — tracked. See figures/fig_8/v1/README_scz_db.md)
+!figures/fig_8/v1/scz_*.csv
+!figures/fig_8/v1/scz_genes.txt
+
+# Large generated caches under analyses
+analyses/Projection_analyses/related_analyses/rand_mod_analysis/

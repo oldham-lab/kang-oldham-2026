@@ -1,0 +1,6 @@
+# Ignore generated outputs (svg/pdf/png/pptx); track only scripts.
+*
+!*/
+!.gitignore
+!*.R
+!*.py

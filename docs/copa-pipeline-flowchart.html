@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>COPA / Consensus-analysis Pipeline</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --surface-2: #eef1f4;
+    --ink: #1b2027;
+    --muted: #5c6672;
+    --faint: #8a94a1;
+    --line: #d9dee4;
+    --line-strong: #c2cad3;
+    --spine: #0e7c86;
+
+    --s1: #3b6ea5;  --s1-bg: #eaf1f8;
+    --s2: #0e7c86;  --s2-bg: #e4f2f2;
+    --s3: #4a7c59;  --s3-bg: #eaf3ec;
+    --s4: #b0643c;  --s4-bg: #f7ede6;
+    --arch: #7a8390; --arch-bg: #eef0f2;
+
+    --mono: ui-monospace, "SFMono-Regular", "Menlo", "Consolas", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+    --radius: 12px;
+    --radius-sm: 7px;
+    --maxw: 940px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151a;
+      --surface: #1a1f27;
+      --surface-2: #222831;
+      --ink: #e6e9ee;
+      --muted: #9aa4b1;
+      --faint: #6b7684;
+      --line: #2c333d;
+      --line-strong: #3a424e;
+      --spine: #3bb5c1;
+
+      --s1: #7aa7d8;  --s1-bg: #1c2733;
+      --s2: #3bb5c1;  --s2-bg: #14282b;
+      --s3: #79b088;  --s3-bg: #182619;
+      --s4: #d99366;  --s4-bg: #2b201a;
+      --arch: #9aa4b1; --arch-bg: #1e232b;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f6f7f9; --surface: #ffffff; --surface-2: #eef1f4;
+    --ink: #1b2027; --muted: #5c6672; --faint: #8a94a1;
+    --line: #d9dee4; --line-strong: #c2cad3; --spine: #0e7c86;
+    --s1: #3b6ea5; --s1-bg: #eaf1f8; --s2: #0e7c86; --s2-bg: #e4f2f2;
+    --s3: #4a7c59; --s3-bg: #eaf3ec; --s4: #b0643c; --s4-bg: #f7ede6;
+    --arch: #7a8390; --arch-bg: #eef0f2;
+  }
+  :root[data-theme="dark"] {
+    --bg: #12151a; --surface: #1a1f27; --surface-2: #222831;
+    --ink: #e6e9ee; --muted: #9aa4b1; --faint: #6b7684;
+    --line: #2c333d; --line-strong: #3a424e; --spine: #3bb5c1;
+    --s1: #7aa7d8; --s1-bg: #1c2733; --s2: #3bb5c1; --s2-bg: #14282b;
+    --s3: #79b088; --s3-bg: #182619; --s4: #d99366; --s4-bg: #2b201a;
+    --arch: #9aa4b1; --arch-bg: #1e232b;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.5;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 56px 24px 96px;
+  }
+
+  /* ---- Masthead ---- */
+  .masthead { margin-bottom: 8px; }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--spine);
+    margin: 0 0 14px;
+  }
+  h1 {
+    font-size: clamp(28px, 4.5vw, 40px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    margin: 0 0 14px;
+    font-weight: 680;
+  }
+  .lede {
+    font-size: 17px;
+    color: var(--muted);
+    max-width: 62ch;
+    margin: 0;
+  }
+  .lede code { font-family: var(--mono); font-size: 0.86em; color: var(--ink); }
+
+  /* ---- Flow summary strip ---- */
+  .flowstrip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 10px;
+    margin: 30px 0 44px;
+    padding: 16px 18px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    font-size: 13.5px;
+  }
+  .flowstrip .node {
+    font-weight: 560;
+    color: var(--ink);
+  }
+  .flowstrip .arr { color: var(--faint); font-size: 15px; }
+
+  /* ---- Spine layout ---- */
+  .spine { position: relative; }
+
+  .stage {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 22px 24px 24px;
+    margin-bottom: 0;
+  }
+  .stage-1 { --accent: var(--s1); --accent-bg: var(--s1-bg); }
+  .stage-2 { --accent: var(--s2); --accent-bg: var(--s2-bg); }
+  .stage-3 { --accent: var(--s3); --accent-bg: var(--s3-bg); }
+  .stage-4 { --accent: var(--s4); --accent-bg: var(--s4-bg); }
+
+  .stage-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .stage-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    background: var(--accent-bg);
+    border-radius: 6px;
+    padding: 3px 8px;
+    white-space: nowrap;
+  }
+  .stage-title {
+    font-size: 20px;
+    font-weight: 640;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .stage-dir {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-left: auto;
+  }
+  .stage-sub {
+    color: var(--muted);
+    font-size: 14px;
+    margin: 8px 0 18px;
+    max-width: 68ch;
+  }
+
+  /* ---- Steps ---- */
+  .steps { display: flex; flex-direction: column; gap: 10px; }
+  .step {
+    display: grid;
+    grid-template-columns: 26px 1fr;
+    gap: 12px;
+    align-items: start;
+  }
+  .step-n {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    text-align: right;
+    padding-top: 9px;
+  }
+  .step-body {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 9px 13px;
+  }
+  .step-body .fn { font-family: var(--mono); font-size: 13px; color: var(--ink); }
+  .step-body .fn b { color: var(--accent); font-weight: 600; }
+  .step-body .desc { color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+  /* ---- Phase grouping (stage 2) ---- */
+  .phase { margin-top: 4px; }
+  .phase-label {
+    font-size: 12.5px;
+    font-weight: 640;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    margin: 16px 0 10px;
+    display: flex; align-items: center; gap: 9px;
+  }
+  .phase-label::before {
+    content: "";
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--accent);
+    flex: none;
+  }
+  .phase-label .tag {
+    font-family: var(--mono); font-weight: 500; font-size: 11.5px;
+    color: var(--muted);
+  }
+
+  /* ---- Artifact pills ---- */
+  .artifacts { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+  .pill {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--accent);
+    background: var(--accent-bg);
+    border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+    border-radius: 20px;
+    padding: 3px 11px;
+    white-space: nowrap;
+  }
+
+  /* ---- Connector between stages ---- */
+  .connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 0;
+  }
+  .connector .dot { color: var(--line-strong); font-size: 13px; line-height: 1; }
+  .connector .carry {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 4px 12px;
+    margin: 3px 0;
+  }
+  .connector .carry b { color: var(--ink); font-weight: 600; }
+
+  /* ---- Archived branch ---- */
+  .archived {
+    position: relative;
+    margin: 4px 0 4px 32px;
+    background: repeating-linear-gradient(
+      -45deg, transparent, transparent 9px,
+      color-mix(in srgb, var(--arch) 6%, transparent) 9px,
+      color-mix(in srgb, var(--arch) 6%, transparent) 10px);
+    border: 1.5px dashed var(--line-strong);
+    border-radius: var(--radius);
+    padding: 18px 22px;
+  }
+  .archived .stage-num { color: var(--arch); background: var(--arch-bg); }
+  .archived .stage-title { font-size: 17px; color: var(--ink); }
+  .arch-note {
+    font-size: 13px; color: var(--muted); margin: 6px 0 14px; max-width: 70ch;
+  }
+  .arch-note code { font-family: var(--mono); font-size: 0.88em; color: var(--ink); }
+  .arch-items { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+  .arch-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 11px 13px;
+  }
+  .arch-card .t { font-family: var(--mono); font-size: 12.5px; font-weight: 600; color: var(--ink); }
+  .arch-card .d { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+  .arch-feed {
+    font-family: var(--mono); font-size: 11.5px; color: var(--arch);
+    margin-top: 13px; display: flex; align-items: center; gap: 7px;
+  }
+
+  /* ---- Runcodes (stage 3 datasets) ---- */
+  .datasets { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin-top: 16px; }
+  .ds {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 11px 13px;
+    background: var(--bg);
+  }
+  .ds .name { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--ink); }
+  .ds .kind { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-top: 6px; }
+  .ds .kind.ad { color: var(--s4); }
+  .ds .kind.scz { color: var(--s1); }
+  .ds .cohorts { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  /* ---- Figures (stage 4) ---- */
+  .figgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin-top: 8px; }
+  .fig {
+    border: 1px solid var(--line); border-radius: var(--radius-sm);
+    padding: 11px 13px; background: var(--bg);
+  }
+  .fig .t { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--accent); }
+  .fig .d { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+
+  /* ---- Footnotes ---- */
+  .footnotes {
+    margin-top: 40px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+  }
+  .footnotes h2 {
+    font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--faint); margin: 0 0 14px; font-weight: 600;
+  }
+  .footnotes ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .footnotes li { font-size: 13.5px; color: var(--muted); padding-left: 18px; position: relative; }
+  .footnotes li::before { content: "▹"; position: absolute; left: 0; color: var(--spine); }
+  .footnotes code { font-family: var(--mono); font-size: 0.86em; color: var(--ink); }
+  .footnotes b { color: var(--ink); font-weight: 600; }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 16px; margin: 0 0 34px;
+    font-size: 12.5px; color: var(--muted);
+  }
+  .legend .item { display: flex; align-items: center; gap: 7px; }
+  .legend .sw { width: 13px; height: 13px; border-radius: 3px; flex: none; }
+
+  @media (max-width: 560px) {
+    .wrap { padding: 40px 16px 72px; }
+    .stage { padding: 18px 16px 20px; }
+    .stage-dir { margin-left: 0; width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="masthead">
+    <p class="eyebrow">Bioinformatics Workflow · run order</p>
+    <h1>COPA / Consensus-analysis Pipeline</h1>
+    <p class="lede">
+      Derive <b>consensus co-expression modules</b> from a batch-corrected bulk human-cortex
+      RNAseq megaset, then <b>project</b> those modules onto single-nucleus datasets to ask which
+      modules are differentially co-expressed in disease (AD, SCZ) vs control — and which findings
+      are <b>conserved</b> across datasets. Spans the <code>COPA</code> method package and the
+      <code>Consensus-analysis</code> analysis repo.
+    </p>
+  </header>
+
+  <div class="flowstrip">
+    <span class="node">Raw cohort RNAseq</span><span class="arr">→</span>
+    <span class="node">ComBat megaset</span><span class="arr">→</span>
+    <span class="node">Consensus modules</span><span class="arr">→</span>
+    <span class="node">SN projection</span><span class="arr">→</span>
+    <span class="node">Compare &amp; conserve</span><span class="arr">→</span>
+    <span class="node">Figures</span>
+  </div>
+
+  <div class="legend">
+    <span class="item"><span class="sw" style="background:var(--s1)"></span>Stage 1 · Preprocessing</span>
+    <span class="item"><span class="sw" style="background:var(--s2)"></span>Stage 2 · COPA engine</span>
+    <span class="item"><span class="sw" style="background:var(--s3)"></span>Stage 3 · Application</span>
+    <span class="item"><span class="sw" style="background:var(--s4)"></span>Stage 4 · Analysis &amp; figures</span>
+    <span class="item"><span class="sw" style="background:var(--arch);border:1.5px dashed var(--line-strong)"></span>Archived (feeds pipeline)</span>
+  </div>
+
+  <div class="spine">
+
+    <!-- STAGE 1 -->
+    <section class="stage stage-1">
+      <div class="stage-head">
+        <span class="stage-num">STAGE 1</span>
+        <h2 class="stage-title">Bulk preprocessing — the RNAseq "megaset"</h2>
+        <span class="stage-dir">Consensus-analysis/Preprocessing/</span>
+      </div>
+      <p class="stage-sub">
+        Assemble the batch-corrected bulk human-cortex RNAseq megaset that feeds consensus-module
+        derivation and COPA's bulk side.
+      </p>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div class="step-body">
+          <div class="fn"><b>1-sample_collection/</b> · <b>1.1-disease_dataset_download/</b></div>
+          <div class="desc">Download raw data per bulk cohort (Brainseq, GTEx, NABEC, ROSMAP, BrainGVEX, CMC/HBCC, MSBB, Brainspan, …) from Synapse/SRA/AnVIL. <code>process_sample_info.R</code> builds control-only (Age ≥ 18) sample-info tables + the Brainseq SCZ subset. Plus SEA-AD 2024 SN download.</div>
+        </div></div>
+        <div class="step"><div class="step-n">2</div><div class="step-body">
+          <div class="fn"><b>2-quantify_counts/</b> · <code>quantify_counts_&lt;cohort&gt;.sh</code></div>
+          <div class="desc">Per-cohort alignment / quantification → gene count matrices.</div>
+        </div></div>
+        <div class="step"><div class="step-n">3</div><div class="step-body">
+          <div class="fn"><b>3-process_counts/</b> · <code>process_&lt;cohort&gt;.R</code> → <code>1-cat_datasets.R</code></div>
+          <div class="desc">Per-cohort QC + batch correction: <b>SampleNetwork</b> outlier removal + <b>ComBat</b>. Then intersect common features and concatenate all cohorts → combined FCX megaset. <code>process_Brainseq_SCZ.R</code> emits the SCZ-sample matrix.</div>
+        </div></div>
+        <div class="step"><div class="step-n">4</div><div class="step-body">
+          <div class="fn"><b>4-analyses/</b> · <code>1-genomewide_bicor_dist.R</code></div>
+          <div class="desc">Genome-wide bicor distributions per dataset (QC / figure).</div>
+        </div></div>
+      </div>
+      <div class="artifacts">
+        <span class="pill">combined_FCX_final_*_ComBat.csv</span>
+        <span class="pill">Brainseq SCZ matrix</span>
+      </div>
+    </section>
+
+    <div class="connector">
+      <span class="dot">▼</span>
+      <span class="carry">carries <b>ComBat-corrected bulk megaset</b></span>
+      <span class="dot">▼</span>
+    </div>
+
+    <!-- ARCHIVED BRANCH -->
+    <section class="archived">
+      <div class="stage-head">
+        <span class="stage-num">ARCHIVED → code_old</span>
+        <h2 class="stage-title">Module derivation · DE reanalysis · SN pseudobulking</h2>
+      </div>
+      <p class="arch-note">
+        Moved out of live <code>Analyses/</code>, but their data products still drive the pipeline.
+        COPA now re-implements greedy-march derivation itself, so the live path no longer depends on this code.
+      </p>
+      <div class="arch-items">
+        <div class="arch-card">
+          <div class="t">FindModules_greedy_march/</div>
+          <div class="d">Consensus co-expression modules (merged by eigengene %VE) — the primary COPA input.</div>
+        </div>
+        <div class="arch-card">
+          <div class="t">DE_reanalysis/</div>
+          <div class="d">Cell-type DE gene sets (e.g. <code>DE_gene_list_supertype_DFC_…csv</code>) — module validation / annotation standard.</div>
+        </div>
+        <div class="arch-card">
+          <div class="t">SN_pseudobulking/</div>
+          <div class="d">Synthetic pseudobulk datasets validating the module/projection approach (Fig 1).</div>
+        </div>
+      </div>
+      <div class="arch-feed">↳ products feed Stage 2 (module set + DE annotation standard)</div>
+    </section>
+
+    <div class="connector">
+      <span class="dot">▼</span>
+      <span class="carry">consensus modules + bulk megaset →</span>
+      <span class="dot">▼</span>
+    </div>
+
+    <!-- STAGE 2 -->
+    <section class="stage stage-2">
+      <div class="stage-head">
+        <span class="stage-num">STAGE 2</span>
+        <h2 class="stage-title">The COPA method package — the engine</h2>
+        <span class="stage-dir">/code/git/COPA · wrapper.R</span>
+      </div>
+      <p class="stage-sub">
+        Public API: <code>COPA()</code>, <code>COPA_compare()</code>, <code>COPA_conserve()</code>.
+        Four internal phases.
+      </p>
+
+      <div class="phase">
+        <div class="phase-label">Phase 2A — Module derivation + annotation <span class="tag">inside COPA()</span></div>
+        <div class="steps">
+          <div class="step"><div class="step-n">1</div><div class="step-body"><div class="fn"><b>check_expr()</b> <span style="color:var(--faint)">· check_expr.R</span></div><div class="desc">Validate / clean bulk expression → cleaned <code>expr</code>.</div></div></div>
+          <div class="step"><div class="step-n">2</div><div class="step-body"><div class="fn"><b>find_unmerged_greedy_mods()</b> <span style="color:var(--faint)">· greedy_march_COPA_20240802.R</span></div><div class="desc">Module finder → <code>modules/unmerged_modules.qs</code>.</div></div></div>
+          <div class="step"><div class="step-n">3</div><div class="step-body"><div class="fn"><b>produce_kme_topmodposbc_tables()</b> <span style="color:var(--faint)">· kme_topmodposbc.R</span></div><div class="desc">Eigengenes + per-gene kME, Bonferroni/FDR module assignment.</div></div></div>
+          <div class="step"><div class="step-n">4</div><div class="step-body"><div class="fn"><b>run_gsea_for_proj()</b> <span style="color:var(--faint)">· gsea.R</span></div><div class="desc">Fisher enrichment vs MSigDB / consensus sets → <code>GSEA/*.csv</code>.</div></div></div>
+          <div class="step"><div class="step-n">5</div><div class="step-body"><div class="fn"><b>calc_real_and_rand_cors()</b> <span style="color:var(--faint)">· bulk_pairwise_cors.R</span></div><div class="desc">Real vs random bulk correlation distributions.</div></div></div>
+        </div>
+        <div class="artifacts"><span class="pill">★ kme_tables/topmodposbc_table.csv — central downstream artifact</span></div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-label">Phase 2B — Single-nucleus projection <span class="tag">inside COPA()</span></div>
+        <div class="steps">
+          <div class="step"><div class="step-n">6</div><div class="step-body"><div class="fn"><b>create_summary_tables_by_cohort()</b> <span style="color:var(--faint)">· sn_summary_tables.R</span></div><div class="desc">SN summary tables (in-memory) — <b>or</b> by-donor R route, <b>or</b> scalable Python <code>dataset_processing/*.py</code> for large data → <code>sn_summary_objects_log.qs</code>.</div></div></div>
+          <div class="step"><div class="step-n">7</div><div class="step-body"><div class="fn"><b>calculate_proj_indices()</b> <span style="color:var(--faint)">· projection_indices.R</span></div><div class="desc">×3 normalizations: <code>log_native</code>, <code>log_REI</code>, <code>log_normByMean</code>.</div></div></div>
+          <div class="step"><div class="step-n">8</div><div class="step-body"><div class="fn"><b>create_*_obj()</b> <span style="color:var(--faint)">· projection_objects.R → projection_pdfs.R</span></div><div class="desc">Plotting objects → optional net snapshots → <code>sn_proj_objects/*.qs</code>.</div></div></div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-label">Phase 2C — Cohort comparison <span class="tag">COPA_compare()</span></div>
+        <div class="steps">
+          <div class="step"><div class="step-n">9</div><div class="step-body"><div class="fn"><b>project_random_and_calculate_euclidean_standalone.R</b></div><div class="desc">Merges random-module projection + Euclidean-distance significance testing between cohorts (passes <code>randinds</code> in memory) → <code>output_table.csv</code>. <span style="color:var(--faint)">Supersedes the split <code>project_random_modules</code> / <code>calculate_euclidean_distances</code> chain in <code>deprecated/</code>.</span></div></div></div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-label">Phase 2D — Conservation across datasets</div>
+        <div class="steps">
+          <div class="step"><div class="step-n">10</div><div class="step-body"><div class="fn"><b>dCoPA_compare()</b> <span style="color:var(--faint)">· dCoPA_compare.R · Feb 2026</span></div><div class="desc">Newer <b>table-based</b> pairwise conservation: <code>output_table_*.csv</code> → <code>shared_output_table.csv</code>.</div></div></div>
+          <div class="step"><div class="step-n">·</div><div class="step-body"><div class="fn"><b>COPA_conserve()</b> <span style="color:var(--faint)">· COPA_conserve.R · older</span></div><div class="desc">Modules significant across ≥2 datasets per cell type (older <code>euclidean_sigmods_*.qs</code> list format).</div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="connector">
+      <span class="dot">▼</span>
+      <span class="carry"><b>COPA()</b> engine applied per dataset →</span>
+      <span class="dot">▼</span>
+    </div>
+
+    <!-- STAGE 3 -->
+    <section class="stage stage-3">
+      <div class="stage-head">
+        <span class="stage-num">STAGE 3</span>
+        <h2 class="stage-title">Per-dataset application of COPA</h2>
+        <span class="stage-dir">Analyses/Projection_analyses/</span>
+      </div>
+      <p class="stage-sub">
+        The application layer — consolidated <code>*_AllComparisons_*_runcode.R</code> drivers run COPA
+        across SN datasets. Corrected within-stage run order:
+      </p>
+      <div class="steps">
+        <div class="step"><div class="step-n">1</div><div class="step-body"><div class="fn"><b>COPA() module-generation runcode</b></div><div class="desc">e.g. <code>Brainseq_SCZsamples_COPA_runcode.R</code> (171 samples) → <code>topmodposbc_table.csv</code>, <code>sn_summary_objects_log.qs</code>.</div></div></div>
+        <div class="step"><div class="step-n">2</div><div class="step-body"><div class="fn"><b>save_modlist_as_json.R</b></div><div class="desc">Module table → JSON bridge to the Python engine (<code>topmodposbc_table.json</code>, <code>seed_table.json</code>).</div></div></div>
+        <div class="step"><div class="step-n">3</div><div class="step-body"><div class="fn"><b>Per-dataset preprocessing</b> <span style="color:var(--faint)">· dataset_processing/*.py + calc_projIndexSE</span></div><div class="desc">Genome-wide means / module means / projection-index SE (×3 norms) → <code>genomewide_means_*.csv</code>, <code>mod_means_*.csv</code>, <code>indices_se_*.csv</code>.</div></div></div>
+        <div class="step"><div class="step-n">4</div><div class="step-body"><div class="fn"><b>AllComparisons comparison runcode</b> <span style="color:var(--faint)">· calls project_rand_and_calculate_euclidean()</span></div><div class="desc">→ <code>euclidean_distances/*output_table.csv</code>, <code>euclidean_sigmods_*.qs</code>.</div></div></div>
+      </div>
+      <div class="datasets">
+        <div class="ds"><div class="name">brainSCOPE_python</div><div class="kind scz">SCZ vs control</div><div class="cohorts">CMC, SZBDMulti-Seq × module types</div></div>
+        <div class="ds"><div class="name">MIT_Multiome_gabittoLabels</div><div class="kind ad">AD vs control</div><div class="cohorts">PFC/MTC × 4 AD comparisons</div></div>
+        <div class="ds"><div class="name">SEAAD2024_gabittoLabels</div><div class="kind ad">AD vs control</div><div class="cohorts">SEA-AD 2024, same structure</div></div>
+      </div>
+      <div class="artifacts" style="margin-top:14px">
+        <span class="pill">SE tables (step 3) feed Stage 4, not step 4</span>
+      </div>
+    </section>
+
+    <div class="connector">
+      <span class="dot">▼</span>
+      <span class="carry">output tables + SE tables + summary objects →</span>
+      <span class="dot">▼</span>
+    </div>
+
+    <!-- STAGE 4 -->
+    <section class="stage stage-4">
+      <div class="stage-head">
+        <span class="stage-num">STAGE 4</span>
+        <h2 class="stage-title">Random-module / dCoPA analysis + figures</h2>
+        <span class="stage-dir">…/Projection_analyses/related_analyses/</span>
+      </div>
+      <p class="stage-sub">
+        Real-vs-random significance and the paper's figures.
+      </p>
+
+      <div class="phase">
+        <div class="phase-label" style="--accent:var(--s4)">Random-module / dCoPA analysis <span class="tag">random_mod_proj_analyses/</span></div>
+        <div class="steps">
+          <div class="step"><div class="step-n">A</div><div class="step-body"><div class="fn"><b>realvsrand_dCoPA_analysis.R</b> <span style="color:var(--faint)">· main driver</span></div><div class="desc">Calls <code>rand_mod_analysis()</code> across all datasets/comparisons → dCoPA scorecards + real-vs-random p-value plots. Consumes <code>sn_summary_objects_log.qs</code>, <code>topmodposbc_table.csv</code>, <code>randinds_native_log.qs</code>, Python SE tables.</div></div></div>
+          <div class="step"><div class="step-n">B</div><div class="step-body"><div class="fn"><b>analysis_of_random_module_projections.R</b></div><div class="desc">100k random modules projected onto 4 SN datasets; real-vs-random projection-index correlations (supplementary figures).</div></div></div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-label" style="--accent:var(--s4)">Figures <span class="tag">dotplots/</span></div>
+        <div class="figgrid">
+          <div class="fig"><div class="t">dotplots.R</div><div class="d">Loads <code>shared_output_table.csv</code>; 4-dataset shared-module intersections; combined summary dotplot.</div></div>
+          <div class="fig"><div class="t">dotplot_related_summaryPlots.R</div><div class="d">UpSet plots, Jaccard heatmaps, networks, gene-overlap Fisher — incl. SCZ↔AD shared modules.</div></div>
+          <div class="fig"><div class="t">dotplots_combined_pairwise_cors.R</div><div class="d">ComplexHeatmaps of pairwise correlations of significant-module counts across comparisons.</div></div>
+          <div class="fig"><div class="t">fxns.R</div><div class="d">Function library — <code>rand_mod_analysis()</code>, <code>create_shared_dotplot_summary_v2()</code>.</div></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="footnotes">
+    <h2>Caveats carried from the source docs</h2>
+    <ul>
+      <li><b>Hardcoded paths.</b> Most scripts <code>source()</code> and read/write absolute paths (<code>~/!softlinks/…</code>, <code>~/RNAseq_megaset/</code>, <code>/mnt/bdata/…</code>); some <code>source()</code> lines are stale relative to files' current locations.</li>
+      <li><b>Partially stale <code>wrapper.R</code>.</b> <code>COPA_compare()</code> still <code>source()</code>s files moved to <code>deprecated/</code> — the live comparison path calls the standalone engine directly, bypassing <code>COPA_compare()</code>.</li>
+      <li><b>Commented-out steps.</b> Several wrapper steps (<code>create_bulk_cor_obj</code>, <code>create_proj_obj</code>, <code>plot_net_snapshots</code>, Oldham/SN GSHG) are off by default — the live path is narrower than the function bodies suggest.</li>
+      <li><b>"claude_input" naming</b> (e.g. <code>5-SEAAD2024_DE_claude_input.R</code>) marks a trimmed standalone script prepared as context — <b>not</b> a script that consumes model output.</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>
