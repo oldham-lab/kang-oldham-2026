@@ -67,14 +67,14 @@ point the var at your checkout:
 | `GSEA_GENERIC_DIR` | `GSEAfxsV3.r`, `GSEAfxsV3_nonpar_temp.r` | fig_2 related analyses (metacell/imputation FindModules runs) |
 | `SAMPLENETWORK_DIR` | `SampleNetwork_1.08.r` | `preprocessing/3-process_counts/` |
 
-> **⚠️ `SAMPLENETWORK_DIR` needs author confirmation.** The path these scripts
-> originally referenced (`/home/gugene/code/SampleNetwork/`) no longer exists, and
-> **two non-identical copies** of `SampleNetwork_1.08.r` survive on the analysis
-> host: `/home/gugene/code/labcode_old/SampleNetwork/` and
-> `/home/shared/code/SampleNetworks/`. The default points at the `labcode_old`
-> copy, because that is the one `preprocessing/3-process_counts/1-cat_datasets.R`
-> still referenced directly. Confirm which copy produced the published
-> preprocessing before release, and pin it (ideally vendor it into this repo).
+> **`SAMPLENETWORK_DIR` — author-confirmed.** The path these scripts originally
+> referenced (`/home/gugene/code/SampleNetwork/`) no longer exists, and two
+> **non-identical** copies of `SampleNetwork_1.08.r` survive on the analysis host.
+> The published preprocessing used
+> **`/home/gugene/code/labcode_old/SampleNetwork/`** (author-confirmed), which is
+> the default; the copy at `/home/shared/code/SampleNetworks/` differs and is
+> *not* the one to use. Before release this file should be vendored into the repo
+> (or otherwise version-pinned), since it is not a package and not distributed.
 
 Smaller external inputs, each with its own var: `SCINRB_DIR` (scINRB imputation,
 fig_2 related analyses only), `COMPAREMARKERS_DIR` (bulk fidelity table for the
