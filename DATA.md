@@ -55,6 +55,40 @@ download scripts: `syn3157322`, `syn3270014`, `syn3275211`, `syn3346807`,
   (NB: `figures/fig_1/full_de_pipeline_from_scratch.R` is a *different* analysis —
   cell-type-vs-all marker DE — not the fig_7 AD-vs-control objects.)
 
+## External analysis tools sourced by path
+
+Three lab tools are `source()`d by absolute path rather than installed as
+packages. Each has an env var (see `.Renviron.example`); clone or copy them and
+point the var at your checkout:
+
+| Var | Tool | Used by |
+|---|---|---|
+| `FINDMODULES_DIR` | FindModules (`FindModules/R/FindModules.R`) | `fig_4`, `fig_5`, `fig_s8`, fig_2 related analyses |
+| `GSEA_GENERIC_DIR` | `GSEAfxsV3.r`, `GSEAfxsV3_nonpar_temp.r` | fig_2 related analyses (metacell/imputation FindModules runs) |
+| `SAMPLENETWORK_DIR` | `SampleNetwork_1.08.r` | `preprocessing/3-process_counts/` |
+
+> **⚠️ `SAMPLENETWORK_DIR` needs author confirmation.** The path these scripts
+> originally referenced (`/home/gugene/code/SampleNetwork/`) no longer exists, and
+> **two non-identical copies** of `SampleNetwork_1.08.r` survive on the analysis
+> host: `/home/gugene/code/labcode_old/SampleNetwork/` and
+> `/home/shared/code/SampleNetworks/`. The default points at the `labcode_old`
+> copy, because that is the one `preprocessing/3-process_counts/1-cat_datasets.R`
+> still referenced directly. Confirm which copy produced the published
+> preprocessing before release, and pin it (ideally vendor it into this repo).
+
+Smaller external inputs, each with its own var: `SCINRB_DIR` (scINRB imputation,
+fig_2 related analyses only), `COMPAREMARKERS_DIR` (bulk fidelity table for the
+fig_1 followup sensitivity analysis), `BBMAP_DIR` (`bbduk.sh` + adapter FASTA for
+read trimming), `HOME_DATA_DIR` (two one-off lein MTG / ABI cell-count CSVs),
+`PYTHON_BIN` (interpreter R invokes for SVG/PPTX rendering).
+
+`SHINYAPP_DIR` points at the CoPA Shiny app checkout and is only used by
+`figures/shiny_code/` snapshot generation — not by any figure.
+
+One reference in `figures/fig_2_related_analyses/exploratory/` points into a
+`~/!softlinks/` symlink farm that no longer exists; that input is unrecoverable,
+and the script is exploratory only.
+
 ## Tracked reproduction inputs (small)
 
 - `analyses/bulk_module_significance/bulk_cors_sigcount_bonf_*.csv` — module

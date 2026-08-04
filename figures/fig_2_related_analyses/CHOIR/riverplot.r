@@ -24,7 +24,7 @@ inc_mat <- table(cell_annoall$Cluster, cell_annoall$CHOIR_clusters_0.05) %>% as.
 
   
 #file_path <- paste0("figures/", data_type, "/", expr_type, "/scSHC_test_clusters_riverplot_", alpha, "_FWER_", data_type, "_", expr_type, "_scaled_", scaled, "_HVGs_", hvgs, ".pdf")
-file_path <- "~/test/test_river.pdf"  
+file_path <- file.path(Sys.getenv("SCRATCH_DIR", "~/test"), "test_river.pdf")  
   
 cellinfo <- cell_type_stats(datinfo)
 new_clusters <- inc_mat

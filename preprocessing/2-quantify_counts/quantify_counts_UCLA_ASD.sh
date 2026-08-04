@@ -1,12 +1,12 @@
 # move fastq files to same folder
 
 cd ${DATA_DIR:-/mnt/bdata/gugene}/datasets/RNAseq/PsychENCODE/RNAseq/Yale_ASD/
-ref="/home/gugene/bin/bbmap/bbmap/resources/adapters.fa"
+ref="${BBMAP_DIR:-/home/gugene/bin/bbmap/bbmap}/resources/adapters.fa"
 outdir="${DATA_DIR:-/mnt/bdata/gugene}/datasets/RNAseq/PsychENCODE/RNAseq/Yale_ASD/trimmed"
 
 for R1 in *1_001.fastq.gz; do
 R2=$(echo $R1 | sed "s/1_001.fastq.gz/2_001.fastq.gz/")
-/home/gugene/bin/bbmap/bbmap/bbduk.sh -Xmx1g \
+${BBMAP_DIR:-/home/gugene/bin/bbmap/bbmap}/bbduk.sh -Xmx1g \
 in1=$R1 in2=$R2 \
 out1=${outdir}/$(echo $R1 | sed "s/.fastq/_trimmed.fastq/") \
 out2=${outdir}/$(echo $R2 | sed "s/.fastq/_trimmed.fastq/") \

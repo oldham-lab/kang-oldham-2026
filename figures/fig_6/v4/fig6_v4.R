@@ -55,7 +55,7 @@ these_mods <- as.numeric(names(mods)[which(modulelengths>filter_under)])
 mods <- mods[these_mods]
 
 sea_dir <- file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "data/greedy_march_pipeline_output/finalNonNorm_minsize10_unmerged/SEAAD2024_full_python_output")
-mit_dir <- "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output"
+mit_dir <- file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output")
 
 snapshot_out_dir <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_6/dCoPA_snapshots/")
 
@@ -142,7 +142,7 @@ these_mods <- as.numeric(names(mods)[which(modulelengths>filter_under)])
 mods <- mods[these_mods]
 
 sea_dir <- file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "data/greedy_march_pipeline_output/finalNonNorm_minsize10_unmerged/SEAAD2024_full_python_output")
-mit_dir <- "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output"
+mit_dir <- file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output")
 
 snapshot_out_dir <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_6/dCoPA_snapshots/")
 
@@ -221,8 +221,8 @@ modulelengths <- unlist(lapply(mods,length))
 these_mods <- as.numeric(names(mods)[which(modulelengths>filter_under)])
 mods <- mods[these_mods]
 
-sea_dir <- "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/CMC"
-mit_dir <- "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/SZBDMulti-Seq"
+sea_dir <- file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/CMC")
+mit_dir <- file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/SZBDMulti-Seq")
 
 snapshot_out_dir <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_6/dCoPA_snapshots/")
 
@@ -272,8 +272,8 @@ modulelengths <- unlist(lapply(mods,length))
 these_mods <- as.numeric(names(mods)[which(modulelengths>filter_under)])
 mods <- mods[these_mods]
 
-sea_dir <- "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/CMC"
-mit_dir <- "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/SZBDMulti-Seq"
+sea_dir <- file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/CMC")
+mit_dir <- file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/SZBDMulti-Seq")
 
 snapshot_out_dir <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_6/dCoPA_snapshots/")
 
@@ -338,7 +338,7 @@ dmod_gab <- fread(data.table=F,file=file.path(Sys.getenv("DATA_DIR", "/mnt/bdata
            sig_FDR,
            Consistency %in% c(0, 1)) |>
     dplyr::select(c(mod, Celltype, Direction, Consistency))
-dmod_liu <- fread(data.table=F, file="/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/MTC/euclidean_distances/allAD_vs_Con_bulk_megaset_output_table.csv") |>
+dmod_liu <- fread(data.table=F, file=file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/MTC/euclidean_distances/allAD_vs_Con_bulk_megaset_output_table.csv")) |>
     filter(mod %in% these_mods,
            sig_FDR,
            Consistency %in% c(0, 1)) |>

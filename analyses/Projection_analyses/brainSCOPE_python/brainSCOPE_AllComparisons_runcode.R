@@ -25,7 +25,7 @@ save_randinds_for <- NULL
 regions  <- c("CMC",
               "SZBDMulti-Seq")
 
-base_dir <- "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output"
+base_dir <- file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output")
 
 mod_configs <- list(
   bulk_megaset = file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "data/greedy_march_pipeline_output/finalNonNorm_minsize10_unmerged/SEAAD2024_AllADVsCon_DFC"),

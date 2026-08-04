@@ -80,7 +80,7 @@ fwrite(mega_expr, file = file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), 
 fwrite(mega_sif, file = file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "datasets/RNAseq/combined_mats/sif_combined.csv"))
 
 
-source("/home/gugene/code/labcode_old/SampleNetwork/SampleNetwork_1.08.r")
+source(file.path(Sys.getenv("SAMPLENETWORK_DIR", "/home/gugene/code/labcode_old/SampleNetwork"), "SampleNetwork_1.08.r"))
 
 setwd(file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "datasets/RNAseq/combined_mats/"))
 mega_expr <- fread(file = file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "datasets/RNAseq/combined_mats/expr_combined.csv"), data.table=F)
@@ -279,7 +279,7 @@ si <- 3:ncol(mega_expr)
 mega_expr[,si] <- mega_expr[,si]+abs(min(mega_expr[,si],na.rm=T))
 fwrite(mega_expr, file = file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "datasets/RNAseq/combined_mats/expr_combined_minus_Brainseq_NABEC_scaled.csv"))
 
-source("/home/gugene/code/SampleNetwork/SampleNetwork_1.08.r")
+source(file.path(Sys.getenv("SAMPLENETWORK_DIR", "/home/gugene/code/labcode_old/SampleNetwork"), "SampleNetwork_1.08.r"))
 
 setwd(file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "datasets/RNAseq/combined_mats/"))
 #mega_expr <- fread(file = file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "datasets/RNAseq/combined_mats/expr_combined_minus_Brainseq_NABEC.csv"), data.table=F)
@@ -552,7 +552,7 @@ fwrite(expr4, file = file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "dat
 
 
 # Perform Combat by dataset
-source("/home/gugene/code/SampleNetwork/SampleNetwork_1.08.r")
+source(file.path(Sys.getenv("SAMPLENETWORK_DIR", "/home/gugene/code/labcode_old/SampleNetwork"), "SampleNetwork_1.08.r"))
 
 setwd(file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "datasets/RNAseq/combined_mats/"))
 mega_expr <- fread(file = file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "datasets/RNAseq/combined_mats/expr_combined_minus_Brainseq_NABEC_firstScaledCtf.csv"), data.table=F)

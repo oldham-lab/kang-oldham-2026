@@ -34,7 +34,7 @@ these_mods_final <- these_mods[!these_mods %in% which(sigcount_bonf$vals < 2)]
 # --- Projection indices (REI), per dataset ------------------------------------
 d <- "log_REI"
 lein   <- fread(data.table = F, file = paste0(base_dir, "/LeinDFC/sn_proj_indices/", d, "/indices_over_all_datasets_Cell_Type_1_topmodposbc_mean.csv")) |> dplyr::select(!module)
-mitcon <- fread(data.table = F, file = file.path("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/mod_means/", d, "mod_means_Con_bulk_megaset.csv"))
+mitcon <- fread(data.table = F, file = file.path(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/mod_means/"), d, "mod_means_Con_bulk_megaset.csv"))
 # Gabitto (SEA-AD): HGNC-harmonized Python output (same format as MIT/Liu; no `module` col)
 SEAcon <- fread(data.table = F, file = paste0(base_dir, "/SEAAD2024_full_python_output/PFC/mod_means/", d, "/mod_means_Con_bulk_megaset.csv"))
 mora   <- fread(data.table = F, file = paste0(base_dir, "/Morabito_ABIanno/sn_proj_indices/", d, "/indices_over_all_datasets_Subclass_Control_topmodposbc_mean.csv")) |> dplyr::select(!module)

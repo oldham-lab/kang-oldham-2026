@@ -7,12 +7,12 @@ cd ${DATA_DIR:-/mnt/bdata/gugene}/datasets/RNAseq/NABEC/
 done
 
 cd ${DATA_DIR:-/mnt/bdata/gugene}/datasets/RNAseq/NABEC/fastq/
-ref="/home/gugene/bin/bbmap/bbmap/resources/adapters.fa"
+ref="${BBMAP_DIR:-/home/gugene/bin/bbmap/bbmap}/resources/adapters.fa"
 outdir="${DATA_DIR:-/mnt/bdata/gugene}/datasets/RNAseq/NABEC/fastq/trimmed"
 
 for R1 in *1.fastq; do
 R2=$(echo $R1 | sed "s/1.fastq/2.fastq/")
-/home/gugene/bin/bbmap/bbmap/bbduk.sh -Xmx1g \
+${BBMAP_DIR:-/home/gugene/bin/bbmap/bbmap}/bbduk.sh -Xmx1g \
 in1=$R1 in2=$R2 \
 out1=${outdir}/$(echo $R1 | sed "s/.fastq/_trimmed.fastq/") \
 out2=${outdir}/$(echo $R2 | sed "s/.fastq/_trimmed.fastq/") \

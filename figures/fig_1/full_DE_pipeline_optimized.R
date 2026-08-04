@@ -147,7 +147,7 @@ future_lapply(regions, function(i) {
     "jorstad_2023_PMID_37824655/10x/expression_", i, ".RDS"))
 
   cell_anno <- fread(paste0(
-    "/mnt/bdata/@shared/scsn.expr_data/human_expr/postnatal/",
+    file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/"),
     "jorstad_2023_PMID_37824655/10x/author_barcode_annotations_", i, ".csv"),
     data.table = FALSE)
 

@@ -1,4 +1,4 @@
-setwd("/home/gugene/code/git/FindModules/FindModules/R/")
+setwd(file.path(Sys.getenv("FINDMODULES_DIR", "/home/gugene/code/git/FindModules"), "FindModules/R/"))
 source("FindModules.R")
 source("map_identifiers_function.R")
 source("FM_helper_fxns.R")
@@ -83,7 +83,7 @@ FindModules(
 # Run geneset enrichment
 #.libPaths("~/R/x86_64-pc-linux-gnu-library/4.4/")
 WD <- file.path(Sys.getenv("EXTFIG_DIR", "/home/gugene/figures"), "figure_1/cellbender_metacell_FM/metacell_nonNeuronal_Modules")
-source("/home/gugene/code/git/GSEA_generic/GSEAfxsV3_nonpar_temp.r")
+source(file.path(Sys.getenv("GSEA_GENERIC_DIR", "/home/gugene/code/git/GSEA_generic"), "GSEAfxsV3_nonpar_temp.r"))
 setwd(WD)
 #MyGSHGloop(kmecut1="seed")
 # setwd(WD)
@@ -92,7 +92,7 @@ setwd(WD)
 MyGSHGloop(kmecut1="topmodposfdr")
 setwd(WD)
 
-source("/home/gugene/code/git/GSEA_generic/GSEAfxsV3.r")
+source(file.path(Sys.getenv("GSEA_GENERIC_DIR", "/home/gugene/code/git/GSEA_generic"), "GSEAfxsV3.r"))
 getMySetEnrichments(simType="any",
                     whichSet=c("MOSET7", "MOSET8", "MOSET6808", "MOSET6837"), 
                     whichKmeCut="topmodposbc",
@@ -255,7 +255,7 @@ FindModules(
 # Run geneset enrichment
 #.libPaths("~/R/x86_64-pc-linux-gnu-library/4.4/")
 WD <- file.path(Sys.getenv("EXTFIG_DIR", "/home/gugene/figures"), "figure_1/cellbender_metacell_FM/metacell_gluta_cellbender_Modules")
-source("/home/gugene/code/git/GSEA_generic/GSEAfxsV3_nonpar_temp.r")
+source(file.path(Sys.getenv("GSEA_GENERIC_DIR", "/home/gugene/code/git/GSEA_generic"), "GSEAfxsV3_nonpar_temp.r"))
 setwd(WD)
 #MyGSHGloop(kmecut1="seed")
 # setwd(WD)

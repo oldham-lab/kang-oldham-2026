@@ -36,7 +36,7 @@ index_dir  <- "log_REI"
 
 lein <- fread(data.table = F, file = paste0(base_dir, "/LeinDFC/sn_proj_indices/", index_dir, "/indices_over_all_datasets_Cell_Type_1_topmodposbc_mean.csv")) |>
   dplyr::select(!module)
-mitcon <- fread(data.table = F, file = file.path("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/mod_means/", index_dir, "mod_means_Con_bulk_megaset.csv"))
+mitcon <- fread(data.table = F, file = file.path(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/mod_means/"), index_dir, "mod_means_Con_bulk_megaset.csv"))
 SEAcon <- fread(data.table = F, file = paste0(base_dir, "/SEAAD2024_AllADVsCon_DFC/sn_proj_indices/", index_dir, "/indices_over_all_datasets_Subclass_Control_topmodposbc_mean.csv")) |>
   dplyr::select(!module)
 mora <- fread(data.table = F, file = paste0(base_dir, "/Morabito_ABIanno/sn_proj_indices/", index_dir, "/indices_over_all_datasets_Subclass_Control_topmodposbc_mean.csv")) |>

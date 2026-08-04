@@ -45,7 +45,7 @@ datasets <- list(
   ),
   list(
     prefix    = "MIT_",
-    base_dir  = "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output",
+    base_dir  = file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output"),
     regions   = c("PFC", "MTC"),
     mod_types = c("bulk_megaset", "rosmap"),
     runs      = list(list(case = "allAD", control = "Con", label = "allAD_vs_Con")),
@@ -53,7 +53,7 @@ datasets <- list(
   ),
   list(
     prefix    = "brainSCOPE_",
-    base_dir  = "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output",
+    base_dir  = file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output"),
     regions   = c("CMC", "SZBDMulti-Seq"),
     mod_types = c("bulk_megaset", "brainseq_scz"),
     runs      = list(list(case = "Schizophrenia", control = "control", label = "Schizophrenia_vs_control")),

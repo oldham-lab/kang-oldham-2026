@@ -20,13 +20,13 @@ multiqc .
 cd ${DATA_DIR:-/mnt/bdata/gugene}/datasets/RNAseq/AMPAD/ROSMAP/fastq/
 
 #ref="${SHARED_DIR:-/home/shared}/programs/bbmap/resources/adapters.fa"
-ref="/home/gugene/bin/bbmap/bbmap/resources/adapters.fa"
+ref="${BBMAP_DIR:-/home/gugene/bin/bbmap/bbmap}/resources/adapters.fa"
 
 outdir="${DATA_DIR:-/mnt/bdata/gugene}/datasets/RNAseq/AMPAD/ROSMAP/fastq/trimmed"
 
 for R1 in *r1*fastq.gz; do
 R2=$(echo $R1 | sed "s/r1/r2/")
-/home/gugene/bin/bbmap/bbmap/bbduk.sh -Xmx1g \
+${BBMAP_DIR:-/home/gugene/bin/bbmap/bbmap}/bbduk.sh -Xmx1g \
 in1=$R1 in2=$R2 \
 out1=${outdir}/$(echo $R1 | sed "s/.fastq/_trimmed.fastq/") \
 out2=${outdir}/$(echo $R2 | sed "s/.fastq/_trimmed.fastq/") \
@@ -83,13 +83,13 @@ mv *quant* kal_quant
 
 cd ${DATA_DIR:-/mnt/bdata/gugene}/datasets/RNAseq/AMPAD/MSBB/fastq/
 
-ref="/home/gugene/bin/bbmap/bbmap/resources/adapters.fa"
+ref="${BBMAP_DIR:-/home/gugene/bin/bbmap/bbmap}/resources/adapters.fa"
 
 outdir="${DATA_DIR:-/mnt/bdata/gugene}/datasets/RNAseq/AMPAD/MSBB/fastq/trimmed"
 mkdir $outdir
 
 for R1 in *fastq.gz; do
-/home/gugene/bin/bbmap/bbmap/bbduk.sh -Xmx1g \
+${BBMAP_DIR:-/home/gugene/bin/bbmap/bbmap}/bbduk.sh -Xmx1g \
 in=$R1 \
 out1=${outdir}/$(echo $R1 | sed "s/fastq/1_trimmed.fastq/") \
 out2=${outdir}/$(echo $R1 | sed "s/fastq/2_trimmed.fastq/") \

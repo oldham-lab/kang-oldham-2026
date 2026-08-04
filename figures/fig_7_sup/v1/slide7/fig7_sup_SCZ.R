@@ -79,14 +79,14 @@ these_mods_case <- as.numeric(names(mods_case)[which(modulelengths>filter_under)
 dat_vec <- list(
   ## con vs SCZ (CTRL modules)
   # CMC
-  "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/CMC/euclidean_distances/SZ_vs_Con_bulk_megaset_output_table.csv",
+  file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/CMC/euclidean_distances/SZ_vs_Con_bulk_megaset_output_table.csv"),
   # SZBD
-  "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/SZBDMulti-Seq/euclidean_distances/SZ_vs_Con_bulk_megaset_output_table.csv",
+  file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/SZBDMulti-Seq/euclidean_distances/SZ_vs_Con_bulk_megaset_output_table.csv"),
   ## con vs SCZ (SCZ modules)
   # CMC
-  "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/CMC/euclidean_distances/SZ_vs_Con_brainseq_scz_output_table.csv",
+  file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/CMC/euclidean_distances/SZ_vs_Con_brainseq_scz_output_table.csv"),
   # SZBD
-  "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/SZBDMulti-Seq/euclidean_distances/SZ_vs_Con_brainseq_scz_output_table.csv"
+  file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/SZBDMulti-Seq/euclidean_distances/SZ_vs_Con_brainseq_scz_output_table.csv")
 )
 
 dat_vec_names <- c("CMC",

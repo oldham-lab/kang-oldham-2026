@@ -40,7 +40,7 @@ qsave(simMatscvi, file=file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "f
 
 
 # Run FM
-setwd("/home/gugene/code/git/FindModules/FindModules/R/")
+setwd(file.path(Sys.getenv("FINDMODULES_DIR", "/home/gugene/code/git/FindModules"), "FindModules/R/"))
 source("FindModules.R")
 source("map_identifiers_function.R")
 source("FM_helper_fxns.R")
@@ -207,14 +207,14 @@ FindModules(
 )
 
 # Run geneset enrichment
-source("/home/gugene/code/git/GSEA_generic/GSEAfxsV3_nonpar_temp.r")
+source(file.path(Sys.getenv("GSEA_GENERIC_DIR", "/home/gugene/code/git/GSEA_generic"), "GSEAfxsV3_nonpar_temp.r"))
 setwd(file.path(Sys.getenv("EXTFIG_DIR", "/home/gugene/figures"), "figure_1/diffCoexpress_impute/donor1_megaMinusLeinPB_Modules/"))
 MyGSHGloop(kmecut1="seed")
 setwd(file.path(Sys.getenv("EXTFIG_DIR", "/home/gugene/figures"), "figure_1/diffCoexpress_impute/donor1_megaMinus_cbscVI_Modules/"))
 MyGSHGloop(kmecut1="seed")
 
 # Collect p-values for AOMN
-source("/home/gugene/code/git/GSEA_generic/GSEAfxsV3.r")
+source(file.path(Sys.getenv("GSEA_GENERIC_DIR", "/home/gugene/code/git/GSEA_generic"), "GSEAfxsV3.r"))
 setwd(file.path(Sys.getenv("EXTFIG_DIR", "/home/gugene/figures"), "figure_1/diffCoexpress_impute/donor1_megaMinusLeinPB_Modules/"))
 getMySetEnrichments(simType="any",
                     whichSet=c("MOSET7025"), 
@@ -327,14 +327,14 @@ FindModules(
 # Run geneset enrichment
 dir1 <- file.path(Sys.getenv("EXTFIG_DIR", "/home/gugene/figures"), "figure_1/diffCoexpress_impute/donor1_megaMinusLeinPB_minMEcor0.9_Modules/")
 dir2 <- file.path(Sys.getenv("EXTFIG_DIR", "/home/gugene/figures"), "figure_1/diffCoexpress_impute/donor1_megaMinus_cbscVI_minMEcor0.9_Modules/")
-source("/home/gugene/code/git/GSEA_generic/GSEAfxsV3_nonpar_temp.r")
+source(file.path(Sys.getenv("GSEA_GENERIC_DIR", "/home/gugene/code/git/GSEA_generic"), "GSEAfxsV3_nonpar_temp.r"))
 setwd(dir1)
 MyGSHGloop(kmecut1="seed")
 setwd(dir2)
 MyGSHGloop(kmecut1="seed")
 
 # Collect p-values for AOMN
-source("/home/gugene/code/git/GSEA_generic/GSEAfxsV3.r")
+source(file.path(Sys.getenv("GSEA_GENERIC_DIR", "/home/gugene/code/git/GSEA_generic"), "GSEAfxsV3.r"))
 setwd(dir1)
 getMySetEnrichments(simType="any",
                     whichSet=c("MOSET7025"), 

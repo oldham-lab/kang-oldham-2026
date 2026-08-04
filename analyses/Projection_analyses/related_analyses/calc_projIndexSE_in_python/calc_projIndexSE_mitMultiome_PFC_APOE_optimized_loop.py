@@ -8,7 +8,7 @@ from datetime import datetime
 from scipy.stats import sem
 
 # ─── Load dataset once ───────────────────────────────────────────────────────
-adata = ad.read_h5ad("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025.h5ad")
+adata = ad.read_h5ad(os.path.join(os.environ.get("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025.h5ad"))
 adata = adata[adata.obs["BrainRegion"] == "PFC", :].copy()
 sc.pp.log1p(adata, copy=False, chunked=False)  # Warning about already log-transformed is a false alarm;
                                                 # see github.com/ZunpengLiu/Multi-region_AD for workflow.
@@ -16,7 +16,7 @@ sc.pp.log1p(adata, copy=False, chunked=False)  # Warning about already log-trans
 adata.var['gene_sym'] = adata.var.index
 
 # add obs data with APOE info
-obs_new = pd.read_csv('/mnt/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025_sif_withAPOE.csv')
+obs_new = pd.read_csv(os.path.join(os.environ.get("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025_sif_withAPOE.csv"))
 obs_new = obs_new[obs_new["BrainRegion"] == "PFC"]
 obs_new.index = adata.obs.index
 adata.obs = obs_new

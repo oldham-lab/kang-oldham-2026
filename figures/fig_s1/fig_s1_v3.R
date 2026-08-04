@@ -12,7 +12,7 @@ library(cowplot)
 #####
 # DFC
 #####
-jor <- fread("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/author_barcode_annotations_DFC.csv", data.table = FALSE) |>
+jor <- fread(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/author_barcode_annotations_DFC.csv"), data.table = FALSE) |>
   mutate(Class = case_when(
     Cell_Type %in% c("Astro", "Endo", "Micro/PVM", "Oligo", "OPC", "VLMC") ~ "Non-neuronal",
     Cell_Type %in% c("Chandelier", "Lamp5", "Lamp5 Lhx6", "Pax6", "Pvalb", "Sncg", "Sst", "Sst Chodl", "Vip") ~ "GABAergic",
@@ -89,7 +89,7 @@ ggsave(pall, file = file.path(file.path(Sys.getenv("REPO_DIR", "/home/gugene/cod
 #####
 # MTG
 #####
-jor <- fread("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/author_barcode_annotations_MTG.csv", data.table = FALSE) |>
+jor <- fread(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/author_barcode_annotations_MTG.csv"), data.table = FALSE) |>
   mutate(Class = case_when(
     Cell_Type %in% c("Astro", "Endo", "Micro/PVM", "Oligo", "OPC", "VLMC") ~ "Non-neuronal",
     Cell_Type %in% c("Chandelier", "Lamp5", "Lamp5 Lhx6", "Pax6", "Pvalb", "Sncg", "Sst", "Sst Chodl", "Vip") ~ "GABAergic",

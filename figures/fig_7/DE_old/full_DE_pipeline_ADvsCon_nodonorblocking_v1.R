@@ -21,8 +21,8 @@ options(future.globals.maxSize = 3000*1024^2)
 #       --input  /path/to/mit_multiome.h5ad \
 #       --outdir /home/gugene/bdata/@shared/.../PFC/pfc_data/
 #
-MIT_PB_EXPR_PATH <- "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/PFC/pfc_data_pseudobulk/mit_pfc_pseudobulk.csv.gz"
-MIT_PB_ANNO_PATH <- "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/PFC/pfc_data_pseudobulk/mit_pfc_pseudobulk_annotations.csv"
+MIT_PB_EXPR_PATH <- file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/PFC/pfc_data_pseudobulk/mit_pfc_pseudobulk.csv.gz")
+MIT_PB_ANNO_PATH <- file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/PFC/pfc_data_pseudobulk/mit_pfc_pseudobulk_annotations.csv")
 
 # --- MIT_Multiome column names in annotation file ---
 MIT_CELLTYPE_COL <- "RNA.Subclass"    # celltype label column

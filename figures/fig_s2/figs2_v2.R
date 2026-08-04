@@ -60,7 +60,7 @@ cts <- unique(cell_anno_pb[[1]]$Cell_Type)
 # gene_means_log <- qread(file = file.path(Sys.getenv("EXTFIG_DIR", "/home/gugene/figures"), "figure_1/jorstad_gene_means_log.qs"))
 
 # Calculate means over all genes for sanity (gabitto)
-sn_expr <- qread("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/gabitto_2024/expr_UMI_notADsamples_mtg.qs")
+sn_expr <- qread(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/gabitto_2024/expr_UMI_notADsamples_mtg.qs"))
 gene_means <- apply(sn_expr, 1, mean)
 gene_means_log <- log(gene_means + 1)
 rm(sn_expr)

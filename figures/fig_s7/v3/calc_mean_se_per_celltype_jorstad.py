@@ -38,8 +38,8 @@ from hgnc_common import select_common_indices
 
 # Paths to the two .h5ad files
 ADATA_PATHS = [
-  "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/expression_DFC.h5ad",
-  "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/expression_MTG.h5ad",
+  os.path.join(os.environ.get("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/expression_DFC.h5ad"),
+  os.path.join(os.environ.get("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/expression_MTG.h5ad"),
 ]
 
 # Path to gene list file (one gene per line), or a Python list of gene names.

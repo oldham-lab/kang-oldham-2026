@@ -9,8 +9,8 @@ library(data.table)
 library(tidyverse)
 library(qs)
 library(MASS)
-source('~/code/git_other/scINRB/code/scINRB.R')
-source('~/code/git_other/scINRB/code/functions.R')
+source(file.path(Sys.getenv("SCINRB_DIR", "/home/gugene/code/git_other/scINRB"), "code/scINRB.R"))
+source(file.path(Sys.getenv("SCINRB_DIR", "/home/gugene/code/git_other/scINRB"), "code/functions.R"))
 
 # Load bulk data
 bulkmat <- fread(data.table=F,file=file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "datasets/RNAseq/combined_mats/combined_FCX_final_SampleNetworks/1_10-35-00/combined_FCX_final_1_1518_ComBat.csv"))

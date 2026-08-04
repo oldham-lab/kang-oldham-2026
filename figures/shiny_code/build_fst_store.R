@@ -27,7 +27,7 @@
 
 suppressMessages({library(fst); library(qs); library(data.table)})
 
-APP     <- "/home/gugene/ShinyApps/CoPA"           # app root (app's working dir)
+APP     <- Sys.getenv("SHINYAPP_DIR", "/home/gugene/ShinyApps/CoPA")           # app root (app's working dir)
 GP_DS   <- c("SEAAD2024", "MIT", "Morabito2021", "LeinA9")
 GB_LVL  <- paste0("annotation_level_", 1:4)
 

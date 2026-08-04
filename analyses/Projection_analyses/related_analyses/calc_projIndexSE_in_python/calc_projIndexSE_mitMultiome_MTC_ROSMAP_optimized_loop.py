@@ -8,7 +8,7 @@ from datetime import datetime
 from scipy.stats import sem
 
 # ─── Load dataset once ───────────────────────────────────────────────────────
-adata = ad.read_h5ad("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025.h5ad")
+adata = ad.read_h5ad(os.path.join(os.environ.get("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025.h5ad"))
 adata = adata[adata.obs["BrainRegion"] == "MTC", :].copy()
 sc.pp.log1p(adata, copy=False, chunked=False)  # Warning about already log-transformed is a false alarm;
                                                 # see github.com/ZunpengLiu/Multi-region_AD for workflow.

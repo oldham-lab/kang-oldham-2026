@@ -367,7 +367,7 @@ dev.off()
 # # Panel C: FM on mod-mod consensus matrix
 # ##########
 
-setwd("/home/gugene/code/git/FindModules/FindModules/R/")
+setwd(file.path(Sys.getenv("FINDMODULES_DIR", "/home/gugene/code/git/FindModules"), "FindModules/R/"))
 source("FindModules.R")
 source("map_identifiers_function.R")
 source("FM_helper_fxns.R")
@@ -693,7 +693,7 @@ fwrite(bp_table, file = file.path(save_dir, "branchpoint_table_modeig_with_genes
 # --- Render the labeled dendrogram (coords mode) and composite it onto the Jorstad
 #     panel_C, replacing that panel's top dendrogram. (matplotlib renderer -> svgutils
 #     composite -> rsvg-convert for the PDF.) Only the Jorstad panel is modified. ---
-render_py  <- "/home/gugene/miniconda3/bin/python"
+render_py  <- Sys.getenv("PYTHON_BIN", "/home/gugene/miniconda3/bin/python")
 render_scr <- file.path(save_dir, "make_labeled_dendrogram_only_v5.py")
 composite  <- file.path(save_dir, "composite_dendrogram_panelC.py")
 system2(render_py, c(shQuote(render_scr),

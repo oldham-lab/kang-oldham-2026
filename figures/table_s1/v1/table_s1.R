@@ -92,7 +92,7 @@ gab_counts_mtg <- fread(data.table=F,file=file.path(Sys.getenv("DATA_DIR", "/mnt
   rename("Donor" = `Donor ID`)
 
 # Liu (MTC, DLPFC)
-liu_counts <- fread(data.table = F, file = "/mnt/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025_sif.csv")  |>
+liu_counts <- fread(data.table = F, file = file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025_sif.csv"))  |>
   mutate(Pathology = case_when(
     Pathology == "nonAD" ~ "Control",
     TRUE ~ "AD"
@@ -110,15 +110,15 @@ liu_counts <- fread(data.table = F, file = "/mnt/bdata/@shared/scsn.expr_data/hu
                              .default = Region))
 
 # Emani (DLPFC)
-donorobjs <- list.files("/mnt/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/sn_summary_tables/by_donor", full.names=T)
-emani_sn_anno <- fread(data.table=F, file="/mnt/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/PEC2_sample_metadata.txt") |>
+donorobjs <- list.files(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/sn_summary_tables/by_donor"), full.names=T)
+emani_sn_anno <- fread(data.table=F, file=file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/PEC2_sample_metadata.txt")) |>
     dplyr::filter(Disorder %in% c("control", "Schizophrenia"),
                   Cohort %in% c("CMC", "SZBDMulti-Seq")) |>
     dplyr::filter(lapply(Individual_ID, \(x) sum(grepl(x, donorobjs)) > 0) |> unlist()) 
 # 100 CMC donors, 53 control 47 SCZ, 287783 Control, 214234 Schizophrenia
 # 48 SZBDMulti-Seq donors, 24 control, 24 SCZ, 173570 control, 171313 SCZ
 
-emani_counts <- list.files("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/Cell_metadata", full.names = T) |>
+emani_counts <- list.files(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/Cell_metadata"), full.names = T) |>
   lapply(\(x) fread(data.table = F, file = x)) |>
   lapply(\(x) c(table(x$individualID)) |> stack()) |>
   do.call(what = "rbind") |>
@@ -164,13 +164,13 @@ nuc_sum2 <- counts_all |> mutate(nuc_sum = nuc_sum) |> group_by(Dataset, Patholo
 
 ## Determining median UMI per nuc
 # Jorstad Cv3
-jormtg <- readRDS("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/expression_DFC.RDS")
+jormtg <- readRDS(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/expression_DFC.RDS"))
 jorm1 <- apply(jormtg, 2, sum)
 rm(jormtg)
-jordfc <- readRDS("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/expression_DFC.RDS")
+jordfc <- readRDS(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/expression_DFC.RDS"))
 jord1 <- apply(jordfc, 2, sum)
 rm(jordfc)
-jorv1 <- readRDS("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/expression_V1.RDS")
+jorv1 <- readRDS(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/expression_V1.RDS"))
 jorv11 <- apply(jorv1, 2, sum)
 rm(jorv1)
 median(c(jorm1, jord1, jorv11))
@@ -191,19 +191,19 @@ median(c(gdfc$`Number of UMIs`, gmtg$`Number of UMIs`))
 rm(gdfc)
 rm(gmtg)
 # Liu
-liu <- fread(data.table=F,file="/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025_sif.csv") |>
+liu <- fread(data.table=F,file=file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025_sif.csv")) |>
   dplyr::filter(BrainRegion %in% c("MTC", "PFC"))
 median(liu$total_counts)
 rm(liu)
 # Emani
-cmc <- fread(data.table=F,file="/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/Cell_metadata/CMC_cell_metadata_redo.tsv")
-szbd <- fread(data.table=F,file="/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/Cell_metadata/SZBD-Kellis_cell_metadata_redo.tsv")
+cmc <- fread(data.table=F,file=file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/Cell_metadata/CMC_cell_metadata_redo.tsv"))
+szbd <- fread(data.table=F,file=file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/Cell_metadata/SZBD-Kellis_cell_metadata_redo.tsv"))
 #median(c(cmc$n_counts, szbd$n_counts))
 median(cmc$n_counts)
 median(szbd$n_counts)
 
 # Morabito
-mor <- Matrix::readMM(file="/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/morabito_2021/all_cells/matrix.mtx")
+mor <- Matrix::readMM(file=file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/morabito_2021/all_cells/matrix.mtx"))
 mor1 <- apply(mor,2,sum)
 median(mor1)
 rm(mor)

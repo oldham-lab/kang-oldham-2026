@@ -36,8 +36,11 @@ import scipy.sparse
 # =============================================================================
 
 DATA_DIR = (
-    "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/"
-    "morabito_2021/all_cells"
+    os.path.join(
+        os.environ.get("SHARED_DATA_DIR", "/mnt/bdata/@shared"),
+        "scsn.expr_data/human_expr/postnatal/"
+        "morabito_2021/all_cells",
+    )
 )
 
 MATRIX_FILE   = f"{DATA_DIR}/matrix.mtx"

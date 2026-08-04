@@ -8,11 +8,11 @@ done
 
 # trim
 cd ${DATA_DIR:-/mnt/bdata/gugene}/datasets/RNAseq/Brainspan/fastq/
-ref="/home/gugene/bin/bbmap/bbmap/resources/adapters.fa"
+ref="${BBMAP_DIR:-/home/gugene/bin/bbmap/bbmap}/resources/adapters.fa"
 outdir="${DATA_DIR:-/mnt/bdata/gugene}/datasets/RNAseq/Brainspan/fastq/trimmed"
 
 for R1 in *.fastq; do
-/home/gugene/bin/bbmap/bbmap/bbduk.sh -Xmx1g \
+${BBMAP_DIR:-/home/gugene/bin/bbmap/bbmap}/bbduk.sh -Xmx1g \
 in=$R1 \
 out1=${outdir}/$(echo $R1 | sed "s/.fastq/.1_trimmed.fastq/") \
 out2=${outdir}/$(echo $R1 | sed "s/.fastq/.2_trimmed.fastq/") \

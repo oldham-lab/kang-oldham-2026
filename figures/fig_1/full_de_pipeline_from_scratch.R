@@ -36,8 +36,8 @@ BPPARAM_SERIAL <- BiocParallel::SerialParam()
 DATASETS <- list(
 
   MIT_Multiome = list(
-    expr_path    = "/home/gugene/bdata/@shared/.../mit_pfc_pseudobulk.csv.gz",
-    anno_path    = "/home/gugene/bdata/@shared/.../mit_pfc_pseudobulk_annotations.csv",
+    expr_path    = file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), ".../mit_pfc_pseudobulk.csv.gz"),
+    anno_path    = file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), ".../mit_pfc_pseudobulk_annotations.csv"),
     celltype_col = "Cell_Type",
     donor_col    = "Donor_ID",
     dx_col       = "Diagnosis",

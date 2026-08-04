@@ -14,7 +14,7 @@ library(circlize)
 library(grid)
 
 # ---- 1. Load data ----
-corr_df   <- read.csv("/home/gugene/test/test.csv", header = TRUE, check.names = FALSE)
+corr_df   <- read.csv(file.path(Sys.getenv("SCRATCH_DIR", "~/test"), "test.csv"), header = TRUE, check.names = FALSE)
 eig_df    <- read.csv(file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_5/v2/mod_eig1.csv"), header = TRUE, check.names = FALSE)
 bp_df     <- read.csv(file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_5/v2/branchpoint_table3_with_genes.csv"), header = TRUE,
                       check.names = FALSE)

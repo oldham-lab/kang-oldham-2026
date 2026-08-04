@@ -88,7 +88,7 @@ for(i in regions){
     # Load Lein et al. 2023 expression data and cell annotations
     cell_expr <- readRDS(paste0(file.path(Sys.getenv("SHARED_DIR", "/home/shared"), "scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/expression_"), i,".RDS"))
     cell_expr <- as.data.frame(as.matrix(cell_expr))
-    cell_anno <- fread(paste0("/mnt/bdata/@shared/scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/author_barcode_annotations_", i, ".csv"), data.table = FALSE)
+    cell_anno <- fread(paste0(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/author_barcode_annotations_"), i, ".csv"), data.table = FALSE)
     # cell_anno <- cell_anno[match(colnames(cell_expr), cell_anno$Cell_ID),]
 
     # Create pseudobulk data by individual per Label (celltype pasted with region) from raw data (sum) and save:

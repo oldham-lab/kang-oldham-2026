@@ -199,7 +199,7 @@ sea_dcopa_list <- setNames(
 )
 
 ### Load all MIT data
-mit_dir <- "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output"
+mit_dir <- file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output")
 
 mit_files <- list.files(mit_dir,
                         pattern = "\\.csv$",

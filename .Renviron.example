@@ -10,10 +10,29 @@ MEGASET_DIR=/home/gugene/RNAseq_megaset
 DATA_OTHER_DIR=/home/gugene/data_other
 EXTFIG_DIR=/home/gugene/figures
 
-# Shared / external tool + data locations:
+# Shared / external tool + data locations.
+# SHARED_DIR and SHARED_DATA_DIR both hold an scsn.expr_data/ tree but are
+# DIFFERENT directories -- neither is a symlink to the other, so set both:
 SHARED_DIR=/home/shared
+SHARED_DATA_DIR=/mnt/bdata/@shared
 ESSA_DIR=/home/gugene/code/git/ESSA
 PSEUDOBULK_DIR=/home/gugene/code/git/Pseudobulk-from-SC-SN-data
+HOME_DATA_DIR=/home/gugene/data
+
+# External analysis tools sourced by path (not R packages; see README):
+FINDMODULES_DIR=/home/gugene/code/git/FindModules
+GSEA_GENERIC_DIR=/home/gugene/code/git/GSEA_generic
+SAMPLENETWORK_DIR=/home/gugene/code/labcode_old/SampleNetwork
+SCINRB_DIR=/home/gugene/code/git_other/scINRB
+COMPAREMARKERS_DIR=/home/gugene/code/git/CompareMarkers
+BBMAP_DIR=/home/gugene/bin/bbmap/bbmap
+PYTHON_BIN=/home/gugene/miniconda3/bin/python
+
+# CoPA Shiny app checkout (snapshot generation only):
+SHINYAPP_DIR=/home/gugene/ShinyApps/CoPA
+
+# Throwaway output dir for exploratory scripts:
+SCRATCH_DIR=~/test
 
 # Large reference files not shipped in CoPA (MSigDB: download from gsea-msigdb.org;
 # HGNC map: built by COPA/dataset_processing_unified/build_alias_map.R):

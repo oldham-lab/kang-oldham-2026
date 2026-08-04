@@ -253,7 +253,7 @@ rand_mod_analysis(sn_summary_object_path = file.path(Sys.getenv("DATA_DIR", "/mn
 
 obj <- qread(file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "data/greedy_march_pipeline_output/finalNonNorm_minsize10_unmerged/MIT_ADMultiome_MTC/sn_summary_tables/sn_summary_objects_log.qs"))
 
-sn_anno_subclass <- fread(data.table = F, file = "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025_sif.csv") |> 
+sn_anno_subclass <- fread(data.table = F, file = file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025_sif.csv")) |> 
   select(RNA.Class, RNA.Subclass) |>
   filter(!duplicated(RNA.Subclass), 
           RNA.Subclass %in% colnames(obj[[1]][[1]][[1]])) |>
@@ -308,7 +308,7 @@ rand_mod_analysis(sn_summary_object_path = file.path(Sys.getenv("DATA_DIR", "/mn
 
 obj <- qread(file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "data/greedy_march_pipeline_output/finalNonNorm_minsize10_unmerged/MIT_ADMultiome_PFC/sn_summary_tables/sn_summary_objects_log.qs"))
 
-sn_anno_subclass <- fread(data.table = F, file = "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025_sif.csv") |> 
+sn_anno_subclass <- fread(data.table = F, file = file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025_sif.csv")) |> 
   select(RNA.Class, RNA.Subclass) |>
   filter(!duplicated(RNA.Subclass), 
           RNA.Subclass %in% colnames(obj[[1]][[1]][[1]])) |>
@@ -362,7 +362,7 @@ rand_mod_analysis(sn_summary_object_path = file.path(Sys.getenv("DATA_DIR", "/mn
 #################
 obj <- qread(file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "data/greedy_march_pipeline_output/finalNonNorm_minsize10_unmerged/MIT_ADMultiome_PFC/sn_summary_tables/sn_summary_objects_log.qs"))
 
-sn_anno_subclass <- fread(data.table = F, file = "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025_sif.csv") |> 
+sn_anno_subclass <- fread(data.table = F, file = file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025_sif.csv")) |> 
   select(RNA.Class, RNA.Subclass) |>
   filter(!duplicated(RNA.Subclass), 
           RNA.Subclass %in% colnames(obj[[1]][[1]][[1]])) |>

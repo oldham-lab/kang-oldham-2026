@@ -46,8 +46,11 @@ import scipy.sparse
 
 # Path to the MIT AD Multiomic Multiregion h5ad file
 ADATA_PATH = (
-    "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/"
-    "MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025.h5ad"
+    os.path.join(
+        os.environ.get("SHARED_DATA_DIR", "/mnt/bdata/@shared"),
+        "scsn.expr_data/human_expr/postnatal/"
+        "MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025.h5ad",
+    )
 )
 
 # Per-region label CSVs — first column is the cell barcode (index);

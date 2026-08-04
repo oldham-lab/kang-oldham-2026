@@ -9,7 +9,7 @@ library(CoPA)
 # Load bulk megaset dataset
 expr <- fread(file = file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "datasets/RNAseq/count_mats/brainseq_samp_filt_SCZ_SampleNetworks/1_04-04-29/brainseq_samp_filt_SCZ_1_171_outliers_removed_geneSymbolsAdded.csv"), data.table=F)
 save_dir1 <- file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "data/greedy_march_pipeline_output/Brainseq_SCZ/")
-sn_summary_object_path <- "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/"
+sn_summary_object_path <- file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/")
 module_output_dir <- save_dir1
 ##################################
  

@@ -36,7 +36,7 @@ index_dir  <- "log_REI"
 
 lein <- fread(data.table = F, file = paste0(base_dir, "/LeinDFC/sn_proj_indices/", index_dir, "/indices_over_all_datasets_Cell_Type_1_topmodposbc_mean.csv")) |>
   dplyr::select(!module)
-mitcon <- fread(data.table = F, file = file.path("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/mod_means/", index_dir, "mod_means_Con_bulk_megaset.csv"))
+mitcon <- fread(data.table = F, file = file.path(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/mod_means/"), index_dir, "mod_means_Con_bulk_megaset.csv"))
 # Gabitto (SEA-AD) now routes through the HGNC-harmonized Python SEA-AD output
 # (SEAAD2024_full_python_output), matching fig_4/v6 + fig_5/v5. Supersedes the pre-fix
 # R sn_proj_indices output; the Python format has no `module` column (no select needed).

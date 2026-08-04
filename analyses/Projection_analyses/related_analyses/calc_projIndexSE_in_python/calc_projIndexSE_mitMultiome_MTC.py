@@ -10,7 +10,7 @@ from scipy.sparse import csc_matrix
 from scipy.stats import sem
 
 # Load dataset (MIT multiome)
-adata = ad.read_h5ad("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025.h5ad")
+adata = ad.read_h5ad(os.path.join(os.environ.get("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025.h5ad"))
 adata = adata[adata.obs["BrainRegion"] == "MTC", :].copy()
 sc.pp.log1p(adata, copy=False, chunked=False) # A warning appears that data is already log-transformed but this is not the case, see https://github.com/ZunpengLiu/Multi-region_AD/blob/main/02_snRNA/01_Integration_Processing/snRNA_integration.py for workflow. deleting 'log1p' unstructured object removes the warning.
 adata.var['gene_sym'] = adata.var.index

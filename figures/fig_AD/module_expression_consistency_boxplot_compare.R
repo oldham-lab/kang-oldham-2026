@@ -132,7 +132,7 @@ library(ggplot2)
 p <- ggplot(diff_df, aes(x = seadiff, y = mitdiff)) + 
   geom_point() +
   geom_abline()
-ggsave(p, file = "~/test/test.png")
+ggsave(p, file = file.path(Sys.getenv("SCRATCH_DIR", "~/test"), "test.png"))
 # Not much of a pattern between SEA and MIT
 # What if we look at direction only and disregard magnitude?
 diff_df2 <- data.frame("seadiff" = lapply(mod_bc, \(x){
@@ -148,7 +148,7 @@ diff_df2 <- data.frame("seadiff" = lapply(mod_bc, \(x){
 p <- ggplot(diff_df2, aes(x = seadiff, y = mitdiff)) + 
   geom_point() +
   geom_abline()
-ggsave(p, file = "~/test/test2.png")
+ggsave(p, file = file.path(Sys.getenv("SCRATCH_DIR", "~/test"), "test2.png"))
 sum(diff_df2[,1]==0 & diff_df2[,2] == 0, na.rm = T)
 # 691
 # Most modules (n=691) are lower in AD astrocytes in both SEA and MIT

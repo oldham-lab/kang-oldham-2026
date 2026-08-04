@@ -26,8 +26,11 @@ GABITTO_PATH_MTG = (
 )
 
 LIU_PATH = (
-    "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/"
-    "MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025.h5ad"
+    os.path.join(
+        os.environ.get("SHARED_DATA_DIR", "/mnt/bdata/@shared"),
+        "scsn.expr_data/human_expr/postnatal/"
+        "MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025.h5ad",
+    )
 )
 SAVE_DIR = Path(os.path.join(os.environ.get("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_s6"))
 

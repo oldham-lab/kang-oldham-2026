@@ -32,14 +32,14 @@ multiqc .
 cd ${DATA_DIR:-/mnt/bdata/gugene}/datasets/RNAseq/Brainseq/RNAseq_merged/
 
 #ref="${SHARED_DIR:-/home/shared}/programs/bbmap/resources/adapters.fa"
-ref="/home/gugene/bin/bbmap/bbmap/resources/adapters.fa"
+ref="${BBMAP_DIR:-/home/gugene/bin/bbmap/bbmap}/resources/adapters.fa"
 
 outdir="${DATA_DIR:-/mnt/bdata/gugene}/datasets/RNAseq/Brainseq/RNAseq_merged/trimmed"
 
 #for R1 in XZ*R1*fastq.gz; do
 for R1 in *R1*fastq.gz; do
 R2=$(echo $R1 | sed "s/R1/R2/")
-/home/gugene/bin/bbmap/bbmap/bbduk.sh -Xmx1g \
+${BBMAP_DIR:-/home/gugene/bin/bbmap/bbmap}/bbduk.sh -Xmx1g \
 in1=$R1 in2=$R2 \
 out1=${outdir}/$(echo $R1 | sed "s/.fastq/_trimmed.fastq/") \
 out2=${outdir}/$(echo $R2 | sed "s/.fastq/_trimmed.fastq/") \

@@ -32,7 +32,7 @@ SEA_EDGER_PATH_MTG <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/ka
 SEA_DESEQ_PATH_MTG <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/v4/DE/SEA_DE_results_MTG/sea_mtg_DESeq2_ADvsCon_by_celltype.qs")
 
 #SAVE_DIR   <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/v4")
-SAVE_DIR <- "/home/gugene/test/"
+SAVE_DIR <- Sys.getenv("SCRATCH_DIR", "~/test")
 
 FDR_THRESH <- 0.05
 LFC_THRESH <- 0

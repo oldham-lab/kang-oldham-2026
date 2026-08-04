@@ -91,14 +91,14 @@ gene2mod_case <- make_gene2mod(mods_case_trim)
 dat_vec <- list(
   ## con vs SCZ (CTRL modules)
   # CMC
-  "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/CMC/DFC/euclidean_distances/Schizophrenia_vs_control_bulk_megaset_output_table.csv",
+  file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/CMC/DFC/euclidean_distances/Schizophrenia_vs_control_bulk_megaset_output_table.csv"),
   # SZBD
-  "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/SZBDMulti-Seq/DFC/euclidean_distances/Schizophrenia_vs_control_bulk_megaset_output_table.csv",
+  file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/SZBDMulti-Seq/DFC/euclidean_distances/Schizophrenia_vs_control_bulk_megaset_output_table.csv"),
   ## con vs SCZ (SCZ modules)
   # CMC
-  "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/CMC/DFC/euclidean_distances/Schizophrenia_vs_control_brainseq_scz_output_table.csv",
+  file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/CMC/DFC/euclidean_distances/Schizophrenia_vs_control_brainseq_scz_output_table.csv"),
   # SZBD
-  "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/SZBDMulti-Seq/DFC/euclidean_distances/Schizophrenia_vs_control_brainseq_scz_output_table.csv"
+  file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/SZBDMulti-Seq/DFC/euclidean_distances/Schizophrenia_vs_control_brainseq_scz_output_table.csv")
 )
 
 dat_vec_names <- c("CMC",

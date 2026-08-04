@@ -28,7 +28,7 @@ copa_dir1 <- file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "data/greedy
 save_path = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_AD/panels/scz")
 objs <- find_cons_mods(save_path = save_path,
                        copa_dir1 = copa_dir1,
-                       sn_summary_path = "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/",
+                       sn_summary_path = file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/"),
                        return_obj = T,
                        plot = T,
                        comp_names = c("SCZ", "Con"),
@@ -224,7 +224,7 @@ save_path = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-
 
 objs2 <- find_cons_mods(save_path = save_path,
                copa_dir1 = copa_dir1,
-               sn_summary_path = "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/",
+               sn_summary_path = file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/"),
                return_obj = T)
 
 

@@ -55,7 +55,7 @@ m1 <- cor(t(rei1)); m2 <- cor(t(rei2))
 mcm1 <- pmin(m1, m2)
 colnames(mcm1) <- paste0("Mod", colnames(mcm1)); rownames(mcm1) <- paste0("Mod", rownames(mcm1))
 
-setwd("/home/gugene/code/git/FindModules/FindModules/R/")
+setwd(file.path(Sys.getenv("FINDMODULES_DIR", "/home/gugene/code/git/FindModules"), "FindModules/R/"))
 source("FindModules.R"); source("map_identifiers_function.R"); source("FM_helper_fxns.R")
 source("FindModules.R"); source("find_seed_genes_greedy_march_megaset.R"); source("similarityType.R")
 source("plotting_functions.R"); source("overlapType.R"); source("networkOutputs.R")
@@ -156,7 +156,7 @@ bp_table <- bp_table[, c(1:4, 6, 5)]
 fwrite(bp_table, file.path(save_dir,"branchpoint_table_modeig_with_genes.csv"))
 
 # ---- render labeled dendrogram + composite onto Jorstad panel -> panel_B.svg + panel_C_consensusMin_Jorstad.svg ----
-render_py  <- "/home/gugene/miniconda3/bin/python"
+render_py  <- Sys.getenv("PYTHON_BIN", "/home/gugene/miniconda3/bin/python")
 render_scr <- file.path(save_dir,"make_labeled_dendrogram_only.py")
 composite  <- file.path(save_dir,"composite_dendrogram_panelC.py")
 system2(render_py, c(shQuote(render_scr),

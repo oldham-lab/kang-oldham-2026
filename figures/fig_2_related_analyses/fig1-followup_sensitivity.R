@@ -127,7 +127,7 @@ lapply(fidlist[[1]], function(x){
 # interesting how specificity is decent across the board but sensitivity of badly modeled markers like AIF1 is low
 
 # load kevin's aomn hi-fi genes
-fidaomn <- fread(data.table=F,file="~/code/git/CompareMarkers/data/bulkFidelity_Hs.FCX_AOMN.csv")
+fidaomn <- fread(data.table=F,file=file.path(Sys.getenv("COMPAREMARKERS_DIR", "/home/gugene/code/git/CompareMarkers"), "data/bulkFidelity_Hs.FCX_AOMN.csv"))
 
 # What is the r2 vs sensitivity for DE genes?
 

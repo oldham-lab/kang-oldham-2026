@@ -37,7 +37,7 @@ library(tidyverse)
 library(data.table)
 
 source(file.path(Sys.getenv("SHARED_DIR", "/home/shared"), "code/SampleNetworks/SampleNetwork_1.08.r"))
-source("/home/gugene/code/SampleNetwork/SampleNetwork_1.08.r")
+source(file.path(Sys.getenv("SAMPLENETWORK_DIR", "/home/gugene/code/labcode_old/SampleNetwork"), "SampleNetwork_1.08.r"))
 
 
 expr <- fread(file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "datasets/RNAseq/count_mats/expr_BrainGVEX_raw_counts.csv"), data.table=F,)

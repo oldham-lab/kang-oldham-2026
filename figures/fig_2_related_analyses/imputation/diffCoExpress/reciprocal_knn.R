@@ -426,7 +426,7 @@ p <- ggplot(ktest, aes(x=pb_vs_corrected, y=Pcntile)) +
   geom_point(alpha=0.5, size=0.2) +
   theme(text=element_text(size=30)) +
   geom_smooth()
-ggsave(p,file="~/test/test.png")
+ggsave(p,file=file.path(Sys.getenv("SCRATCH_DIR", "~/test"), "test.png"))
 
 
 # Load zero percentages
@@ -455,7 +455,7 @@ p <- ggplot(ktest, aes(x=pb_vs_corrected, y=Pcntile)) +
   geom_point(alpha=0.5, size=0.2) +
   theme(text=element_text(size=30)) +
   geom_smooth()
-ggsave(p,file="~/test/test.png")
+ggsave(p,file=file.path(Sys.getenv("SCRATCH_DIR", "~/test"), "test.png"))
 # pretty much the same pattern as with mean expression
 
 # Calculate mean expr percentiles from lein pb
@@ -478,4 +478,4 @@ p <- ggplot(ktest, aes(x=pb_vs_corrected, y=Pcntile)) +
   geom_point(alpha=0.5, size=0.2) +
   theme(text=element_text(size=30)) +
   geom_smooth()
-ggsave(p,file="~/test/test.png")
+ggsave(p,file=file.path(Sys.getenv("SCRATCH_DIR", "~/test"), "test.png"))

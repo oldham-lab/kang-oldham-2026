@@ -52,12 +52,12 @@ JORSTAD_EXPR_DIR <- file.path(Sys.getenv("SHARED_DIR", "/home/shared"), "scsn.ex
 JORSTAD_PB_DIR   <- file.path(Sys.getenv("DATA_OTHER_DIR", "/home/gugene/data_other"), "lein_allRegions_pseudobulk_by_donor_all_genes")
 
 # --- SEAAD 2024 (DFC) ----------------------------------------------------
-SEAAD_EXPR_DFC   <- "~/bdata/@shared/scsn.expr_data/human_expr/postnatal/gabitto_2024/expr_UMI_notADsamples.qs"
+SEAAD_EXPR_DFC   <- file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/gabitto_2024/expr_UMI_notADsamples.qs")
 SEAAD_ANNO_DFC   <- file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "datasets/SN_RNAseq/sea_ad_2024/RNAseq/SEAAD_A9_RNAseq_final-nuclei_metadata.2024-02-13.csv")
 SEAAD_PB_DIR     <- file.path(Sys.getenv("DATA_OTHER_DIR", "/home/gugene/data_other"), "seaad2024_pseudobulk_by_donor_all_genes")
 
 # --- SEAAD 2024 (MTG) ----------------------------------------------------
-SEAAD_EXPR_MTG   <- "~/bdata/@shared/scsn.expr_data/human_expr/postnatal/gabitto_2024/expr_UMI_notADsamples_mtg.qs"
+SEAAD_EXPR_MTG   <- file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/gabitto_2024/expr_UMI_notADsamples_mtg.qs")
 SEAAD_ANNO_MTG   <- file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "datasets/SN_RNAseq/sea_ad_2024/mtg/RNAseq/SEAAD_MTG_RNAseq_final-nuclei.2024-02-13_metadata.csv")
 
 # --- HGNC symbol harmonization -------------------------------------------
@@ -232,7 +232,7 @@ future_lapply(REGIONS, function(i) {
   cell_expr <- readRDS(file.path(JORSTAD_EXPR_DIR, paste0("expression_", i, ".RDS")))
 
   cell_anno <- fread(
-    file.path("/mnt/bdata/@shared/scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x",
+    file.path(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x"),
               paste0("author_barcode_annotations_", i, ".csv")),
     data.table = FALSE)
 

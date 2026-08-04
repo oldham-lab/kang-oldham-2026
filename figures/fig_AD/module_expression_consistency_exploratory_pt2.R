@@ -47,7 +47,7 @@ plot_allgenes_diff(copa_dir1 = file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/guge
                    plottitle = "Early vs late AD expression over all genes in SEAAD2024",
                    save_dir = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_AD/panels/earlyVsLate_over_allGenes.png"))
 
-plot_allgenes_diff(copa_dir1 = "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/",
+plot_allgenes_diff(copa_dir1 = file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/"),
                    ytitle = "Mean expression difference\n(SCZ minus con)",
                    plottitle = "Con vs SCZ expression over all genes in brainSCOPE",
                    save_dir = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_AD/panels/conVsSCZ_over_allGenes.png"))

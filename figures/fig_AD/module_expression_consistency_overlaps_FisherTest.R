@@ -114,8 +114,8 @@ for(i in seq_along(mod_bc)){
   cat(i, " ")
 }
 testdf <- do.call(cbind, testlist)
-fwrite(testdf, file = "~/test/test.csv")
-testdf <- fread(data.table = F, file = "~/test/test.csv")
+fwrite(testdf, file = file.path(Sys.getenv("SCRATCH_DIR", "~/test"), "test.csv"))
+testdf <- fread(data.table = F, file = file.path(Sys.getenv("SCRATCH_DIR", "~/test"), "test.csv"))
 # rows: rosmapmods
 # cols: bulk mods
 #testdfcolranks <- apply(testdf, 2, rank)
@@ -131,15 +131,15 @@ for(i in seq_along(mod_bc)){
   cat(i, " ")
 }
 testdf2 <- do.call(cbind, testlist2)
-fwrite(testdf2, file = "~/test/test2.csv")
-testdf2 <- fread(data.table = F, file = "~/test/test2.csv")
+fwrite(testdf2, file = file.path(Sys.getenv("SCRATCH_DIR", "~/test"), "test2.csv"))
+testdf2 <- fread(data.table = F, file = file.path(Sys.getenv("SCRATCH_DIR", "~/test"), "test2.csv"))
 
 # Which rosmap mods correspond to bulk megaset mods
 #lapply(pathList$bulk_megaset$conVAll$pos, \(x) which.min(testdf[, as.numeric(x)])) |> unlist() # which rosmap mod has lowest pval
 #lapply(pathList$bulk_megaset$conVAll$pos, \(x) min(testdf[, as.numeric(x)])) |> unlist() # what is lowest pval
 #lapply(pathList$bulk_megaset$conVAll$pos, \(x) testdfcolranks[as.numeric(pathList$rosmapAD$conVsAllAD$pos), as.numeric(x)]) # what are ranks of significant rosmap mods for bulk mods
 library(ComplexHeatmap)
-pdf("~/test/test.pdf")
+pdf(file.path(Sys.getenv("SCRATCH_DIR", "~/test"), "test.pdf"))
 for(i in 1:4){
   bulk1 <- pathList$bulk_megaset[[i]] |> unlist()
   ros1 <- pathList$rosmapAD[[i]] |> unlist()
@@ -149,7 +149,7 @@ for(i in 1:4){
 dev.off()
 
 # Which bulk mods (seaad2024) correspond to bulk mods (mit)
-pdf("~/test/test2.pdf")
+pdf(file.path(Sys.getenv("SCRATCH_DIR", "~/test"), "test2.pdf"))
 for(i in 1:4){
   bulk1 <- pathList$bulk_megaset[[i]] |> unlist()
   ros1 <- pathList$bulk_MIT[[i]] |> unlist()

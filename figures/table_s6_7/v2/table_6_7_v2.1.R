@@ -107,7 +107,7 @@ jor_dfc <- create_table(homedir, cell_anno, genemap, donornames, san_mean,
 
 # MTG — Chromium v3
 homedir    <- file.path(Sys.getenv("MEGASET_DIR", "/home/gugene/RNAseq_megaset"), "13.1-sn_cell_pseudobulk/lein2023/MTG_indiv_donor/")
-cell_anno  <- fread("/mnt/bdata/@shared/scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/author_barcode_annotations_MTG.csv", data.table = FALSE)
+cell_anno  <- fread(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/author_barcode_annotations_MTG.csv"), data.table = FALSE)
 genemap    <- fread(file.path(Sys.getenv("MEGASET_DIR", "/home/gugene/RNAseq_megaset"), "13.1-sn_cell_pseudobulk/Lein2023_DFC_genemap.csv"), data.table = FALSE)
 donornames <- c("H200.1023", "H200.1025", "H200.1030")
 san_mean   <- qread(file = file.path(Sys.getenv("DATA_OTHER_DIR", "/home/gugene/data_other"), "lein_mtg_10x/gene_count_means_byDonor.qs"))

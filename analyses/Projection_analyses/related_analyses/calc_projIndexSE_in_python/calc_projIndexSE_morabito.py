@@ -10,15 +10,15 @@ from scipy.sparse import csc_matrix
 from scipy.stats import sem
 
 # Load dataset (Morabito)
-adata = ad.read_mtx("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/morabito_2021/all_cells/matrix.mtx")
+adata = ad.read_mtx(os.path.join(os.environ.get("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/morabito_2021/all_cells/matrix.mtx"))
 adata = adata.transpose()
-obs_df = pd.read_csv("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/morabito_2021/all_cells/barcodes.tsv", sep="\t", header=None)
+obs_df = pd.read_csv(os.path.join(os.environ.get("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/morabito_2021/all_cells/barcodes.tsv"), sep="\t", header=None)
 adata.obs = obs_df
-var_df = pd.read_csv("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/morabito_2021/all_cells/genes.tsv", sep="\t", header=None)
+var_df = pd.read_csv(os.path.join(os.environ.get("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/morabito_2021/all_cells/genes.tsv"), sep="\t", header=None)
 adata.var = var_df
 sc.pp.log1p(adata, copy=False, chunked=False) 
 adata.var['gene_sym'] = adata.var[0]
-metadata = pd.read_csv("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/morabito_2021/all_cells/metadata_withABIanno_filtered.csv")
+metadata = pd.read_csv(os.path.join(os.environ.get("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/morabito_2021/all_cells/metadata_withABIanno_filtered.csv"))
 adata.obs['Diagnosis'] = metadata['Diagnosis']
 adata.obs['Subclass'] = metadata['Subclass.x']
 adata.obs['Subclass confidence'] = metadata['Subclass confidence.x']

@@ -82,20 +82,20 @@ these_mods_scz <- as.numeric(names(mods_scz)[which(modulelengths>filter_under)])
 dat_vec <- list(
   # con vs All DFC
   file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "data/greedy_march_pipeline_output/finalNonNorm_minsize10_unmerged/SEAAD2024_full_python_output/PFC/euclidean_distances/allAD_vs_Con_bulk_megaset_output_table.csv"),
-  "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/euclidean_distances/allAD_vs_Con_bulk_megaset_output_table.csv",
+  file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/euclidean_distances/allAD_vs_Con_bulk_megaset_output_table.csv"),
   ## con vs SCZ (CTRL modules)
   # CMC
-  "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/CMC/DFC/euclidean_distances/Schizophrenia_vs_control_bulk_megaset_output_table.csv",
+  file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/CMC/DFC/euclidean_distances/Schizophrenia_vs_control_bulk_megaset_output_table.csv"),
   # SZBD
-  "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/SZBDMulti-Seq/DFC/euclidean_distances/Schizophrenia_vs_control_bulk_megaset_output_table.csv",
+  file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/SZBDMulti-Seq/DFC/euclidean_distances/Schizophrenia_vs_control_bulk_megaset_output_table.csv"),
   # con vs All DFC ROSMAP
   file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "data/greedy_march_pipeline_output/finalNonNorm_minsize10_unmerged/SEAAD2024_full_python_output/PFC/euclidean_distances/allAD_vs_Con_rosmap_output_table.csv"),
-  "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/euclidean_distances/allAD_vs_Con_rosmap_output_table.csv",
+  file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/euclidean_distances/allAD_vs_Con_rosmap_output_table.csv"),
   ## con vs SCZ (SCZ modules)
   # CMC
-  "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/CMC/DFC/euclidean_distances/Schizophrenia_vs_control_brainseq_scz_output_table.csv",
+  file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/CMC/DFC/euclidean_distances/Schizophrenia_vs_control_brainseq_scz_output_table.csv"),
   # SZBD
-  "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/SZBDMulti-Seq/DFC/euclidean_distances/Schizophrenia_vs_control_brainseq_scz_output_table.csv"
+  file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output/SZBDMulti-Seq/DFC/euclidean_distances/Schizophrenia_vs_control_brainseq_scz_output_table.csv")
 )
 
 dat_vec_names <- c("Gabitto_AllADVsCon_DFC",

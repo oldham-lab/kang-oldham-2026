@@ -60,7 +60,7 @@ mod_id <- 1:1158
 # }
 # vevec <- lapply(r2_vec_bc_list, mean) |> unlist()
 # qsave(vevec, file = "/home/gugene/ShinyApps/CoPA/www/mod_eig_var_explained.qs")
-vevec <- qread("/home/gugene/ShinyApps/CoPA/www/CoPA_files/mod_eig_var_explained.qs")
+vevec <- qread(file.path(Sys.getenv("SHINYAPP_DIR", "/home/gugene/ShinyApps/CoPA"), "www/CoPA_files/mod_eig_var_explained.qs"))
 
 # Tweak aesthetics of module graphs
 cols2 <- RColorBrewer::brewer.pal(10, "Spectral")
@@ -139,10 +139,10 @@ for(i in seq_along(these_mods)){
   if (j %% 100 == 0) print(j)
 }
 
-saveoutstring <- file.path("/home/gugene/ShinyApps/CoPA/www/CoPA_files/expr_line/", "topmodposbc.qs")
+saveoutstring <- file.path(file.path(Sys.getenv("SHINYAPP_DIR", "/home/gugene/ShinyApps/CoPA"), "www/CoPA_files/expr_line/"), "topmodposbc.qs")
 qsave(expr_plots, file = saveoutstring)
 
-saveoutstring <- file.path("/home/gugene/ShinyApps/CoPA/www/CoPA_files/expr_line/", "seed.qs")
+saveoutstring <- file.path(file.path(Sys.getenv("SHINYAPP_DIR", "/home/gugene/ShinyApps/CoPA"), "www/CoPA_files/expr_line/"), "seed.qs")
 qsave(expr_plots_seed, file = saveoutstring)
 
 
@@ -225,8 +225,8 @@ for(def in c("seed",
     lein_se <- fread(data.table = F, file = paste0(base_dir, "/LeinDFC/sn_proj_indices/", index_dirs[d], "/indices_se_", def, ".csv"))
     lein_se <- lein_se[, match(colnames(lein), colnames(lein_se))]
 
-    mitcon <- fread(data.table = F, file = file.path("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/mod_means/", index_dirs[d], paste0("mod_means_Con_", modtoken, ".csv")))
-    mitse <- fread(data.table = F, file = file.path("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/se/", index_dirs[d], paste0("se_Con_", modtoken, ".csv")))
+    mitcon <- fread(data.table = F, file = file.path(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/mod_means/"), index_dirs[d], paste0("mod_means_Con_", modtoken, ".csv")))
+    mitse <- fread(data.table = F, file = file.path(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/se/"), index_dirs[d], paste0("se_Con_", modtoken, ".csv")))
 
     SEAcon <- fread(data.table = F, file = paste0(base_dir, "/SEAAD2024_full_python_output/PFC/mod_means/", index_dirs[d], "/mod_means_Con_", modtoken, ".csv"))
     SEAcon_se <- fread(data.table = F, file = paste0(base_dir, "/SEAAD2024_full_python_output/PFC/se/", index_dirs[d], "/se_Con_", modtoken, ".csv"))
@@ -308,7 +308,7 @@ for(def in c("seed",
       projplotlist[[j]] <- plotdf
       if (j %% 100 == 0) print(j)
     }
-    saveoutstring_proj <- file.path("/home/gugene/ShinyApps/CoPA/www/CoPA_files/projs/", paste0(def, "_", dstring, ".qs"))
+    saveoutstring_proj <- file.path(file.path(Sys.getenv("SHINYAPP_DIR", "/home/gugene/ShinyApps/CoPA"), "www/CoPA_files/projs/"), paste0(def, "_", dstring, ".qs"))
     qsave(projplotlist, file = saveoutstring_proj)
 
     # Plot individual cor heatmaps for each module
@@ -331,7 +331,7 @@ for(def in c("seed",
       if (j %% 100 == 0) print(j)
     }
 
-    saveoutstring <- file.path("/home/gugene/ShinyApps/CoPA/www/CoPA_files/proj_cors/", paste0(def, "_", dstring, ".qs"))
+    saveoutstring <- file.path(file.path(Sys.getenv("SHINYAPP_DIR", "/home/gugene/ShinyApps/CoPA"), "www/CoPA_files/proj_cors/"), paste0(def, "_", dstring, ".qs"))
     qsave(corlistind, file = saveoutstring)
     
   }

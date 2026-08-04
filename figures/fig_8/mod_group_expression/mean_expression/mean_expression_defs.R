@@ -14,7 +14,7 @@ source(file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"
 # ---------------------------------------------------------------------------
 sc_sources <- tribble(
   ~dataset,  ~dir,
-  "Liu",     file.path("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output", REGION, "means"),
+  "Liu",     file.path(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output"), REGION, "means"),
   "Gabitto", file.path(file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "data/greedy_march_pipeline_output/finalNonNorm_minsize10_unmerged/SEAAD2024_full_python_output"), REGION, "means")
 )
 

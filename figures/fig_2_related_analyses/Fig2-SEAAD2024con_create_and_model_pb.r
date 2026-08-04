@@ -13,7 +13,7 @@ registerDoParallel(cores=8)
 ####################
 # Load required data 
 ####################
-cell_exprall <- qread("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/gabitto_2024/expr_UMI_notADsamples.qs")
+cell_exprall <- qread(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/gabitto_2024/expr_UMI_notADsamples.qs"))
 cell_annoall <- fread(data.table=F,file=file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "datasets/SN_RNAseq/sea_ad_2024/RNAseq/SEAAD_A9_RNAseq_final-nuclei_metadata.2024-02-13.csv")) |>
   dplyr::filter(`Overall AD neuropathological Change` == "Not AD")
 cell_annoall <- cell_annoall[match(colnames(cell_exprall), cell_annoall$sample_id), ]

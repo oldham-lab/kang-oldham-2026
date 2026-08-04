@@ -43,7 +43,7 @@ proj <- fread(data.table = F, file = file.path(Sys.getenv("DATA_DIR", "/mnt/bdat
 expr <- data.frame("Gene" = 1:length(these_mods), proj[these_mods, ]) 
 
 # Celltypes are "samples", modules are "genes"
-setwd("/home/gugene/code/git/FindModules/FindModules/R/")
+setwd(file.path(Sys.getenv("FINDMODULES_DIR", "/home/gugene/code/git/FindModules"), "FindModules/R/"))
 source("FindModules.R")
 source("map_identifiers_function.R")
 source("FM_helper_fxns.R")

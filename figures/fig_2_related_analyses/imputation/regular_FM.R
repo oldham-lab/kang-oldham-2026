@@ -39,7 +39,7 @@ scvi <- scvi[match(common_genes, scvi[,2]),]
 # qsave(simMatscvi, file=file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "figures/fig1/imputation/diffcoex/scvi_donor1_adjMat.qs"))
 
 # Run FM
-setwd("/home/gugene/code/git/FindModules/FindModules/R/")
+setwd(file.path(Sys.getenv("FINDMODULES_DIR", "/home/gugene/code/git/FindModules"), "FindModules/R/"))
 source("FindModules.R")
 source("map_identifiers_function.R")
 source("FM_helper_fxns.R")
@@ -174,7 +174,7 @@ FindModules(
 )
 
 # Run geneset enrichment
-source("/home/gugene/code/git/GSEA_generic/GSEAfxsV3_nonpar_temp.r")
+source(file.path(Sys.getenv("GSEA_GENERIC_DIR", "/home/gugene/code/git/GSEA_generic"), "GSEAfxsV3_nonpar_temp.r"))
 setwd(file.path(Sys.getenv("EXTFIG_DIR", "/home/gugene/figures"), "figure_1/impute_FM/mega_Modules/"))
 MyGSHGloop(kmecut1="topmodposbc")
 setwd(file.path(Sys.getenv("EXTFIG_DIR", "/home/gugene/figures"), "figure_1/impute_FM/mega_Modules/"))
@@ -189,7 +189,7 @@ MyGSHGloop(kmecut1="topmodposbc")
 #MyGSHGloop(kmecut1="topmodposfdr")
 
 # Collect p-values for AOMN
-source("/home/gugene/code/git/GSEA_generic/GSEAfxsV3.r")
+source(file.path(Sys.getenv("GSEA_GENERIC_DIR", "/home/gugene/code/git/GSEA_generic"), "GSEAfxsV3.r"))
 dirlist <- c(file.path(Sys.getenv("EXTFIG_DIR", "/home/gugene/figures"), "figure_1/impute_FM/mega_Modules/"),
              #file.path(Sys.getenv("EXTFIG_DIR", "/home/gugene/figures"), "figure_1/impute_FM/mega_Modules/"),
              file.path(Sys.getenv("EXTFIG_DIR", "/home/gugene/figures"), "figure_1/impute_FM/leinpb_donor1_Modules/"),

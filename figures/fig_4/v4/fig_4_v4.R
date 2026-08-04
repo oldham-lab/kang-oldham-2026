@@ -237,8 +237,8 @@ lein <- fread(data.table = F, file = paste0(base_dir, "/LeinDFC/sn_proj_indices/
 lein_se <- fread(data.table = F, file = paste0(base_dir, "/LeinDFC/sn_proj_indices/", index_dirs[d], "/indices_se_topmodposbc.csv")) 
 lein_se <- lein_se[, match(colnames(lein), colnames(lein_se))]
 
-mitcon <- fread(data.table = F, file = file.path("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/mod_means/", index_dirs[d], "mod_means_Con_bulk_megaset.csv"))
-mitse <- fread(data.table = F, file = file.path("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/se/", index_dirs[d], "se_Con_bulk_megaset.csv"))
+mitcon <- fread(data.table = F, file = file.path(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/mod_means/"), index_dirs[d], "mod_means_Con_bulk_megaset.csv"))
+mitse <- fread(data.table = F, file = file.path(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/se/"), index_dirs[d], "se_Con_bulk_megaset.csv"))
 
 SEAcon <- fread(data.table = F, file = paste0(base_dir, "/SEAAD2024_AllADVsCon_DFC/sn_proj_indices/", index_dirs[d], "/indices_over_all_datasets_Subclass_Control.csv")) |>
   dplyr::select(!module)
@@ -476,7 +476,7 @@ plist[[1]] <- input_df[,c(1:3)] |>
          title = "Size of modules") +
     guides(color = guide_legend(override.aes = list(linewidth = 2))) 
 
-ggsave(plist[[1]], file = "~/test/test.svg")
+ggsave(plist[[1]], file = file.path(Sys.getenv("SCRATCH_DIR", "~/test"), "test.svg"))
 
 # %VE
 plist[[2]] <- input_df[,c(1, 4)] |>

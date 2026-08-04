@@ -77,16 +77,16 @@ these_mods_case <- these_mods_case[!these_mods_case %in% which(sigcount_bonf$val
 dat_vec <- list(
   # con vs All DFC
   file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "data/greedy_march_pipeline_output/finalNonNorm_minsize10_unmerged/SEAAD2024_full_python_output/PFC/euclidean_distances/lateAD_vs_earlyAD_bulk_megaset_output_table.csv"),
-  "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/euclidean_distances/lateAD_vs_earlyAD_bulk_megaset_output_table.csv",
+  file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/euclidean_distances/lateAD_vs_earlyAD_bulk_megaset_output_table.csv"),
   # con vs All MTG
   file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "data/greedy_march_pipeline_output/finalNonNorm_minsize10_unmerged/SEAAD2024_full_python_output/MTC/euclidean_distances/lateAD_vs_earlyAD_bulk_megaset_output_table.csv"),
-  "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/MTC/euclidean_distances/lateAD_vs_earlyAD_bulk_megaset_output_table.csv", 
+  file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/MTC/euclidean_distances/lateAD_vs_earlyAD_bulk_megaset_output_table.csv"), 
   # con vs All DFC ROSMAP
   file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "data/greedy_march_pipeline_output/finalNonNorm_minsize10_unmerged/SEAAD2024_full_python_output/PFC/euclidean_distances/lateAD_vs_earlyAD_rosmap_output_table.csv"),
-  "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/euclidean_distances/lateAD_vs_earlyAD_rosmap_output_table.csv", 
+  file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/euclidean_distances/lateAD_vs_earlyAD_rosmap_output_table.csv"), 
   # all AD vs con MTG ROSMAP
   file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "data/greedy_march_pipeline_output/finalNonNorm_minsize10_unmerged/SEAAD2024_full_python_output/MTC/euclidean_distances/lateAD_vs_earlyAD_rosmap_output_table.csv"), 
-  "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/MTC/euclidean_distances/lateAD_vs_earlyAD_rosmap_output_table.csv"
+  file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/MTC/euclidean_distances/lateAD_vs_earlyAD_rosmap_output_table.csv")
 )
 
 dat_vec_names <- c("Gabitto_lateVsEarlyAD_DFC",

@@ -23,8 +23,8 @@ d <- "log_REI"
 lein   <- fread(data.table = F, file = paste0(base_dir, "/LeinDFC/sn_proj_indices/", d, "/indices_over_all_datasets_Cell_Type_1_topmodposbc_mean.csv")) |> dplyr::select(!module)
 lein_se <- fread(data.table = F, file = paste0(base_dir, "/LeinDFC/sn_proj_indices/", d, "/indices_se_topmodposbc.csv"))
 lein_se <- lein_se[, match(colnames(lein), colnames(lein_se))]
-mitcon <- fread(data.table = F, file = file.path("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/mod_means/", d, "mod_means_Con_bulk_megaset.csv"))
-mitse  <- fread(data.table = F, file = file.path("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/se/", d, "se_Con_bulk_megaset.csv"))
+mitcon <- fread(data.table = F, file = file.path(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/mod_means/"), d, "mod_means_Con_bulk_megaset.csv"))
+mitse  <- fread(data.table = F, file = file.path(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output/PFC/se/"), d, "se_Con_bulk_megaset.csv"))
 # Gabitto (SEA-AD): HGNC-harmonized Python output (same format as MIT/Liu; no `module` col)
 SEAcon <- fread(data.table = F, file = paste0(base_dir, "/SEAAD2024_full_python_output/PFC/mod_means/", d, "/mod_means_Con_bulk_megaset.csv"))
 SEAcon_se <- fread(data.table = F, file = paste0(base_dir, "/SEAAD2024_full_python_output/PFC/se/", d, "/se_Con_bulk_megaset.csv"))
