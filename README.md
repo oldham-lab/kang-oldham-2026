@@ -29,7 +29,19 @@ for the full run-order and data-flow.
 | `analyses/` | Stage 3–4: per-dataset CoPA application + random/dCoPA analysis |
 | `figures/` | `fig_1`…`fig_8`, `fig_s*`, `table_s*` — one directory per figure/table |
 | `docs/` | Pipeline flowchart, workflow write-up |
-| `_reorg_archive/` | Superseded/historical code (to be split into a separate archive repo) |
+
+### Figure/table versions
+
+Most figure and table directories are versioned (`v1`, `v2`, …). This repo keeps
+only the versions the published figures actually need: **the latest version of
+each figure, plus any earlier version that a kept file still reads from.** That
+second clause is load-bearing — several latest versions read regenerated panels
+or base workbooks out of an earlier one (`fig_3/v4`→`v3`, `fig_s11/v3`→`v2`,
+`table_s1/v7`→`v6`, `table_s13/v3`→`v2`), and `fig_7/v3`, `v4`, `v7.1` and `v7.2`
+are read by *other* figures and tables (`fig_7_sup`, `fig_8`, `fig_s11`,
+`table_s11`, `table_s14`, `table_s15`). Superseded versions and exploratory
+scripts were removed; the full history remains in the upstream
+`oldham-lab/Consensus-analysis` repo.
 
 ## Requirements
 

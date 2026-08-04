@@ -85,10 +85,6 @@ read trimming), `HOME_DATA_DIR` (two one-off lein MTG / ABI cell-count CSVs),
 `SHINYAPP_DIR` points at the CoPA Shiny app checkout and is only used by
 `figures/shiny_code/` snapshot generation — not by any figure.
 
-One reference in `figures/fig_2_related_analyses/exploratory/` points into a
-`~/!softlinks/` symlink farm that no longer exists; that input is unrecoverable,
-and the script is exploratory only.
-
 ## Tracked reproduction inputs (small)
 
 - `analyses/bulk_module_significance/bulk_cors_sigcount_bonf_*.csv` — module
