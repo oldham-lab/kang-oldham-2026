@@ -37,7 +37,7 @@ BBMAP_DIR          <- Sys.getenv("BBMAP_DIR", unset = "/home/gugene/bin/bbmap/bb
 PYTHON_BIN         <- Sys.getenv("PYTHON_BIN", unset = "/home/gugene/miniconda3/bin/python")            # interpreter invoked from R for SVG/PPTX rendering
 
 # --- CoPA Shiny app checkout (snapshot generation only, not part of any figure) ---
-SHINYAPP_DIR   <- Sys.getenv("SHINYAPP_DIR", unset = "/home/gugene/ShinyApps/CoPA")
+SHINYAPP_DIR   <- Sys.getenv("SHINYAPP_DIR", unset = "/home/gugene/ShinyApps/copacabana")
 
 # --- throwaway output dir used by exploratory scripts (safe to point anywhere) ---
 SCRATCH_DIR    <- Sys.getenv("SCRATCH_DIR", unset = "~/test")

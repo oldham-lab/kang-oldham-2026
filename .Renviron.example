@@ -29,7 +29,7 @@ BBMAP_DIR=/home/gugene/bin/bbmap/bbmap
 PYTHON_BIN=/home/gugene/miniconda3/bin/python
 
 # CoPA Shiny app checkout (snapshot generation only):
-SHINYAPP_DIR=/home/gugene/ShinyApps/CoPA
+SHINYAPP_DIR=/home/gugene/ShinyApps/copacabana
 
 # Throwaway output dir for exploratory scripts:
 SCRATCH_DIR=~/test

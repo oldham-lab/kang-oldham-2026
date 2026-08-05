@@ -16,7 +16,7 @@
 set -euo pipefail
 
 SOURCE_DIR="${REPO_DIR:-/home/gugene/code/git/kang-oldham-2026}/figures/fig_6/dCoPA_snapshots"
-TARGET_DIR="${SHINYAPP_DIR:-/home/gugene/ShinyApps/CoPA}/www/dCoPA_snapshots"
+TARGET_DIR="${SHINYAPP_DIR:-/home/gugene/ShinyApps/copacabana}/www/dCoPA_snapshots"
 DPI=144
 
 command -v rsvg-convert >/dev/null 2>&1 || {

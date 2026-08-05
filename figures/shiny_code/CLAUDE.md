@@ -2,8 +2,8 @@
 
 ## Key Files
 
-- **Main app**: `/home/gugene/ShinyApps/CoPA/app.R`
-- **www root**: `/home/gugene/ShinyApps/CoPA/www/`
+- **Main app**: `/home/gugene/ShinyApps/copacabana/app.R`
+- **www root**: `/home/gugene/ShinyApps/copacabana/www/`
 
 ## App Structure (tabs)
 
@@ -50,8 +50,8 @@ staging for rebuilds; drop from the bundle to keep it small).
 
 Resource aliases registered:
 ```r
-addResourcePath("copa_www", "/home/gugene/ShinyApps/CoPA/www")
-addResourcePath("svgs",     file.path("/home/gugene/ShinyApps/CoPA/www", "dCoPA_snapshots"))
+addResourcePath("copa_www", "/home/gugene/ShinyApps/copacabana/www")
+addResourcePath("svgs",     file.path("/home/gugene/ShinyApps/copacabana/www", "dCoPA_snapshots"))
 ```
 
 ## Key Technical Decisions

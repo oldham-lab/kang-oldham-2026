@@ -2,7 +2,7 @@
 # Optimize SVG files in-place using scour.
 # Usage: ./optimize_svgs.sh [svg_dir] [jobs]
 
-SVG_DIR="${1:-/home/gugene/ShinyApps/CoPA/www/dCoPA_snapshots}"
+SVG_DIR="${1:-/home/gugene/ShinyApps/copacabana/www/dCoPA_snapshots}"
 JOBS="${2:-4}"
 
 if [[ ! -d "$SVG_DIR" ]]; then

@@ -59,8 +59,8 @@ mod_id <- 1:1158
 #  # cat(j, " ")
 # }
 # vevec <- lapply(r2_vec_bc_list, mean) |> unlist()
-# qsave(vevec, file = "/home/gugene/ShinyApps/CoPA/www/mod_eig_var_explained.qs")
-vevec <- qread(file.path(Sys.getenv("SHINYAPP_DIR", "/home/gugene/ShinyApps/CoPA"), "www/CoPA_files/mod_eig_var_explained.qs"))
+# qsave(vevec, file = "/home/gugene/ShinyApps/copacabana/www/mod_eig_var_explained.qs")
+vevec <- qread(file.path(Sys.getenv("SHINYAPP_DIR", "/home/gugene/ShinyApps/copacabana"), "www/CoPA_files/mod_eig_var_explained.qs"))
 
 # Tweak aesthetics of module graphs
 cols2 <- RColorBrewer::brewer.pal(10, "Spectral")
@@ -139,10 +139,10 @@ for(i in seq_along(these_mods)){
   if (j %% 100 == 0) print(j)
 }
 
-saveoutstring <- file.path(file.path(Sys.getenv("SHINYAPP_DIR", "/home/gugene/ShinyApps/CoPA"), "www/CoPA_files/expr_line/"), "topmodposbc.qs")
+saveoutstring <- file.path(file.path(Sys.getenv("SHINYAPP_DIR", "/home/gugene/ShinyApps/copacabana"), "www/CoPA_files/expr_line/"), "topmodposbc.qs")
 qsave(expr_plots, file = saveoutstring)
 
-saveoutstring <- file.path(file.path(Sys.getenv("SHINYAPP_DIR", "/home/gugene/ShinyApps/CoPA"), "www/CoPA_files/expr_line/"), "seed.qs")
+saveoutstring <- file.path(file.path(Sys.getenv("SHINYAPP_DIR", "/home/gugene/ShinyApps/copacabana"), "www/CoPA_files/expr_line/"), "seed.qs")
 qsave(expr_plots_seed, file = saveoutstring)
 
 
@@ -308,7 +308,7 @@ for(def in c("seed",
       projplotlist[[j]] <- plotdf
       if (j %% 100 == 0) print(j)
     }
-    saveoutstring_proj <- file.path(file.path(Sys.getenv("SHINYAPP_DIR", "/home/gugene/ShinyApps/CoPA"), "www/CoPA_files/projs/"), paste0(def, "_", dstring, ".qs"))
+    saveoutstring_proj <- file.path(file.path(Sys.getenv("SHINYAPP_DIR", "/home/gugene/ShinyApps/copacabana"), "www/CoPA_files/projs/"), paste0(def, "_", dstring, ".qs"))
     qsave(projplotlist, file = saveoutstring_proj)
 
     # Plot individual cor heatmaps for each module
@@ -331,7 +331,7 @@ for(def in c("seed",
       if (j %% 100 == 0) print(j)
     }
 
-    saveoutstring <- file.path(file.path(Sys.getenv("SHINYAPP_DIR", "/home/gugene/ShinyApps/CoPA"), "www/CoPA_files/proj_cors/"), paste0(def, "_", dstring, ".qs"))
+    saveoutstring <- file.path(file.path(Sys.getenv("SHINYAPP_DIR", "/home/gugene/ShinyApps/copacabana"), "www/CoPA_files/proj_cors/"), paste0(def, "_", dstring, ".qs"))
     qsave(corlistind, file = saveoutstring)
     
   }
@@ -361,20 +361,20 @@ for(def in c("seed",
 
 #     # Load expression line plot
 #     if(def == "seed"){
-#       expr_line_df <- qread(file.path("/home/gugene/ShinyApps/CoPA/www/CoPA_files/expr_line/", "seed.qs"))
+#       expr_line_df <- qread(file.path("/home/gugene/ShinyApps/copacabana/www/CoPA_files/expr_line/", "seed.qs"))
 #     } else {
-#       expr_line_df <- qread(file.path("/home/gugene/ShinyApps/CoPA/www/CoPA_files/expr_line/", "topmodposbc.qs"))
+#       expr_line_df <- qread(file.path("/home/gugene/ShinyApps/copacabana/www/CoPA_files/expr_line/", "topmodposbc.qs"))
 #     }
 
 #     # Load appropriate bulk correlation data
 #     bulk_cor_list <- qread(file = file.path("/home", "gugene", "ShinyApps", "CoPA", "www", "CoPA_files", "bulk_cor", "bulk_cor_list.qs"))
 
 #     # Load appropriate projection data
-#     proj_path_proj <- file.path("/home/gugene/ShinyApps/CoPA/www/CoPA_files/projs", paste0(def, "_", dstring, ".qs"))
+#     proj_path_proj <- file.path("/home/gugene/ShinyApps/copacabana/www/CoPA_files/projs", paste0(def, "_", dstring, ".qs"))
 #     projplotdf <- qread(proj_path_proj)
     
 #     # Load appropriate projection correlation data
-#     proj_path <- file.path("/home/gugene/ShinyApps/CoPA/www/CoPA_files/proj_cors", paste0(def, "_", dstring, ".qs"))
+#     proj_path <- file.path("/home/gugene/ShinyApps/copacabana/www/CoPA_files/proj_cors", paste0(def, "_", dstring, ".qs"))
 #     corlistdf <- qread(proj_path)
 
 #     # Loop through modules
