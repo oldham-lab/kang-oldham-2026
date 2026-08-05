@@ -69,7 +69,7 @@ overlap is the subset of those that are DE-significant in both datasets
 ## Fix approach
 
 Alias map (prev_symbol → current_symbol, 56,964 entries):
-`/home/gugene/code/git/COPA/dataset_processing_unified/hgnc_prev_to_current.tsv`
+`/home/gugene/code/git/CoPA/inst/python/dataset_processing_unified/hgnc_prev_to_current.tsv`
 (built by `build_alias_map.R`; from HGNC complete set).
 
 1. Before the intersect, **canonicalize the rownames** of both pseudobulk

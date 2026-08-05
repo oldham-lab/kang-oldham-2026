@@ -66,7 +66,7 @@ SEAAD_ANNO_MTG   <- file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "data
 # ...) otherwise fail the symbol-string intersection below and get dropped from
 # DE in BOTH datasets. We canonicalize both matrices to current HGNC before
 # intersecting. Alias map: prev_symbol -> current_symbol (from HGNC complete set).
-ALIAS_MAP_PATH <- Sys.getenv("HGNC_MAP", "/home/gugene/code/git/COPA/dataset_processing_unified/hgnc_prev_to_current.tsv")
+ALIAS_MAP_PATH <- Sys.getenv("HGNC_MAP", "/home/gugene/code/git/CoPA/inst/python/dataset_processing_unified/hgnc_prev_to_current.tsv")
 
 # --- Regions to process ---------------------------------------------------
 REGIONS <- c("MTG", "DFC")

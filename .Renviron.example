@@ -36,8 +36,8 @@ SCRATCH_DIR=~/test
 
 # Large reference files not shipped in CoPA (MSigDB: download from gsea-msigdb.org;
 # HGNC map: built by COPA/dataset_processing_unified/build_alias_map.R):
-MSIGDB_XML=/home/gugene/code/git/COPA/data/msigdb_v7.4.xml
-HGNC_MAP=/home/gugene/code/git/COPA/dataset_processing_unified/hgnc_prev_to_current.tsv
+MSIGDB_XML=/home/gugene/code/git/CoPA/data-raw/msigdb_v7.4.xml
+HGNC_MAP=/home/gugene/code/git/CoPA/inst/python/dataset_processing_unified/hgnc_prev_to_current.tsv
 
 # Cell-type AD-vs-control DE results for fig_7 (~140MB, NOT tracked; regenerate
 # via figures/fig_7/v4/full_DE_pipeline_ADvsCon.R + DE/concat_DE_results.R).

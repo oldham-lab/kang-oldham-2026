@@ -27,8 +27,8 @@ genemap <- fread(file.path(Sys.getenv("MEGASET_DIR", "/home/gugene/RNAseq_megase
 # Calculate greedy mods from pseudobulk for each donor
 ######################################################
 
-# source("/home/gugene/code/git/COPA/kme_topmodposbc.R")
-# source("/home/gugene/code/git/COPA/greedy_march_COPA_20240802.R")
+# source("/home/gugene/code/git/CoPA/kme_topmodposbc.R")
+# source("/home/gugene/code/git/CoPA/greedy_march_COPA_20240802.R")
 # library(CoPA)
 # for(i in 1:3){
 #   exdir <- list.files(paste0(file.path(Sys.getenv("MEGASET_DIR", "/home/gugene/RNAseq_megaset"), "13.1-sn_cell_pseudobulk/lein2023/DFC_indiv_donor/donor"),i,"/SyntheticDatasets/"),full.names=T)

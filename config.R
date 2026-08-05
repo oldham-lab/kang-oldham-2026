@@ -43,8 +43,8 @@ SHINYAPP_DIR   <- Sys.getenv("SHINYAPP_DIR", unset = "/home/gugene/ShinyApps/cop
 SCRATCH_DIR    <- Sys.getenv("SCRATCH_DIR", unset = "~/test")
 
 # --- large reference files not shipped in CoPA (download separately) ---
-MSIGDB_XML     <- Sys.getenv("MSIGDB_XML", unset = "/home/gugene/code/git/COPA/data/msigdb_v7.4.xml")  # MSigDB XML for Broad GSEA
-HGNC_MAP       <- Sys.getenv("HGNC_MAP",   unset = "/home/gugene/code/git/COPA/dataset_processing_unified/hgnc_prev_to_current.tsv")  # HGNC prev->current symbol map
+MSIGDB_XML     <- Sys.getenv("MSIGDB_XML", unset = "/home/gugene/code/git/CoPA/data-raw/msigdb_v7.4.xml")  # MSigDB XML for Broad GSEA
+HGNC_MAP       <- Sys.getenv("HGNC_MAP",   unset = "/home/gugene/code/git/CoPA/inst/python/dataset_processing_unified/hgnc_prev_to_current.tsv")  # HGNC prev->current symbol map
 
 # --- cell-type AD-vs-control DE result objects (fig_7; ~140MB, NOT tracked) ---
 # Regenerate on demand: figures/fig_7/v4/full_DE_pipeline_ADvsCon.R then

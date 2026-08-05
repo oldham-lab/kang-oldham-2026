@@ -13,7 +13,7 @@ from pathlib import Path
 import pandas as pd
 
 # prev_symbol -> current_symbol map (HGNC complete set), same file the DE pipeline uses.
-ALIAS_MAP_PATH = os.environ.get("HGNC_MAP", "/home/gugene/code/git/COPA/dataset_processing_unified/hgnc_prev_to_current.tsv")
+ALIAS_MAP_PATH = os.environ.get("HGNC_MAP", "/home/gugene/code/git/CoPA/inst/python/dataset_processing_unified/hgnc_prev_to_current.tsv")
 
 
 def load_alias_map(path: str = ALIAS_MAP_PATH) -> dict:

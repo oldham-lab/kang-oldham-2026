@@ -18,7 +18,7 @@ The repo is not self-contained — it sources six external toolkits. All exist o
 |------|------|------|
 | **FindModules** | `/home/shared/code/FindModules/FindModules094.R` | Oldham-lab WGCNA-style co-expression module detection (clustering of a bicor/TOM matrix → modules, eigengenes, kME) |
 | **SampleNetwork** | `/home/shared/code/SampleNetworks/SampleNetwork_1.08.r` | Sample-level QC: bicor outlier detection + ComBat batch correction |
-| **COPA** | `/home/gugene/code/git/COPA/` (entry point `wrapper.R`, sourced 68×) | The projection engine — builds modules, kME tables, projection indices, null distributions, GSEA, plotting objects |
+| **COPA** | `/home/gugene/code/git/CoPA/` (entry point `wrapper.R`, sourced 68×) | The projection engine — builds modules, kME tables, projection indices, null distributions, GSEA, plotting objects |
 | **GSEA_generic** | `/home/gugene/code/git/GSEA_generic/GSEAfxsV3*.r` | Fisher's-exact gene-set enrichment |
 | **Pseudobulk-from-SC-SN-data** | `/home/gugene/code/git/Pseudobulk-from-SC-SN-data/makeSyntheticDatasets_0.51.r` | Generates synthetic bulk samples by sampling single cells |
 | **ggplot_theme_settings** | `/home/gugene/code/ggplot_theme_settings.R` | Shared plot theming |

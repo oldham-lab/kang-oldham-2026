@@ -6,7 +6,7 @@ outputs, and a grouping into new / old / related / other.
 ## Architecture note
 
 None of these scripts contain the analysis logic — they are thin **"runcode" drivers**
-that `source()` shared functions from `/home/gugene/code/git/COPA/`:
+that `source()` shared functions from `/home/gugene/code/git/CoPA/`:
 
 - `wrapper.R`
 - `project_random_and_calculate_euclidean_standalone.R`
@@ -139,7 +139,7 @@ or tied to one. The only non-code artifacts checked into the tree:
 Both are run logs of the two SEAAD2024 optimized-loop scripts.
 
 **External dependency (not in this folder, but every script needs it):**
-`/home/gugene/code/git/COPA/` — `wrapper.R`,
+`/home/gugene/code/git/CoPA/` — `wrapper.R`,
 `project_random_and_calculate_euclidean_standalone.R`,
 `calculate_euclidean_distances_v2_standalone.R`.
 

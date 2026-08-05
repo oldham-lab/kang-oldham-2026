@@ -150,7 +150,7 @@ run_gsea_for_proj <- function(allModules,
   }
 
   if(broad){
-    broadSets <- getBroadSets(Sys.getenv("MSIGDB_XML", "/home/gugene/code/git/COPA/data/msigdb_v7.4.xml"))
+    broadSets <- getBroadSets(Sys.getenv("MSIGDB_XML", "/home/gugene/code/git/CoPA/data-raw/msigdb_v7.4.xml"))
     cat("Running GSEA using Broad genesets...\n")
     BroadGSHG(allModules = allModules,
               allgenes = allgenes,
