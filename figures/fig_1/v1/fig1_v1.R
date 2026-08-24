@@ -49,7 +49,7 @@ cts <- unique(cell_anno_pb[[1]]$Cell_Type)
 
 # # Calculate means over all genes for sanity (jorstad mtg)
 # sn_expr <- readRDS(file.path(Sys.getenv("SHARED_DIR", "/home/shared"), "scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/expression_DFC.RDS"))
-# # sn_anno <- fread("/mnt/bdata/@shared/scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/author_barcode_annotations_MTG.csv", data.table = FALSE)
+# # sn_anno <- fread(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/author_barcode_annotations_MTG.csv"), data.table = FALSE)
 # # meanbysub <- lapply(unique(sn_anno$Cell_Type), \(subclass){
 # #   rowMeans(sn_expr[ ,colnames(sn_expr) %in% sn_anno$Cell_ID[sn_anno$Cell_Type == subclass]])
 # # }) |> do.call(what = "cbind")
@@ -61,7 +61,7 @@ cts <- unique(cell_anno_pb[[1]]$Cell_Type)
 gene_means_log <- qread(file = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_s2/v1/jorstad_gene_means_log_dfc.qs"))
 
 # # Calculate means over all genes for sanity (gabitto)
-# sn_expr <- qread("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/gabitto_2024/expr_UMI_notADsamples.qs")
+# sn_expr <- qread(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/gabitto_2024/expr_UMI_notADsamples.qs"))
 # gene_means <- apply(sn_expr, 1, mean)
 # gene_means_log <- log(gene_means + 1)
 # rm(sn_expr)

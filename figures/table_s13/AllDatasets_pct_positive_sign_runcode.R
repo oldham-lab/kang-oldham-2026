@@ -20,7 +20,7 @@ library(tibble)
 
 filter_under <- 3   # keep modules with > filter_under member genes (as before)
 
-out_subdir <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/table_s13/v2/pct_positive_signs")
+out_subdir <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/table_s13/projdistpvalindiv/pct_positive_signs")
 
 # ── Module-definition directories (shared across datasets) ──────────────────
 mod_dirs <- list(

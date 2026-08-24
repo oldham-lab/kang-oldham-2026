@@ -1,8 +1,10 @@
 library(tools)
 
+# Exclude this script's own *_FDR.csv outputs: they live in the same directory, so a
+# bare "\\.csv$" glob picks them up on a second run and writes *_FDR_FDR.csv.
 csv_files <- list.files(
-  path = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/table_s13/v2"),
-  pattern = "\\.csv$",
+  path = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/table_s13/projdistpvalindiv"),
+  pattern = "projdistpvalindiv\\.csv$",
   full.names = TRUE
 )
 

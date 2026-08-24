@@ -68,7 +68,7 @@ RUNS <- list(
   list(
     dcopa_path    = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_8/v4/panel_C_D_DFC_dcopa_genelist.csv"),
     save_dir      = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_8/v4/"),
-    universe_path = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/v3/all_bulk_genes.txt"),
+    universe_path = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/all_bulk_genes.txt"),
     file_prefix   = "panel_C_D_DFC"
     # Optional: override axis labels (omit to use set_keys as axis text)
     # axis_label    = c(

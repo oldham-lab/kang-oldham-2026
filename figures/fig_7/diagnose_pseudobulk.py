@@ -24,7 +24,7 @@ import pandas as pd
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
 
-MIT_DIR = os.path.join(os.environ.get("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/v4/mit_pseudobulk")
+MIT_DIR = os.path.join(os.environ.get("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/mit_pseudobulk")
 SEA_DFC_DIR = os.path.join(os.environ.get("DATA_DIR", "/mnt/bdata/gugene"), "datasets/SN_RNAseq/sea_ad_2024/RNAseq/dfc_data_pseudobulk")
 SEA_MTG_DIR = os.path.join(os.environ.get("DATA_DIR", "/mnt/bdata/gugene"), "datasets/SN_RNAseq/sea_ad_2024/mtg/RNAseq/mtg_data_pseudobulk")
 

@@ -4,8 +4,8 @@
 # Usage: ./svg_to_png.sh [src_dir] [dst_dir] [dpi] [jobs]
 
 SRC_DIR="${1:-${REPO_DIR:-/home/gugene/code/git/kang-oldham-2026}/figures/fig_6/dCoPA_snapshots}"
-DST_DIR="${2:-/home/gugene/ShinyApps/copacabana/www/dCoPA_snapshots}"
-SVG_MAP_DIR="${SVG_MAP_DIR:-/home/gugene/ShinyApps/copacabana/www/dcopa/svg_map}"
+DST_DIR="${2:-${SHINYAPP_DIR:-/home/gugene/ShinyApps/copacabana}/www/dCoPA_snapshots}"
+SVG_MAP_DIR="${SVG_MAP_DIR:-${SHINYAPP_DIR:-/home/gugene/ShinyApps/copacabana}/www/dcopa/svg_map}"
 DPI="${3:-144}"
 JOBS="${4:-4}"
 

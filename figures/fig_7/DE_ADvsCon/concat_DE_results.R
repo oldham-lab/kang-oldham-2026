@@ -1,7 +1,7 @@
 library(qs)
 library(dplyr)
 
-de_dir <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/v4/DE")
+de_dir <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/DE_ADvsCon")
 
 files <- list(
   list(path = file.path(de_dir, "MIT_DE_results_DFC/mit_dfc_DESeq2_ADvsCon_by_celltype.qs"),  dataset = "Liu_DFC",     method = "DESeq2"),

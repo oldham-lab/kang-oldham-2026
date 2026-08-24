@@ -5,7 +5,7 @@ library(openxlsx)
 # ============================================================
 # Paths
 # ============================================================
-de_dir   <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/v4/DE")
+de_dir   <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/DE_ADvsCon")
 OUT_PATH <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/table_s11/v1/Kang_Table_S11_v1.xlsx")
 
 files <- list(

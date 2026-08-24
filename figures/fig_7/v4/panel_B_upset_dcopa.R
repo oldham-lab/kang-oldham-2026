@@ -21,7 +21,7 @@ showtext_auto()
 #DCOPA_PATH <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/v4/panel_B_dcopa_genelist.csv")
 DCOPA_PATH <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/v7.1/panel_B_dcopa_genelist.csv")
 SAVE_DIR   <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/v4")
-#SAVE_DIR <- "/home/gugene/test/"
+#SAVE_DIR <- Sys.getenv("SCRATCH_DIR", "~/test")
 
 PLOT_W <- 8
 PLOT_H <- 3.5

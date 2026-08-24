@@ -7,15 +7,17 @@ Deliverables (all named Kang_Figure_8_v4.*):
   .png   — raster, 300 dpi
   .pptx  — one slide, the figure embedded as a vector SVG with a PNG fallback
 
-Layout reference = the hand-laid-out fig_8/v3/v2.pptx (copied from v2; positions,
-panel letters a–f, the per-panel titles). This script reads those positions, then
-composes a single master SVG that INLINES the panel sources (so they stay vector)
+Layout: the pics/texts tables below ARE the layout. They were read once out of the
+hand-laid-out v2.pptx that used to sit in this folder and frozen here, so the
+untracked template is no longer a build input and the figure rebuilds from a
+clone. This script composes a single master SVG that INLINES the panel sources (so they stay vector)
 with the letters / titles drawn as Arial <text>. The master SVG is an internal
 intermediate (deleted at the end, not a deliverable): rsvg-convert renders it to
 the PDF and PNG, and it is embedded as the pptx's vector layer.
 
-Panel sources live in fig_8/v1 (single source of truth). The template's embedded
-copies are ignored; v1 is re-inlined so the figure tracks the current v1 files:
+Panel sources all live in this folder (MEDIA_SRC below); the keys are the template's
+old media names, kept because the render order and the a/b special-casing refer to
+them:
   panel a (top-left scatter)   <- panel_A_indiv_DFC.svg
   panel b (top-right scatter)  <- panel_B_indiv_DFC.svg
   panel c (overlap heatmap)    <- panel_C_D_DFC_panel_lower_nolegend.svg
@@ -28,12 +30,8 @@ copies are ignored; v1 is re-inlined so the figure tracks the current v1 files:
 PDF panel sources are converted to cropped vector SVGs via Inkscape before inlining.
 """
 import os, re, subprocess
-import xml.etree.ElementTree as ET
-import zipfile
 
 V4       = os.path.join(os.environ.get("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_8/v4")
-V1       = os.path.join(os.environ.get("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_8/v1")
-TEMPLATE = f"{V4}/v2.pptx"           # layout template (copied from v2)
 OUT_PDF  = f"{V4}/Kang_Figure_8_v4.pdf"
 OUT_PNG  = f"{V4}/Kang_Figure_8_v4.png"
 OUT_PPTX = f"{V4}/Kang_Figure_8_v4.pptx"
@@ -67,59 +65,53 @@ AB_LEG_GAP_PX    = 4.0                       # gap between plots and legend
 
 EMU_PER_PX = 9525.0          # 96 dpi
 def px(emu): return float(emu) / EMU_PER_PX
-def ptpx(centipt): return float(centipt) / 100.0 * 96.0 / 72.0  # PowerPoint sz -> px
 
 NS = {"a":"http://schemas.openxmlformats.org/drawingml/2006/main",
       "p":"http://schemas.openxmlformats.org/presentationml/2006/main",
       "r":"http://schemas.openxmlformats.org/officeDocument/2006/relationships",
       "asvg":"http://schemas.microsoft.com/office/drawing/2016/SVG/main"}
 
-# ---- read layout from v2.pptx --------------------------------------------
-z = zipfile.ZipFile(TEMPLATE)
-rels = {rel.get("Id"): rel.get("Target").split("/")[-1]
-        for rel in ET.fromstring(z.read("ppt/slides/_rels/slide1.xml.rels"))}
-slide = ET.fromstring(z.read("ppt/slides/slide1.xml"))
-pres  = ET.fromstring(z.read("ppt/presentation.xml"))
-
-sldSz = pres.find("p:sldSz", NS)
-W_EMU, H_EMU = int(sldSz.get("cx")), int(sldSz.get("cy"))   # full slide canvas
+# ---- layout, frozen from v2.pptx (EMU; 914400 per inch) ------------------
+# Slide canvas, the panel boxes, and the text shapes drawn over them. Text sizes are
+# px (the pptx sz/100 converted at 96/72). Everything else is derived from these.
+W_EMU, H_EMU = 7772400, 10058400
 W, H = px(W_EMU), px(H_EMU)
 
-pics = {}   # media basename -> (x, y, w, h) in EMU
-for pic in slide.iter("{%s}pic" % NS["p"]):
-    svg = pic.find(".//asvg:svgBlip", NS)
-    if svg is None:
-        continue
-    media = rels.get(svg.get("{%s}embed" % NS["r"]))
-    xf = pic.find(".//a:xfrm", NS); off = xf.find("a:off", NS); ext = xf.find("a:ext", NS)
-    pics.setdefault(media, (int(off.get("x")), int(off.get("y")),
-                            int(ext.get("cx")), int(ext.get("cy"))))
+pics = {
+    "image2.svg":  (4617360, 2711160, 2792880, 1775520),
+    "image4.svg":  (1038600, 2644920, 2506680, 2349720),
+    "image6.svg":  (3249000, 3217320,  912600,  684000),
+    "image8.svg":  (3922920,  603360, 3394080, 1697040),
+    "image10.svg": (  90720,  640080, 3437640, 1645560),
+    "image12.svg": ( 838800, 5230440, 3657600, 2532960),
+    "image14.svg": (5157360, 5111640, 1938600, 3877200),
+}
 
-# text shapes: keep explicit paragraph breaks (the wrapping titles are split into
-# one <a:p> per line in the template) AND per-run colours (the reference colours the
-# phrase "shared dCoPA genes" gold, #B8860B, in the c/d/e subtitles).
-texts = []  # (paras, x, y, cx, cy, size_px, bold, centred); paras = list of lines,
-            # each line a list of (text, colour-hex-or-None) runs
-for sp in slide.iter("{%s}sp" % NS["p"]):
-    paras = []
-    for p_el in sp.findall(".//a:p", NS):
-        runs = []
-        for r in p_el.findall("a:r", NS):
-            t = "".join(x.text or "" for x in r.findall("a:t", NS))
-            clr = r.find(".//a:solidFill/a:srgbClr", NS)
-            runs.append((t, clr.get("val") if clr is not None else None))
-        if any(t.strip() for t, _ in runs):
-            paras.append(runs)
-    if not paras:
-        continue
-    xf = sp.find(".//a:xfrm", NS); off = xf.find("a:off", NS); ext = xf.find("a:ext", NS)
-    rpr = sp.find(".//a:rPr", NS)
-    sz  = ptpx(rpr.get("sz")) if (rpr is not None and rpr.get("sz")) else 12.0
-    bold = bool(rpr is not None and rpr.get("b") == "1")
-    centred = any(p.get("algn") == "ctr" for p in sp.findall(".//a:pPr", NS))
-    texts.append((paras, int(off.get("x")), int(off.get("y")),
-                  int(ext.get("cx")), int(ext.get("cy")), sz, bold, centred))
-z.close()
+# (paras, x, y, cx, cy, size_px, bold, centred); paras = lines, each a list of
+# (text, colour-hex-or-None) runs -- the phrase "shared dCoPA genes" is gold.
+# Two template shapes are deliberately absent: its "Fig. 8 v1" placeholder title
+# (TITLE is drawn above instead) and a static "r = 0.82" (panel a now draws that as
+# a real bracket, from fig8_panelA_bracket.R).
+texts = [
+    ([[("# of significant dCoPA modules", "000000")], [(" with lower expression in SCZ", "000000")]],
+     1918080, 377640, 1229040, 272520, 8.0, False, True),
+    ([[("a", None)]], 1152000, 320400, 250200, 242280, 13.3333, True, False),
+    ([[("b", None)]], 4896000, 320400, 257400, 242280, 13.3333, True, False),
+    ([[("# of significant dCoPA modules", "000000")], [(" with higher expression in SCZ", "000000")]],
+     5625720, 378000, 1229040, 272520, 8.0, False, True),
+    ([[("d", None)]], 4860360, 2300400, 257760, 242280, 13.3333, True, False),
+    ([[("c", None)]], 1152360, 2300400, 250560, 242280, 13.3333, True, False),
+    ([[("Cell type overlap of ", "000000"), ("shared dCoPA genes", "b8860b"), (" ", "000000")],
+      [("with lower expression in SCZ", "000000")]],
+     5416200, 2394000, 1589040, 272520, 8.0, False, True),
+    ([[("Significance of overlap of ", "000000"), ("shared dCoPA genes", "b8860b"), (" ", "000000")],
+      [("with lower expression in SCZ", "000000")]],
+     1609200, 2394360, 1788120, 272520, 8.0, False, True),
+    ([[("e", None)]], 1152720, 5000400, 250200, 242280, 13.3333, True, False),
+    ([[("Summary of ", "000000"), ("shared dCoPA genes", "b8860b")]],
+     1984320, 5058360, 1326600, 181080, 8.0, False, True),
+    ([[("f", None)]], 4895280, 5038200, 222120, 242280, 13.3333, True, False),
+]
 
 # ---- panel e: PDF -> content-cropped vector SVG --------------------------
 subprocess.run(["inkscape", MEDIA_SRC["image12.svg"][1],
@@ -237,10 +229,6 @@ def plain_lines(paras):
 e_letter_y = next((t[2] for t in texts if plain_lines(t[0]) == ["e"]), None)  # EMU y of "e"
 for paras, x, y, cx, cy, sz, bold, centred in texts:
     plain = plain_lines(paras)
-    if plain and plain[0].startswith("Fig. 8"):
-        continue   # drop the template's placeholder title; real title drawn above
-    if plain and plain[0].startswith("r ="):
-        continue   # drop static "r = 0.82"; panel a now draws it as a real bracket
     # panel e letter/subtitle + panel f letter: drop further toward the table, with
     # f snapped to e's row so the two letters align.
     is_e_letter = plain == ["e"]

@@ -492,7 +492,7 @@ find_cons_mods <- function(save_path,
       rh <- length(allpos) + 1
       p <- cowplot::plot_grid(allpos[[1]][[i]][[1]], psub, nrow = 2, rel_heights = c(1/rh, (rh-1)/rh))
       #ggsave(p, file = file.path(save_indiv, paste0(sprintf("%04d", as.numeric(y)), ".pdf")),  height = 2, width = 7, bg = "white", limitsize = F)
-      #ggsave(p, file = "~/test/test.pdf", height = 3, width = 8)
+      #ggsave(p, file = file.path(Sys.getenv("SCRATCH_DIR", "~/test"), "test.pdf"), height = 3, width = 8)
       if(!dir.exists(file.path(save_indiv, "pos")))
         dir.create(file.path(save_indiv, "pos"), recursive = T)
       ggsave(p, file = file.path(save_indiv, "pos", paste0(sprintf("%04d", as.numeric(i)), ".pdf")),  height = length(allpos) + 1, width = 8, bg = "white", limitsize = F)
@@ -512,7 +512,7 @@ find_cons_mods <- function(save_path,
       rh <- length(allneg) + 1
       p <- cowplot::plot_grid(allneg[[1]][[i]][[1]], psub, nrow = 2, rel_heights = c(1/rh, (rh-1)/rh))
       #ggsave(p, file = file.path(save_indiv, paste0(sprintf("%04d", as.numeric(y)), ".pdf")),  height = 2, width = 7, bg = "white", limitsize = F)
-      #ggsave(p, file = "~/test/test.pdf", height = 3, width = 8)
+      #ggsave(p, file = file.path(Sys.getenv("SCRATCH_DIR", "~/test"), "test.pdf"), height = 3, width = 8)
       if(!dir.exists(file.path(save_indiv, "neg")))
         dir.create(file.path(save_indiv, "neg"), recursive = T)
       ggsave(p, file = file.path(save_indiv, "neg", paste0(sprintf("%04d", as.numeric(i)), ".pdf")),  height = length(allneg) + 1, width = 8, bg = "white", limitsize = F)

@@ -18,19 +18,18 @@ import scipy.sparse as sp
 from pathlib import Path
 
 # ── Paths ────────────────────────────────────────────────────────────────────
-GABITTO_PATH_DFC = os.path.join(os.environ.get("DATA_DIR", "/mnt/bdata/gugene"), "datasets/SN_RNAseq/sea_ad_2024/RNAseq/"
-                                                                  "SEAAD_A9_RNAseq_final-nuclei.2024-02-13.h5ad")
+GABITTO_PATH_DFC = (
+    os.path.join(os.environ.get("DATA_DIR", "/mnt/bdata/gugene"), "datasets/SN_RNAseq/sea_ad_2024/RNAseq/"
+    "SEAAD_A9_RNAseq_final-nuclei.2024-02-13.h5ad")
+)
 
 GABITTO_PATH_MTG = (
     os.path.join(os.environ.get("DATA_DIR", "/mnt/bdata/gugene"), "datasets/SN_RNAseq/sea_ad_2024/mtg/RNAseq/SEAAD_MTG_RNAseq_final-nuclei.2024-02-13.h5ad")
 )
 
 LIU_PATH = (
-    os.path.join(
-        os.environ.get("SHARED_DATA_DIR", "/mnt/bdata/@shared"),
-        "scsn.expr_data/human_expr/postnatal/"
-        "MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025.h5ad",
-    )
+    os.path.join(os.environ.get("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/"
+    "MIT_AD_Multiomic_Multiregion/snRNA_Matrix.2263395_Cells_July7_2025.h5ad")
 )
 SAVE_DIR = Path(os.path.join(os.environ.get("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_s6"))
 
@@ -47,6 +46,12 @@ LIU_SUBCLASS_COL = "RNA.Subclass"
 LIU_REGION_COL   = "BrainRegion"
 
 # ── Filters ───────────────────────────────────────────────────────────────────
+# VLMC is dropped from the Gabitto reference because Liu has no equivalent subclass:
+# its vascular/mural types (SMC, Fib, Per) are excluded on the query side below, so a
+# VLMC metacell would have no legitimate counterpart and could only collect
+# mis-assigned nuclei. Consequence: 23 (not 24) Gabitto subclasses are mapped, and VLMC
+# is therefore absent from every downstream Gabitto-vs-Liu comparison (e.g. the Fig. 6
+# projection barplots, which intersect cell types across both datasets).
 GAB_EXCLUDE = {"VLMC"}
 LIU_EXCLUDE = {"Exc HC", "Exc EC", "T", "SMC", "Fib", "Per"}
 

@@ -14,7 +14,7 @@ import json
 import time
 import requests
 
-OUT_FILE = os.path.join(os.environ.get("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_8/v1/scz_gene_databases_prefilter.csv")
+OUT_FILE = os.path.join(os.environ.get("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_8/v4/scz_db_pipeline/scz_gene_databases_prefilter.csv")
 BASE_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
 OT_API = "https://api.platform.opentargets.org/api/v4/graphql"
 MAX_GENES_PER_CLINVAR_VARIANT = 10  # exclude large structural variants

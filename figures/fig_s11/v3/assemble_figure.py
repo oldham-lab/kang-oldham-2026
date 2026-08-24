@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
 Figure assembly for Fig. S11 (v3 = post-HGNC-fix re-run of v2; panels regenerated
-import os
 from the updated fig_7/v7.1 dCoPA gene lists. Layout is read from v2/v2.pptx, which
 is unchanged; only the panel content differs).
 
@@ -10,28 +9,27 @@ Deliverables (all named Kang_Figure_S11_v3.*):
   .png   — raster, 300 dpi
   .pptx  — one slide, the figure embedded as a vector SVG with a PNG fallback
 
-Layout reference = the hand-laid-out fig_s11/v2/v2.pptx (panel positions, panel
-letters a/b, the per-panel titles). This script reads those positions, then
-composes a single master SVG that INLINES the panel SVGs (so they stay vector)
+Layout: PANELS and LABELS below ARE the layout. They were read once out of the
+hand-laid-out fig_s11/v2/v2.pptx and frozen here, so a superseded version folder
+is no longer a build input and the figure rebuilds from a clone (the template was
+never tracked). This script composes a single master SVG that INLINES the panel
+SVGs (so they stay vector)
 with the title / labels / panel titles drawn as Arial <text>. That master SVG is
 an internal intermediate (deleted at the end, not a deliverable): rsvg-convert
 renders it to the PDF and PNG, and it is embedded as the pptx's vector layer.
 
 Panels (produced by make_panels.R in this folder), MTG left / DFC right:
-  image4.svg  -> panel_a_MTG.svg   (Fig. S11a, left)
-  image6.svg  -> panel_b_DFC.svg   (Fig. S11b, right)
-  image2.svg  -> legend.svg        (shared -log10(FDR) legend, transparent bg)
+  a_MTG  -> panel_a_MTG.svg   (Fig. S11a, left)
+  b_DFC  -> panel_b_DFC.svg   (Fig. S11b, right)
+  legend.svg                  (shared -log10(FDR) legend, transparent, drawn twice)
 
 The legend is drawn ONCE, transparent, centred in the gap between the two panels
 so it never occludes a heatmap (the v2 reference overlapped each panel with an
 opaque legend; that is the bug this fixes).
 """
-import zipfile, os, re, subprocess
-import xml.etree.ElementTree as ET
+import os, re, subprocess
 
-V2       = os.path.join(os.environ.get("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_s11/v2")  # layout template only
 V3       = os.path.join(os.environ.get("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_s11/v3")  # panels + deliverables
-TEMPLATE = f"{V2}/v2.pptx"   # hand-laid-out layout reference (positions unchanged for v3)
 OUT_PDF  = f"{V3}/Kang_Figure_S11_v3.pdf"
 OUT_PNG  = f"{V3}/Kang_Figure_S11_v3.png"
 OUT_PPTX = f"{V3}/Kang_Figure_S11_v3.pptx"
@@ -39,9 +37,9 @@ OUT_PPTX = f"{V3}/Kang_Figure_S11_v3.pptx"
 # pptx's vector layer); deleted at the end so it is not a deliverable.
 MASTER_SVG = f"{V3}/.s11_master.svg"
 
-# template media -> panel source SVG in V2 (left=MTG, right=DFC)
-MEDIA_SRC = {"image4.svg": "panel_a_MTG.svg",
-             "image6.svg": "panel_b_DFC.svg"}
+# panel key -> source SVG in this folder (left=MTG, right=DFC)
+MEDIA_SRC = {"a_MTG": "panel_a_MTG.svg",
+             "b_DFC": "panel_b_DFC.svg"}
 LEGEND_SRC = "legend.svg"
 
 TITLE = ("Fig. S11 | Modular gene activity is reproducibly and coordinately "
@@ -49,55 +47,34 @@ TITLE = ("Fig. S11 | Modular gene activity is reproducibly and coordinately "
 
 EMU_PER_PX = 9525.0          # 96 dpi
 def px(emu): return float(emu) / EMU_PER_PX
-def ptpx(centipt): return float(centipt) / 100.0 * 96.0 / 72.0  # PowerPoint sz -> px
 
-NS = {"a":"http://schemas.openxmlformats.org/drawingml/2006/main",
-      "p":"http://schemas.openxmlformats.org/presentationml/2006/main",
-      "r":"http://schemas.openxmlformats.org/officeDocument/2006/relationships",
-      "asvg":"http://schemas.microsoft.com/office/drawing/2016/SVG/main"}
-
-# ---- read layout from v2.pptx --------------------------------------------
-z = zipfile.ZipFile(TEMPLATE)
-rels = {rel.get("Id"): rel.get("Target").split("/")[-1]
-        for rel in ET.fromstring(z.read("ppt/slides/_rels/slide1.xml.rels"))}
-slide = ET.fromstring(z.read("ppt/slides/slide1.xml"))
-
-pics = {}   # media basename -> (x, y, w, h) in EMU
-for pic in slide.iter("{%s}pic" % NS["p"]):
-    svg = pic.find(".//asvg:svgBlip", NS)
-    if svg is None:
-        continue
-    media = rels.get(svg.get("{%s}embed" % NS["r"]))
-    xf = pic.find(".//a:xfrm", NS); off = xf.find("a:off", NS); ext = xf.find("a:ext", NS)
-    pics.setdefault(media, (int(off.get("x")), int(off.get("y")),
-                            int(ext.get("cx")), int(ext.get("cy"))))
-
-texts = []  # (text, x, y, cx, cy, size_px, bold, centred) — excludes the old title
-for sp in slide.iter("{%s}sp" % NS["p"]):
-    txt = "".join(t.text or "" for t in sp.findall(".//a:t", NS)).strip()
-    if not txt or txt.startswith("Fig. S11"):   # drop the v2 placeholder title
-        continue
-    xf = sp.find(".//a:xfrm", NS); off = xf.find("a:off", NS); ext = xf.find("a:ext", NS)
-    rpr = sp.find(".//a:rPr", NS)
-    sz  = ptpx(rpr.get("sz")) if (rpr is not None and rpr.get("sz")) else 12.0
-    bold = bool(rpr is not None and rpr.get("b") == "1")
-    centred = any(p.get("algn") == "ctr" for p in sp.findall(".//a:pPr", NS))
-    texts.append((txt, int(off.get("x")), int(off.get("y")),
-                  int(ext.get("cx")), int(ext.get("cy")), sz, bold, centred))
-z.close()
+# ---- layout, frozen from v2.pptx (EMU; 914400 per inch) ------------------
+# Panel boxes, and the text shapes drawn over them. Sizes are px (the pptx sz/100
+# converted at 96/72). Everything else on the canvas is derived from these.
+pics = {
+    "a_MTG": (  82440, 887040, 3200040, 3008160),
+    "b_DFC": (4003920, 887040, 3200040, 3008160),
+}
+# (text, x, y, cx, cy, size_px, bold, centred)
+texts = [
+    ("Significance of overlap of dCoPA genes (MTG)", 1135080, 665640, 2006640, 196200, 9.3333, False, True),
+    ("a",                                             468000, 608400,  279000, 303120, 18.6667, True, False),
+    ("b",                                            4140000, 608400,  289080, 303120, 18.6667, True, False),
+    ("Significance of overlap of dCoPA genes (DFC)", 4852080, 665640, 1990800, 196200, 9.3333, False, True),
+]
 
 # Legends: ONE per panel (a and b), transparent. The legend's visible colour-bar
 # block is ~0.435x its box width, centred in the box. Place panel a's legend so that
 # block is centred in the gap between the panels, and panel b's in a right-hand
 # margin, so neither colour-bar overlaps a heatmap.
-panel_media = ["image4.svg", "image6.svg"]
+panel_media = ["a_MTG", "b_DFC"]
 leg_w, leg_h = 1218240, 913320
-leg_y = (pics["image4.svg"][1] + pics["image4.svg"][3] / 2) - leg_h / 2
+leg_y = (pics["a_MTG"][1] + pics["a_MTG"][3] / 2) - leg_h / 2
 LEG_CONTENT_HALF = 0.435 / 2 * leg_w     # half-width of the visible colour-bar block
 GAP_CLEAR = 95250                        # 0.1 in clearance from a panel edge
-a_r = pics["image4.svg"][0] + pics["image4.svg"][2]   # panel a right edge
-b_l = pics["image6.svg"][0]                            # panel b left edge
-b_r = pics["image6.svg"][0] + pics["image6.svg"][2]   # panel b right edge
+a_r = pics["a_MTG"][0] + pics["a_MTG"][2]   # panel a right edge
+b_l = pics["b_DFC"][0]                            # panel b left edge
+b_r = pics["b_DFC"][0] + pics["b_DFC"][2]   # panel b right edge
 legA_center = (a_r + b_l) / 2                          # colour-bar centred in the gap
 legB_center = b_r + GAP_CLEAR + LEG_CONTENT_HALF       # colour-bar clear, right of panel b
 legends = [("legendA_", legA_center - leg_w / 2),      # panel a (MTG)
@@ -141,7 +118,7 @@ parts = [f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.or
 # panels first (opaque), then the transparent legends on top (one per panel)
 for media in panel_media:
     x, y, w, h = pics[media]
-    parts.append(inline(f"{V3}/{MEDIA_SRC[media]}", media.replace(".", "_") + "_",
+    parts.append(inline(f"{V3}/{MEDIA_SRC[media]}", media + "_",
                         px(x), px(y), px(w), px(h)))
 for prefix, lx in legends:
     parts.append(inline(f"{V3}/{LEGEND_SRC}", prefix,
@@ -149,7 +126,7 @@ for prefix, lx in legends:
 
 # title: left-justified, flush with the left edge of panel a, across the top
 t_size = 14.0
-parts.append(f'<text x="{px(pics["image4.svg"][0]):.1f}" y="{px(31680)+t_size*0.9:.1f}" text-anchor="start" '
+parts.append(f'<text x="{px(pics["a_MTG"][0]):.1f}" y="{px(31680)+t_size*0.9:.1f}" text-anchor="start" '
              f'font-family="{FAMILY}" font-size="{t_size:.1f}" font-weight="bold">{esc(TITLE)}</text>')
 
 # panel letters (a, b) and per-panel titles, from the v2 text shapes, in Arial.
@@ -166,7 +143,7 @@ def _grid_center_px(panel_media):
     scale = min(bw / vbw, bh / vbh)                 # xMidYMid meet
     offx = bx + (bw - vbw * scale) / 2
     return px(offx + (gx + gw / 2) * scale)
-GRID_CX = {"(MTG)": _grid_center_px("image4.svg"), "(DFC)": _grid_center_px("image6.svg")}
+GRID_CX = {"(MTG)": _grid_center_px("a_MTG"), "(DFC)": _grid_center_px("b_DFC")}
 for txt, x, y, cx, cy, sz, bold, centred in texts:
     weight = ' font-weight="bold"' if bold else ''
     if centred:

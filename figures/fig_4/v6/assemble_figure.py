@@ -1,269 +1,250 @@
 #!/usr/bin/env python3
 """
-Figure assembly for Fig. 4 (v6), modeled on fig_3/v4/assemble_figure.py.
+Assemble Figure 4 (v6) from its panels into PDF, PNG and PPTX -- de novo.
 
-Source layout = the hand-laid-out fig_4/v5/v5.pptx (positions, sizes, panel
-letters, "r = ..." labels, text). This script copies that pptx verbatim, swaps
-ONLY the embedded panel media for the current fig_4/v6 panel SVGs (each panel is
-stored as an SVG plus a PNG raster fallback), aspect-fits each swapped picture's
-box so a regenerated panel isn't stretched, and writes the result to a NEW v6
-deliverable (the v5 template is never modified).
+Replaces the media-swap assembler, which copied the hand-laid-out fig_4/v5/v5.pptx
+and substituted its embedded images. That made a superseded version directory a
+build input, and the template was never tracked, so the figure could not be
+rebuilt from a clone. It also had to recover which template media held which panel
+by content-hashing the embedded SVGs against fig_4/v5, falling back to column
+position for five of them -- CELLS below simply says.
 
-Fig-4-specific notes vs. the fig_3 recipe:
-  * There is no top schematic banner to remove (fig_3 deleted its panel A); all
-    19 panels in the v5 layout are real outputs and are kept.
-  * The "r = ..." correlation labels are kept -- the underlying correlation values
-    did not change in v6, so the hand-placed labels remain valid.
-  * The slide title is rewritten to the Fig. 4 caption and spanned across the full
-    slide width at the top.
+Same house pattern as fig_1/v3, fig_3/v4 and fig_6/v6: compute placements once,
+emit the PDF as vector, the PNG as a 300-dpi raster of it, and the PPTX with
+panels rasterised at 300 dpi and the text live. The placements were read out of
+the v6 deliverable the old script produced (v5's boxes plus the aspect-fit and
+title respan it applied at build time), then each box was tied to its source file
+by md5-matching the images embedded in that deliverable against this folder's
+SVGs -- all 19 matched, so the mapping is recovered exactly rather than inferred.
 
-The 19 panels are 4 modules x 4 sub-panels (expression/bulk-cor/GSEA/projection)
-plus the three summary panels Q (size distribution), R (seed-gene mean corr) and
-S (projection correlation heatmap). The template media <-> source-panel mapping
-below was recovered by content-hashing the embedded SVGs against fig_4/v5 and, for
-the five panels that the v5 pptx embedded from an older export (the four projection
-panels and S), by their column position on the slide. Panel S is stored as a shape
-picture-fill (not a <p:pic>); its media is still swapped, and its 4:3 aspect is
-unchanged so it needs no refit.
+The old path exported the PDF through LibreOffice from a raster-only copy of the
+pptx, so every panel arrived rasterised; here the panels stay vector.
+
+Layout (US Letter portrait, 612 x 792 pt): 4 modules x 4 rows, plus 3 summaries.
+  a-d  panel_<m>_1.svg                  module expression
+  e-h  panel_<m>_2.svg                  bulk correlation
+  i-l  panel_<m>_3.svg                  GSEA
+  m-p  panel_<m>_4_with_brackets.svg    projection, with the r = ... brackets baked in
+  q    panel_Q.svg                      module size distribution
+  r    panel_R.svg                      seed-gene mean correlation
+  s    panel_S.svg                      REI projection correlation heatmap
+
+The correlation labels are part of the *_with_brackets panels (drawn by
+fig_4_v6.R), not slide text, so they track the data rather than needing to be
+re-placed by hand. Panel S was a shape picture-fill in the template; here it is
+just another placed panel.
 """
-import os
-import zipfile, os, re, shutil, subprocess
-import xml.etree.ElementTree as ET
+import os, subprocess, tempfile
 
-TEMPLATE = os.path.join(os.environ.get("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_4/v5/v5.pptx")  # source layout (read-only)
-OUT      = os.path.join(os.environ.get("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_4/v6/Kang_Figure_4_v6.pptx")
-V6       = os.path.dirname(OUT)        # fig_4/v6 = canonical panel sources
-STAGE    = "/tmp/fig4_assets"          # staging dir for placed assets (gitignored)
+import numpy as np
+import fitz  # PyMuPDF
+from pptx import Presentation
+from pptx.util import Pt
 
-TITLE_NEW = ("Fig. 4 | Bulk gene coexpression modules in human neocortex reflect "
-             "highly reproducible patterns of genomic activity among neocortical "
-             "cell types")
+V6 = os.path.dirname(os.path.abspath(__file__))
+BASE = os.path.join(V6, "Kang_Figure_4_v6")
+OUT_PDF, OUT_PNG, OUT_PPTX = BASE + ".pdf", BASE + ".png", BASE + ".pptx"
 
-# template media (svg vector, png fallback) -> source SVG in V6.
-PANELS = [
-    ("image14.svg", "image13.png", "panel_1_1.svg"),  # module 1, expression
-    ("image12.svg", "image11.png", "panel_1_2.svg"),  # module 1, bulk cor
-    ("image30.svg", "image29.png", "panel_1_3.svg"),  # module 1, GSEA
-    ("image6.svg",  "image5.png",  "panel_1_4_with_brackets.svg"),  # module 1, projection + corr brackets
-    ("image28.svg", "image27.png", "panel_2_1.svg"),  # module 2, expression
-    ("image26.svg", "image25.png", "panel_2_2.svg"),  # module 2, bulk cor
-    ("image32.svg", "image31.png", "panel_2_3.svg"),  # module 2, GSEA
-    ("image4.svg",  "image3.png",  "panel_2_4_with_brackets.svg"),  # module 2, projection + corr brackets
-    ("image24.svg", "image23.png", "panel_3_1.svg"),  # module 3, expression
-    ("image22.svg", "image21.png", "panel_3_2.svg"),  # module 3, bulk cor
-    ("image34.svg", "image33.png", "panel_3_3.svg"),  # module 3, GSEA
-    ("image38.svg", "image37.png", "panel_3_4_with_brackets.svg"),  # module 3, projection + corr brackets
-    ("image20.svg", "image19.png", "panel_4_1.svg"),  # module 4, expression
-    ("image18.svg", "image17.png", "panel_4_2.svg"),  # module 4, bulk cor
-    ("image36.svg", "image35.png", "panel_4_3.svg"),  # module 4, GSEA
-    ("image2.svg",  "image1.png",  "panel_4_4_with_brackets.svg"),  # module 4, projection + corr brackets
-    ("image10.svg", "image9.png",  "panel_Q.svg"),    # Q: module size distribution
-    ("image8.svg",  "image7.png",  "panel_R.svg"),    # R: seed-gene mean corr
-    ("image16.svg", "image15.png", "panel_S.svg"),    # S: projection corr heatmap
+# --- page geometry (points; US Letter portrait) -------------------------------
+PW, PH = 612.0, 792.0
+
+TITLE = ("Fig. 4 | Bulk gene coexpression modules in human neocortex reflect "
+         "highly reproducible patterns of genomic activity among neocortical "
+         "cell types")
+TITLE_BOX = (7.2, 5.33, 597.6, 50.4)   # spans the page, wraps to 2 lines
+TITLE_FS, LET_FS = 12.0, 11.0
+
+# PowerPoint insets its shape text; the coordinates here are shape origins, so the
+# same offsets fig_1/v3, fig_3/v4 and fig_6/v6 needed apply.
+INSET_X, INSET_Y_BOX, INSET_Y_LETTER = 7.2, 5.0, 6.25
+
+# Placement cells (x, y, w, h), keyed by source SVG. Several sit at negative x --
+# that is the hand layout, not a mistake; those panels bleed off the left margin.
+CELLS = {
+    "panel_1_1.svg":               (   2.91,  64.80, 143.72,  71.86),
+    "panel_2_1.svg":               ( 161.49,  64.80, 143.55,  71.77),
+    "panel_3_1.svg":               ( 310.90,  64.80, 143.55,  71.77),
+    "panel_4_1.svg":               ( 461.14,  64.80, 143.55,  71.77),
+    "panel_1_2.svg":               (  -4.17, 141.11, 143.42,  95.61),
+    "panel_2_2.svg":               ( 150.28, 141.17, 143.29,  95.53),
+    "panel_3_2.svg":               ( 299.69, 141.17, 143.29,  95.53),
+    "panel_4_2.svg":               ( 448.99, 141.17, 143.29,  95.53),
+    "panel_1_3.svg":               ( -11.69, 237.54, 161.35,  40.34),
+    "panel_2_3.svg":               ( 144.95, 237.71, 160.67,  40.17),
+    "panel_3_3.svg":               ( 294.48, 237.60, 160.67,  40.17),
+    "panel_4_3.svg":               ( 439.36, 237.60, 160.67,  40.17),
+    "panel_1_4_with_brackets.svg": (   2.19, 288.00, 145.37, 110.13),
+    "panel_2_4_with_brackets.svg": ( 154.81, 288.00, 145.37, 110.13),
+    "panel_3_4_with_brackets.svg": ( 305.06, 288.00, 144.43, 109.42),
+    "panel_4_4_with_brackets.svg": ( 454.08, 288.00, 144.43, 109.42),
+    "panel_Q.svg":                 (  13.83, 414.00, 138.50,  79.14),
+    "panel_R.svg":                 ( 173.58, 414.00, 251.80,  71.94),
+    "panel_S.svg":                 ( 441.47, 408.85, 162.39,  93.69),
+}
+
+LETTERS = {
+    "a": ( -1.50,  45.01), "b": (148.73,  45.01), "c": (296.14,  45.01), "d": (446.37,  45.01),
+    "e": ( -1.30, 131.05), "f": (148.93, 131.05), "g": (296.33, 131.05), "h": (446.57, 131.05),
+    "i": ( -1.30, 223.68), "j": (148.93, 226.52), "k": (299.17, 226.52), "l": (446.57, 226.52),
+    "m": ( -1.30, 273.69), "n": (146.10, 273.69), "o": (299.17, 273.69), "p": (446.57, 273.69),
+    "q": ( -1.45, 398.15), "r": (174.44, 398.44), "s": (434.98, 398.15),
+}
+
+# (text, x, y, w, size, centred). The module labels are left-aligned over their
+# column; the three summary captions are centred over their panels.
+CAPTIONS = [
+    ("Module 105",  44.65,  52.04,  45.52, 6.0, False),
+    ("Module 616", 200.55,  51.96,  45.52, 6.0, False),
+    ("Module 627", 350.79,  51.99,  45.52, 6.0, False),
+    ("Module 904", 498.19,  52.02,  45.52, 6.0, False),
+    ("Distribution of module sizes",                    44.56, 401.75,  93.37, 6.5, True),
+    ("Mean pairwise correlations of module seed genes", 230.80, 401.75, 156.78, 6.5, True),
+    ("Mean pairwise correlations of REI indices",       452.44, 401.75, 133.00, 6.5, True),
 ]
 
-def _sh(cmd): subprocess.run(cmd, shell=True, check=True, capture_output=True)
 
-# Stage each panel SVG from the v6 outputs and rasterize a matching PNG fallback.
-def stage_assets():
-    os.makedirs(STAGE, exist_ok=True)
-    for _, _, src in PANELS:
-        key = os.path.splitext(src)[0]
-        shutil.copy(f"{V6}/{src}", f"{STAGE}/{key}.svg")
-        # -b white: flatten on an opaque white background. A transparent fallback
-        # (e.g. a panel SVG with no background rect) becomes a PDF soft-mask that
-        # some viewers render as a black box; an opaque raster avoids that entirely.
-        _sh(f"rsvg-convert -b white -d 300 -p 300 {STAGE}/{key}.svg -o {STAGE}/{key}.png")
+def stage(tmp):
+    """Panel SVG -> PDF. Inkscape rather than rsvg (see fig_3/v4 and fig_6/v6)."""
+    out = {}
+    for name in CELLS:
+        p = os.path.join(tmp, name.replace(".svg", ".pdf"))
+        subprocess.run(["inkscape", os.path.join(V6, name), "--export-type=pdf",
+                        f"--export-filename={p}"], check=True, capture_output=True)
+        out[name] = p
+    return out
 
-stage_assets()
 
-# template media path -> staged file to embed in its place
-MEDIA_MAP = {}
-for svg_media, png_media, src in PANELS:
-    key = os.path.splitext(src)[0]
-    MEDIA_MAP[f"ppt/media/{svg_media}"] = f"{key}.svg"
-    MEDIA_MAP[f"ppt/media/{png_media}"] = f"{key}.png"
+def content_bbox(src_pdf):
+    """Ink box of a staged panel.
 
-# svg media basename -> panel key; aspect (w/h) read from each staged SVG.
-SVG_PANEL = {svg_media: os.path.splitext(src)[0] for svg_media, _, src in PANELS}
-def _svg_aspect(path):
-    s = open(path, encoding="utf-8", errors="ignore").read(2000)
-    w = float(re.search(r'width=["\']([\d.]+)', s).group(1))
-    h = float(re.search(r'height=["\']([\d.]+)', s).group(1))
-    return w / h
-ASPECT = {os.path.splitext(src)[0]: _svg_aspect(f"{STAGE}/{os.path.splitext(src)[0]}.svg")
-          for _, _, src in PANELS}
+    The text/drawings scan alone is NOT enough here: get_drawings() does not
+    descend into Form XObjects, and Inkscape emits panel S's column dendrogram
+    inside one. Trimming to that under-reported box clipped the dendrogram off the
+    figure. So union it with a raster ink scan, which sees everything the page
+    actually paints; the union can only ever grow the box, never crop.
+    """
+    page = fitz.open(src_pdf)[0]
+    r = fitz.Rect(1e9, 1e9, -1e9, -1e9)
+    for b in page.get_text("blocks"):
+        r |= fitz.Rect(b[:4])
+    for d in page.get_drawings():
+        r |= d["rect"]
 
-NS = {"a":"http://schemas.openxmlformats.org/drawingml/2006/main",
-      "p":"http://schemas.openxmlformats.org/presentationml/2006/main",
-      "r":"http://schemas.openxmlformats.org/officeDocument/2006/relationships",
-      "asvg":"http://schemas.microsoft.com/office/drawing/2016/SVG/main",
-      "mc":"http://schemas.openxmlformats.org/markup-compatibility/2006",
-      "p14":"http://schemas.microsoft.com/office/powerpoint/2010/main",
-      "p15":"http://schemas.microsoft.com/office/powerpoint/2012/main"}
-for k,v in NS.items(): ET.register_namespace(k, v)
+    # Applied as a SAFETY NET, not a co-equal source: the scan rounds outward by up
+    # to a pixel and antialiasing bleeds past the true vector edge, so taking it
+    # verbatim would nudge every box by a fraction of a point and shift figures that
+    # are already published. Only genuinely missed content -- beyond SCAN_TOL -- wins.
+    SCAN_DPI, SCAN_TOL = 144, 1.0
+    pm = page.get_pixmap(dpi=SCAN_DPI)
+    a = np.frombuffer(pm.samples, dtype=np.uint8).reshape(pm.height, pm.width, pm.n)[:, :, :3]
+    ys, xs = np.where((a < 250).any(2))
+    if len(ys):
+        k = 72.0 / SCAN_DPI
+        ink = fitz.Rect(page.rect.x0 + xs.min() * k, page.rect.y0 + ys.min() * k,
+                        page.rect.x0 + (xs.max() + 1) * k, page.rect.y0 + (ys.max() + 1) * k)
+        if ink.x0 < r.x0 - SCAN_TOL: r.x0 = ink.x0
+        if ink.y0 < r.y0 - SCAN_TOL: r.y0 = ink.y0
+        if ink.x1 > r.x1 + SCAN_TOL: r.x1 = ink.x1
+        if ink.y1 > r.y1 + SCAN_TOL: r.y1 = ink.y1
 
-z = zipfile.ZipFile(TEMPLATE)
+    if r.is_empty or r.x1 < r.x0:
+        return page.rect
+    return r & page.rect
 
-# rId -> media basename (from slide rels)
-rels = {}
-for rel in ET.fromstring(z.read("ppt/slides/_rels/slide1.xml.rels")):
-    rels[rel.get("Id")] = rel.get("Target").split("/")[-1]
 
-slide = ET.fromstring(z.read("ppt/slides/slide1.xml"))
+def fit(bb, cx, cy, cw, ch):
+    """Aspect-preserving fit, centred in the cell -- matching the old script."""
+    s = min(cw / bb.width, ch / bb.height)
+    dw, dh = bb.width * s, bb.height * s
+    return fitz.Rect(cx + (cw - dw) / 2, cy + (ch - dh) / 2,
+                     cx + (cw - dw) / 2 + dw, cy + (ch - dh) / 2 + dh)
 
-# slide width (EMU), for spanning the title across the top
-SLIDE_W = int(ET.fromstring(z.read("ppt/presentation.xml")).find("p:sldSz", NS).get("cx"))
-MARGIN  = 91440  # 0.1 in
 
-# (1) Rewrite the slide title and span it across the full top of the slide:
-# pin the box to the left margin, stretch it to the right margin, and raise its
-# height so the long caption can wrap to a few lines.
-title_done = False
-for sp in slide.iter("{%s}sp" % NS["p"]):
-    ts = sp.findall(".//a:t", NS)
-    if ts and "".join(t.text or "" for t in ts).strip().startswith("Fig. 4"):
-        ts[0].text = TITLE_NEW
-        for t in ts[1:]: t.text = ""
-        xfrm = sp.find(".//a:xfrm", NS)
-        off, ext = xfrm.find("a:off", NS), xfrm.find("a:ext", NS)
-        off.set("x", str(MARGIN))
-        ext.set("cx", str(SLIDE_W - 2 * MARGIN))
-        ext.set("cy", str(640080))   # ~0.7 in (room for ~2-3 wrapped lines)
-        # The v5 template title box is wrap="none", so LibreOffice lays the long
-        # caption on a single overflowing line (clipped) when exporting to PDF.
-        # Force word-wrap so it breaks within the box width (PowerPoint already did).
-        bodyPr = sp.find(".//a:bodyPr", NS)
-        if bodyPr is not None:
-            bodyPr.set("wrap", "square")
-        title_done = True
-        break
+def compute_layout(pdf):
+    panels = []
+    for name, cell in CELLS.items():
+        bb = content_bbox(pdf[name])
+        panels.append((name, pdf[name], bb, fit(bb, *cell)))
+    return {"panels": panels}
 
-# (2) Remove the "r = ..." pairwise-correlation labels sitting to the right of the
-# projection panels (m-p). The "Overall mean: r = ..." annotation by panel S does
-# not start with "r =", so it is preserved.
-parent = {c: p for p in slide.iter() for c in list(p)}   # child -> parent, for removal
-removed_txt = 0
-for sp in list(slide.iter("{%s}sp" % NS["p"])):
-    txt = "".join(t.text or "" for t in sp.findall(".//a:t", NS)).strip()
-    if re.match(r"^r\s*=", txt):
-        parent[sp].remove(sp); removed_txt += 1
 
-# (3) Aspect-fit each swapped <p:pic> box to its new asset, centered in its box.
-# (Panel S is a shape blipFill, not a pic, and keeps its 4:3 aspect, so it is not
-# refit here -- only its media bytes are swapped on write.)
-fitted = []
-for pic in slide.iter("{%s}pic" % NS["p"]):
-    svgblip = pic.find(".//asvg:svgBlip", NS)
-    if svgblip is None:
-        continue
-    rid = svgblip.get("{%s}embed" % NS["r"])
-    panel = SVG_PANEL.get(rels.get(rid, ""))
-    if panel is None:
-        continue
-    xfrm = pic.find(".//a:xfrm", NS)
-    off, ext = xfrm.find("a:off", NS), xfrm.find("a:ext", NS)
-    ox, oy = int(off.get("x")), int(off.get("y"))
-    cx, cy = int(ext.get("cx")), int(ext.get("cy"))
-    asp, box = ASPECT[panel], cx/cy
-    if panel.endswith("_4_with_brackets"):
-        # m-p projection panels carry correlation brackets in a right margin, making
-        # them wider than the placeholder box. Keep full box HEIGHT and grow width so
-        # the bars stay full size and the brackets extend out (centered horizontally),
-        # rather than letterboxing the whole thing shorter.
-        ncy, ncx = cy, round(cy * asp)
-    elif asp > box:          # too wide for box -> limit by width
-        ncx, ncy = cx, round(cx/asp)
-    else:                    # too tall for box -> limit by height
-        ncy, ncx = cy, round(cy*asp)
-    nox, noy = ox + (cx - ncx)//2, oy + (cy - ncy)//2
-    off.set("x", str(nox)); off.set("y", str(noy))
-    ext.set("cx", str(ncx)); ext.set("cy", str(ncy))
-    fitted.append(f"{panel}: {cx}x{cy} -> {ncx}x{ncy} (centered)")
+def render_pdf(lay):
+    doc = fitz.open()
+    page = doc.new_page(width=PW, height=PH)
+    x, y, w, h = TITLE_BOX
+    page.insert_textbox(fitz.Rect(x + INSET_X, y + INSET_Y_BOX, x + w, y + INSET_Y_BOX + h),
+                        TITLE, fontname="hebo", fontsize=TITLE_FS,
+                        align=fitz.TEXT_ALIGN_LEFT, lineheight=1.15)
+    for _, src, bb, rect in lay["panels"]:
+        page.show_pdf_page(rect, fitz.open(src), 0, clip=bb)
+    for ch, (lx, ly) in LETTERS.items():
+        page.insert_text((lx + INSET_X, ly + INSET_Y_LETTER + LET_FS), ch,
+                         fontname="hebo", fontsize=LET_FS)
+    for text, cx, cy, cw, fs, centred in CAPTIONS:
+        x0 = cx if centred else cx + INSET_X      # centred text centres in the raw box
+        page.insert_textbox(fitz.Rect(x0, cy + INSET_Y_BOX, x0 + cw, cy + INSET_Y_BOX + 4 * fs),
+                            text, fontname="helv", fontsize=fs, lineheight=1.2,
+                            align=fitz.TEXT_ALIGN_CENTER if centred else fitz.TEXT_ALIGN_LEFT)
+    doc.save(OUT_PDF, deflate=True)
+    return doc
 
-# (4) Lay out panel S. The panel_S.svg now carries the heatmap on the left and a
-# right-hand column with the "Overall mean" label above the legend, so: (a) nudge the
-# shape (image16 shape-fill) DOWN to clear the "Mean pairwise correlations of REI
-# indices" title above it; (b) widen its box to the SVG's new 5.2:3 aspect, reclaiming
-# the space the standalone "Overall mean" text used to occupy; and (c) delete that now-
-# redundant template text box. (1 in = 914400 EMU.)
-PANEL_S_DY     = round(0.06 * 914400)   # 0.06 in down (sits just under the title)
-PANEL_S_ASPECT = 5.2 / 3                # matches ggsave(width = 5.2, height = 3)
-parent = {c: p for p in slide.iter() for c in list(p)}   # refresh child -> parent
-nudged = []
-for sp in list(slide.iter("{%s}sp" % NS["p"])):
-    b = sp.find(".//asvg:svgBlip", NS)
-    if b is not None and rels.get(b.get("{%s}embed" % NS["r"])) == "image16.svg":
-        xfrm = sp.find(".//a:xfrm", NS)
-        off, ext = xfrm.find("a:off", NS), xfrm.find("a:ext", NS)
-        off.set("y", str(int(off.get("y")) + PANEL_S_DY))
-        ext.set("cx", str(round(int(ext.get("cy")) * PANEL_S_ASPECT)))
-        nudged.append("panel_S +down, widened to %.3f aspect" % PANEL_S_ASPECT)
-    txt = "".join(t.text or "" for t in sp.findall(".//a:t", NS)).strip()
-    if txt.startswith("Overall mean"):
-        parent[sp].remove(sp); nudged.append("overall-mean text removed (now in SVG)")
 
-# (5) Panel-letter labels (a..p, q/r/s) must paint on top of the panel images.
-# The GSEA panels (i-l) are now saved with an opaque white background, so wherever
-# a picture box overlaps its letter the picture would cover it. Move each single-
-# character label to the end of the shape tree (= topmost z-order).
-spTree = slide.find(".//p:spTree", NS)
-raised = 0
-for sp in list(spTree.findall("p:sp", NS)):
-    txt = "".join(t.text or "" for t in sp.findall(".//a:t", NS)).strip()
-    if len(txt) == 1 and txt.isalpha():
-        spTree.remove(sp); spTree.append(sp); raised += 1
+def render_png(doc):
+    doc[0].get_pixmap(dpi=300).save(OUT_PNG)
 
-slide_xml = (b'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n'
-             + ET.tostring(slide, encoding="unicode").encode("utf-8"))
 
-# Write the new pptx: copy everything from the template, replace the panel media
-# and the edited slide XML. OUT != TEMPLATE, so the v5 source is untouched.
-# Write to a temp file then atomically move into place.
-os.makedirs(os.path.dirname(OUT), exist_ok=True)
-tmp = OUT + ".tmp"
-with zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as out:
-    for item in z.infolist():
-        name = item.filename
-        if name in MEDIA_MAP:
-            data = open(f"{STAGE}/{MEDIA_MAP[name]}", "rb").read()
-        elif name == "ppt/slides/slide1.xml":
-            data = slide_xml
-        else:
-            data = z.read(name)
-        out.writestr(item, data)
-z.close()
-os.replace(tmp, OUT)
+def _box(slide, x, y, w, h):
+    tb = slide.shapes.add_textbox(Pt(x), Pt(y), Pt(w), Pt(h))
+    tf = tb.text_frame
+    tf.word_wrap = True
+    tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = 0
+    return tf
 
-print("wrote:", OUT)
-print("title set:", title_done, "(spanning slide width) ->", TITLE_NEW)
-print("r= labels removed (right of m-p):", removed_txt)
-print("panel-letter labels raised to top of z-order:", raised)
-print("panel S declutter nudges:", nudged)
-print("aspect-fit per panel:")
-for f in fitted: print("  ", f)
 
-# (6) Reproducible PDF + PNG deliverables. LibreOffice's headless SVG importer
-# mis-renders the embedded panel SVGs (black boxes / spurious frames), so convert
-# from a raster-only copy of the pptx: strip the <asvg:svgBlip> extension from each
-# blip so the primary <a:blip> (the rsvg-rendered PNG fallback staged above) is used.
-# The SVG-based OUT pptx is the PowerPoint deliverable and is left untouched.
-_SVGEXT = re.compile(r'<a:extLst>\s*<a:ext uri="\{96DAC541[^}]*\}">\s*'
-                     r'<asvg:svgBlip\b[^>]*/>\s*</a:ext>\s*</a:extLst>')
-base   = os.path.splitext(OUT)[0]
-raster = base + ".raster.pptx"
-zin = zipfile.ZipFile(OUT)
-with zipfile.ZipFile(raster, "w", zipfile.ZIP_DEFLATED) as zo:
-    for it in zin.infolist():
-        d = zin.read(it.filename)
-        if re.match(r"ppt/slides/slide\d+\.xml$", it.filename):
-            d = _SVGEXT.sub("", d.decode("utf-8")).encode("utf-8")
-        zo.writestr(it, d)
-zin.close()
-prof = "file://" + os.path.join(STAGE, "lo_profile")
-_sh(f"soffice -env:UserInstallation={prof} --headless --convert-to pdf "
-    f"--outdir {os.path.dirname(OUT)} {raster}")
-os.replace(base + ".raster.pdf", base + ".pdf")
-_sh(f"pdftoppm -png -singlefile -r 300 {base}.pdf {base}")
-os.remove(raster)
-print("wrote:", base + ".pdf", "and", base + ".png")
+def _run(p, text, size, bold=False):
+    r = p.add_run()
+    r.text = text
+    r.font.name = "Arial"
+    r.font.size = Pt(size)
+    r.font.bold = bold
+    return r
+
+
+def render_pptx(lay, tmp):
+    prs = Presentation()
+    prs.slide_width, prs.slide_height = Pt(PW), Pt(PH)
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+
+    for name, src, bb, rect in lay["panels"]:
+        png = os.path.join(tmp, name.replace(".svg", "_raster.png"))
+        fitz.open(src)[0].get_pixmap(matrix=fitz.Matrix(300 / 72, 300 / 72),
+                                     clip=bb).save(png)
+        slide.shapes.add_picture(png, Pt(rect.x0), Pt(rect.y0),
+                                 Pt(rect.width), Pt(rect.height))
+
+    x, y, w, h = TITLE_BOX
+    _run(_box(slide, x + INSET_X, y + INSET_Y_BOX, w, h).paragraphs[0],
+         TITLE, TITLE_FS, bold=True)
+    for ch, (lx, ly) in LETTERS.items():
+        _run(_box(slide, lx + INSET_X, ly + INSET_Y_BOX, 22.0,
+                  LET_FS * 1.7).paragraphs[0], ch, LET_FS, bold=True)
+    for text, cx, cy, cw, fs, centred in CAPTIONS:
+        _run(_box(slide, cx if centred else cx + INSET_X, cy + INSET_Y_BOX, cw,
+                  4 * fs).paragraphs[0], text, fs)
+
+    prs.save(OUT_PPTX)
+
+
+def main():
+    with tempfile.TemporaryDirectory() as tmp:
+        pdf = stage(tmp)
+        lay = compute_layout(pdf)
+        doc = render_pdf(lay)
+        render_png(doc)
+        render_pptx(lay, tmp)
+    for p in (OUT_PDF, OUT_PNG, OUT_PPTX):
+        print(f"wrote {p}  ({os.path.getsize(p)/1e6:.2f} MB)")
+
+
+if __name__ == "__main__":
+    main()

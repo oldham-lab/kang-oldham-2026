@@ -22,7 +22,7 @@ save_randinds_for <- NULL
 regions  <- c("PFC",
               "MTC")
 
-base_dir <- file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output")
+base_dir <- file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "data/greedy_march_pipeline_output/finalNonNorm_minsize10_unmerged/SEAAD2024_full_python_output")
 
 mod_configs <- list(
   bulk_megaset = file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "data/greedy_march_pipeline_output/finalNonNorm_minsize10_unmerged/SEAAD2024_AllADVsCon_DFC"),
@@ -51,13 +51,12 @@ load_means <- function(group) {
   return(out)
 }
 
-
 # ── Run definitions: 4 comparisons x 2 module types = 8 runs ──────────────────
 runs <- list(
-  list(case = "allAD",   control = "Con",     label = "allAD_vs_Con")#,
-  #list(case = "earlyAD", control = "Con",     label = "earlyAD_vs_Con"),
-  #list(case = "lateAD",  control = "earlyAD", label = "lateAD_vs_earlyAD"),
-  #list(case = "APOE44",  control = "APOE33",  label = "APOE44_vs_APOE33")
+  list(case = "allAD",   control = "Con",     label = "allAD_vs_Con")#
+  # list(case = "earlyAD", control = "Con",     label = "earlyAD_vs_Con"),
+  # list(case = "lateAD",  control = "earlyAD", label = "lateAD_vs_earlyAD"),
+  # list(case = "APOE44",  control = "APOE33",  label = "APOE44_vs_APOE33")
 )
 
 mod_types <- names(mod_configs)
@@ -74,15 +73,14 @@ for (region in regions) {
     for (mod_type in mod_types) {
 
       if (!is.null(run_only) && !any(sapply(run_only, \(x) region == x$region && run$label == x$label && mod_type == x$mod_type))) next
-
+      
       module_output_dir <- mod_configs[[mod_type]]
       these_mods        <- mod_filters[[mod_type]]
-
+      
       if(mod_type == "bulk_megaset"){
         sigcount_bonf <- fread(data.table = F, file = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "analyses/bulk_module_significance/bulk_cors_sigcount_bonf_1158.csv"))
         these_mods <- these_mods[!these_mods %in% which(sigcount_bonf$vals < 2)]
       }
-
 
       cat(sprintf("\n%s\nRun: %s | %s | region: %s\n%s\n",
                   strrep("=", 60), run$label, mod_type, region, strrep("=", 60)))
@@ -119,18 +117,18 @@ for (region in regions) {
         return(out)
       })
 
-      # Output saved to: {script_dir}/MIT_{region}_{label}_{mod_type}_projdistpvalindiv.csv
+      # Output saved to: {script_dir}/SEAAD_{region}_{label}_{mod_type}_projdistpvalindiv.csv
       project_rand_and_calculate_pval(
         module_output_dir = module_output_dir,
         filter_under      = filter_under,
         do_log            = TRUE,
         bulk_genes        = bulk_genes,
-        save_dir1         = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/table_s13/v2"),
+        save_dir1         = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/table_s13/projdistpvalindiv/"),
         sn_objs           = sn_objs,
         proj_all          = proj_all,
         rand_n            = 10000,
         seed              = 26,
-        out_prefix        = paste0("MIT_", region, "_", run$label, "_", mod_type, "_"),
+        out_prefix        = paste0("SEAAD_", region, "_", run$label, "_", mod_type, "_"),
         save_randinds     = !is.null(save_randinds_for) && region == save_randinds_for$region && run$label == save_randinds_for$label && mod_type == save_randinds_for$mod_type
       )
     }

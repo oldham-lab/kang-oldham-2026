@@ -6,7 +6,7 @@ library(openxlsx)
 # ============================================================
 
 # Directory containing all *_projdistpvalindiv.csv files produced by the runcode scripts.
-INPUT_DIR <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/table_s13/v2/")
+INPUT_DIR <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/table_s13/projdistpvalindiv/")
 
 OUT_PATH  <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/table_s13/v3/Kang_Table_S13_v3.xlsx")
 

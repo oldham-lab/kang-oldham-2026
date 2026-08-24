@@ -215,8 +215,11 @@ gsea_input_case <- dcopa_to_df(dcopa_allct_case) |>
 
 gsea_input <- rbind(gsea_input_ctrl, gsea_input_case)
 
-# panel_B genelist is a SHARED output (read by table_s14 from v7.1) — keep canonical, not v8
-fwrite(gsea_input, file = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/v7.1/panel_B_dcopa_genelist.csv"))
+# panel_B genelist is a SHARED output (table_s14, table_s15 and
+# fig_7/dcopa_vs_DE_overlap.R read it). It used to be written into v7.1 to keep one
+# canonical copy, but a superseded version folder is the one place it cannot live if
+# the published repo filters to newest-version-only -- the readers now point here.
+fwrite(gsea_input, file = file.path(save_dir, "panel_B_dcopa_genelist.csv"))
 
 ################
 # Panel A+B

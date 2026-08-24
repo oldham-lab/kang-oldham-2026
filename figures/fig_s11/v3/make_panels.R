@@ -58,7 +58,7 @@ FILL_SCALE <- ggplot2::scale_fill_gradient(
 
 # Raw data lives in fig_7/ — reference it, do not regenerate.
 FIG7        <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7")
-UNIVERSE    <- file.path(FIG7, "v3", "all_bulk_genes.txt")
+UNIVERSE    <- file.path(FIG7, "all_bulk_genes.txt")
 OUT_DIR     <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_s11/v3")
 
 CT_RENAME <- c(

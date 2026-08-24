@@ -1,5 +1,5 @@
 """
-prepare_mit_multiome.py
+prepare_mit_multiome_and_pseudobulk.py  (v4)
 
 Loads a MIT_Multiome .h5ad object, filters to a specified brain region, and saves:
   1. A pseudobulked (genes x samples) compressed CSV — recommended default,
@@ -9,6 +9,12 @@ Loads a MIT_Multiome .h5ad object, filters to a specified brain region, and save
   OR (with --no-pseudobulk):
   1. Raw sparse matrix in HDF5 format (fast binary, readable by R's BPCells)
   2. Fallback to a fast gzipped .mtx if HDF5 is unavailable
+
+v4 change:
+  Accepts --external-labels pointing to an external CSV (index = cell barcode)
+  that contains a "Gabitto_metacell_labels" column.  When provided, these labels
+  replace the h5ad's own celltype column for pseudobulking.  Cells whose barcodes
+  are absent from the external table are excluded before pseudobulking.
 
 Key bottlenecks fixed vs the previous version:
   - backed="r" on read_h5ad: memory-maps the file, only loads filtered cells
@@ -22,17 +28,25 @@ Key bottlenecks fixed vs the previous version:
     (h5py, fast binary) or a numpy-based MTX writer as fallback
 
 Usage:
-    # Recommended: pseudobulk in Python, load direct in R
+    # Recommended: pseudobulk in Python using external celltype labels
     python prepare_mit_multiome_and_pseudobulk.py \
-        --input         /path/to/mit_multiome.h5ad \
-        --outdir        /path/to/output/ \
-        --region-value  PFC
+        --input           /path/to/mit_multiome.h5ad \
+        --outdir          /path/to/output/ \
+        --region-value    PFC \
+        --external-labels /path/to/liu_gabitto_metacell_labels_DFC_lognorm.csv
 
-    # Alternative: export raw sparse matrix for manual pseudobulking in R
+    # Without external labels (uses h5ad's own celltype column)
     python prepare_mit_multiome_and_pseudobulk.py \
-        --input         /path/to/mit_multiome.h5ad \
-        --outdir        /path/to/output/ \
-        --region-value  EC \
+        --input           /path/to/mit_multiome.h5ad \
+        --outdir          /path/to/output/ \
+        --region-value    PFC
+
+    # Export raw sparse matrix instead of pseudobulking
+    python prepare_mit_multiome_and_pseudobulk.py \
+        --input           /path/to/mit_multiome.h5ad \
+        --outdir          /path/to/output/ \
+        --region-value    PFC \
+        --external-labels /path/to/liu_gabitto_metacell_labels_DFC_lognorm.csv \
         --no-pseudobulk
 
 Dependencies:
@@ -57,11 +71,14 @@ BRAIN_REGION_COL = "BrainRegion"
 # Set to a layer name (e.g. "counts") if raw counts are not in .X
 RAW_LAYER = None
 
+# Column in the external labels CSV that holds the celltype labels
+EXTERNAL_LABEL_COL = "Gabitto_metacell_labels"
+
 # Columns from .obs to keep in the metadata CSV
 OBS_COLS_TO_KEEP = [
-    "RNA.Subclass",     # celltype label     → MIT_CELLTYPE_COL in R
-    "ROSMAP_IndividualID",      # donor ID           → MIT_DONOR_COL    in R
-    "Pathology",     # AD / Control label → MIT_DX_COL       in R
+    "RNA.Subclass",         # original celltype label
+    "ROSMAP_IndividualID",  # donor ID           → MIT_DONOR_COL in R
+    "Pathology",            # AD / Control label → MIT_DX_COL    in R
     "BrainRegion"
 ]
 # ── End placeholders ──────────────────────────────────────────────────────────
@@ -71,18 +88,26 @@ def parse_args():
     p = argparse.ArgumentParser(
         description="Filter MIT_Multiome .h5ad to a specified brain region and export for R DE pipeline"
     )
-    p.add_argument("--input",         required=True,  help="Path to input .h5ad file")
-    p.add_argument("--outdir",        required=True,  help="Output directory")
-    p.add_argument("--region-col",    default=BRAIN_REGION_COL,
+    p.add_argument("--input",            required=True,  help="Path to input .h5ad file")
+    p.add_argument("--outdir",           required=True,  help="Output directory")
+    p.add_argument("--region-col",       default=BRAIN_REGION_COL,
                    help=f"obs column containing brain region labels (default: '{BRAIN_REGION_COL}')")
-    p.add_argument("--region-value",  required=True,
-                   help="Brain region value to filter on (e.g. 'PFC', 'EC', 'HIP')")
-    p.add_argument("--layer",         default=RAW_LAYER,
+    p.add_argument("--region-value",     required=True,
+                   help="Brain region value to filter on (e.g. 'PFC', 'MTC')")
+    p.add_argument("--layer",            default=RAW_LAYER,
                    help="AnnData layer with raw counts; omit to use .X")
-    p.add_argument("--celltype-col",  default="RNA.Subclass")
-    p.add_argument("--donor-col",     default="ROSMAP_IndividualID")
-    p.add_argument("--dx-col",        default="Pathology")
-    p.add_argument("--no-pseudobulk", action="store_true",
+    p.add_argument("--celltype-col",     default="RNA.Subclass",
+                   help="obs column for celltypes (used when --external-labels is not provided)")
+    p.add_argument("--donor-col",        default="ROSMAP_IndividualID")
+    p.add_argument("--dx-col",           default="Pathology")
+    p.add_argument("--external-labels",  default=None,
+                   help=(
+                       "Path to external CSV (cell barcode as index) containing "
+                       f"'{EXTERNAL_LABEL_COL}' column.  When provided, these labels "
+                       "replace the h5ad celltype column for pseudobulking.  Cells "
+                       "absent from this table are excluded."
+                   ))
+    p.add_argument("--no-pseudobulk",    action="store_true",
                    help="Skip pseudobulking; save raw sparse matrix instead")
     return p.parse_args()
 
@@ -109,6 +134,45 @@ def warn_if_normalised(X):
             f"  WARNING: max sampled value = {sample.max():.3f}. "
             "Matrix may be normalised/log-transformed. DE tools require raw integer counts."
         )
+
+
+def apply_external_labels(adata, labels_path):
+    """
+    Load external celltype labels CSV, join onto adata by cell barcode index,
+    and return a filtered AnnData with the external labels added as
+    EXTERNAL_LABEL_COL in .obs.  Cells not present in the labels table are dropped.
+    """
+    print(f"\nLoading external celltype labels from:\n  {labels_path}")
+    ext = pd.read_csv(labels_path, index_col=0)
+
+    if EXTERNAL_LABEL_COL not in ext.columns:
+        sys.exit(
+            f"ERROR: '{EXTERNAL_LABEL_COL}' not found in external labels CSV.\n"
+            f"Available columns: {list(ext.columns)}"
+        )
+
+    ext_labels = ext[[EXTERNAL_LABEL_COL]]
+
+    # Match on cell barcode (obs_names)
+    common = adata.obs_names.intersection(ext_labels.index)
+    n_before = adata.n_obs
+    n_missing = n_before - len(common)
+
+    if len(common) == 0:
+        sys.exit(
+            "ERROR: No cell barcodes overlap between h5ad and external labels CSV. "
+            "Check that the index column of the CSV matches adata.obs_names."
+        )
+    if n_missing > 0:
+        print(f"  WARNING: {n_missing:,} cells not found in external labels table — excluded.")
+
+    adata = adata[common].copy()
+    adata.obs[EXTERNAL_LABEL_COL] = ext_labels.loc[common, EXTERNAL_LABEL_COL].values
+    print(f"  {len(common):,} cells retained after joining external labels "
+          f"({n_before - len(common):,} dropped).")
+    print(f"  External celltype breakdown ({adata.obs[EXTERNAL_LABEL_COL].nunique()} types):\n"
+          f"{adata.obs[EXTERNAL_LABEL_COL].value_counts().to_string()}")
+    return adata
 
 
 def pseudobulk_sparse(X_csr, obs, celltype_col, donor_col):
@@ -264,24 +328,34 @@ def main():
             f"Values present: {regions_found}"
         )
 
-    # 3. Filter — slice obs index first (cheap), then .to_memory() loads
-    #    only the selected rows from disk
+    # 3. Filter to region — slice obs index first (cheap), then .to_memory()
+    #    loads only the selected rows from disk
     mask  = adata.obs[args.region_col] == args.region_value
     adata = adata[mask].to_memory()
-    print(f"  After filter: {adata.n_obs:,} cells  ({time.time()-t_start:.1f}s)")
+    print(f"  After region filter: {adata.n_obs:,} cells  ({time.time()-t_start:.1f}s)")
 
-    # 4. Extract counts as CSR
+    # 4. Optionally replace celltype labels with external Gabitto metacell labels
+    if args.external_labels:
+        adata = apply_external_labels(adata, args.external_labels)
+        celltype_col = EXTERNAL_LABEL_COL
+    else:
+        celltype_col = args.celltype_col
+
+    # 5. Extract counts as CSR
     X = get_counts(adata, args.layer)
     warn_if_normalised(X)
 
     genes    = adata.var_names.tolist()
     barcodes = adata.obs_names.tolist()
 
-    # 5. Save metadata
+    # 6. Save metadata
     missing = [c for c in OBS_COLS_TO_KEEP if c not in adata.obs.columns]
     if missing:
         print(f"  WARNING: OBS_COLS_TO_KEEP not found, skipped: {missing}")
     keep_cols = [c for c in OBS_COLS_TO_KEEP if c in adata.obs.columns]
+    # Always include the active celltype column in the metadata CSV
+    if celltype_col not in keep_cols:
+        keep_cols = [celltype_col] + keep_cols
     meta = adata.obs[keep_cols].copy()
     meta.index.name = "Cell_ID"
     meta = meta.reset_index()
@@ -292,15 +366,15 @@ def main():
 
     if args.dx_col in meta.columns:
         print(f"  Diagnosis breakdown:\n{meta[args.dx_col].value_counts().to_string()}")
-    if args.celltype_col in meta.columns:
-        print(f"  Cell types ({meta[args.celltype_col].nunique()} unique):\n"
-              f"{meta[args.celltype_col].value_counts().to_string()}")
+    if celltype_col in meta.columns:
+        print(f"  Cell types ({meta[celltype_col].nunique()} unique):\n"
+              f"{meta[celltype_col].value_counts().to_string()}")
 
-    # 6a. Default: pseudobulk in Python — R loads a small dense CSV
+    # 7a. Default: pseudobulk in Python — R loads a small dense CSV
     if not args.no_pseudobulk:
         print("\nPseudobulking in Python ...")
         pb_matrix, pb_meta = pseudobulk_sparse(
-            X, adata.obs, args.celltype_col, args.donor_col
+            X, adata.obs, celltype_col, args.donor_col
         )
 
         # Attach diagnosis to pseudobulk metadata
@@ -324,7 +398,7 @@ def main():
   # run_edger_dx_de() / run_deseq2_dx_de() in full_pipeline_ADvsCon.R
 """)
 
-    # 6b. Alternative: export raw sparse matrix (for manual pseudobulking in R)
+    # 7b. Alternative: export raw sparse matrix (for manual pseudobulking in R)
     else:
         print("\nSaving raw sparse matrix ...")
         h5_path = save_sparse_h5(X, genes, barcodes, args.outdir, region_tag)

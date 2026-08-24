@@ -21,16 +21,16 @@ showtext_auto()
 # ============================================================
 
 # --- DFC ---
-MIT_EDGER_PATH_DFC <- file.path(Sys.getenv("DE_DIR", "/home/gugene/code/git/kang-oldham-2026/figures/fig_7/DE_old"), "MIT_DE_results/mit_edgeR_ADvsCon_by_celltype.RDS")
-MIT_DESEQ_PATH_DFC <- file.path(Sys.getenv("DE_DIR", "/home/gugene/code/git/kang-oldham-2026/figures/fig_7/DE_old"), "MIT_DE_results/mit_DESeq2_ADvsCon_by_celltype.qs")
-SEA_EDGER_PATH_DFC <- file.path(Sys.getenv("DE_DIR", "/home/gugene/code/git/kang-oldham-2026/figures/fig_7/DE_old"), "SEA_DE_results/sea_edgeR_ADvsCon_by_celltype.RDS")
-SEA_DESEQ_PATH_DFC <- file.path(Sys.getenv("DE_DIR", "/home/gugene/code/git/kang-oldham-2026/figures/fig_7/DE_old"), "SEA_DE_results/sea_DESeq2_ADvsCon_by_celltype.qs")
+MIT_EDGER_PATH_DFC <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/DE_old/MIT_DE_results/mit_edgeR_ADvsCon_by_celltype.RDS")
+MIT_DESEQ_PATH_DFC <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/DE_old/MIT_DE_results/mit_DESeq2_ADvsCon_by_celltype.qs")
+SEA_EDGER_PATH_DFC <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/DE_old/SEA_DE_results/sea_edgeR_ADvsCon_by_celltype.RDS")
+SEA_DESEQ_PATH_DFC <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/DE_old/SEA_DE_results/sea_DESeq2_ADvsCon_by_celltype.qs")
 
 # --- MTG ---
-MIT_EDGER_PATH_MTG <- file.path(Sys.getenv("DE_DIR", "/home/gugene/code/git/kang-oldham-2026/figures/fig_7/DE_old"), "MIT_DE_results_MTG/mit_mtg_edgeR_ADvsCon_by_celltype.RDS")
-MIT_DESEQ_PATH_MTG <- file.path(Sys.getenv("DE_DIR", "/home/gugene/code/git/kang-oldham-2026/figures/fig_7/DE_old"), "MIT_DE_results_MTG/mit_mtg_DESeq2_ADvsCon_by_celltype.qs")
-SEA_EDGER_PATH_MTG <- file.path(Sys.getenv("DE_DIR", "/home/gugene/code/git/kang-oldham-2026/figures/fig_7/DE_old"), "SEA_DE_results_MTG/sea_mtg_edgeR_ADvsCon_by_celltype.RDS")
-SEA_DESEQ_PATH_MTG <- file.path(Sys.getenv("DE_DIR", "/home/gugene/code/git/kang-oldham-2026/figures/fig_7/DE_old"), "SEA_DE_results_MTG/sea_mtg_DESeq2_ADvsCon_by_celltype.qs")
+MIT_EDGER_PATH_MTG <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/DE_old/MIT_DE_results_MTG/mit_mtg_edgeR_ADvsCon_by_celltype.RDS")
+MIT_DESEQ_PATH_MTG <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/DE_old/MIT_DE_results_MTG/mit_mtg_DESeq2_ADvsCon_by_celltype.qs")
+SEA_EDGER_PATH_MTG <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/DE_old/SEA_DE_results_MTG/sea_mtg_edgeR_ADvsCon_by_celltype.RDS")
+SEA_DESEQ_PATH_MTG <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/DE_old/SEA_DE_results_MTG/sea_mtg_DESeq2_ADvsCon_by_celltype.qs")
 
 SAVE_DIR   <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/v3")
 

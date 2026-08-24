@@ -15,6 +15,7 @@ filter_under = 3
 
 broad = T
 
+setwd("/home/gugene/code/git/CoPA")
 
 save_dir <- file.path(save_dir1, "sn_proj_objects")
 

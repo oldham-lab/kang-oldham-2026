@@ -29,7 +29,7 @@ genemap <- fread(file.path(Sys.getenv("MEGASET_DIR", "/home/gugene/RNAseq_megase
 
 # source("/home/gugene/code/git/CoPA/kme_topmodposbc.R")
 # source("/home/gugene/code/git/CoPA/greedy_march_COPA_20240802.R")
-# library(CoPA)
+# source("/home/gugene/code/git/CoPA/wrapper.R")
 # for(i in 1:3){
 #   exdir <- list.files(paste0(file.path(Sys.getenv("MEGASET_DIR", "/home/gugene/RNAseq_megaset"), "13.1-sn_cell_pseudobulk/lein2023/DFC_indiv_donor/donor"),i,"/SyntheticDatasets/"),full.names=T)
 #   exdirexpr <- exdir[grep("EXPRLIST",exdir)]
@@ -615,8 +615,7 @@ plotdf <- mapply(function(sublist, donor){
     rownames_to_column(var="ct") %>%
     pivot_longer(!ct, names_to="Gene") %>% 
     mutate(Gene=factor(Gene,levels=markervec), Donor=donor) %>% as.data.frame
-}, sublist_all, donorvec, SIMPLIFY=F) %>% do.call(rbind,.) %>%
-  group_by(ct,Gene) %>%
+}, sublist_all, donorvec, SIMPLIFY=F) %>% do.call(rbind,.) %>% group_by(ct,Gene) %>%
   summarise(mean_value=mean(value), se_value=sd(value)/sqrt(3))
 
 p <- ggplot(plotdf2,aes(x=ct,y=mean_value)) + 

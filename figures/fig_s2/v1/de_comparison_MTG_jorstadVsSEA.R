@@ -43,7 +43,7 @@ cts <- unique(cell_anno_pb[[1]]$Cell_Type)
 
 # Calculate means over all genes for sanity (jorstad mtg)
 # sn_expr <- readRDS(file.path(Sys.getenv("SHARED_DIR", "/home/shared"), "scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/expression_MTG.RDS"))
-# # sn_anno <- fread("/mnt/bdata/@shared/scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/author_barcode_annotations_MTG.csv", data.table = FALSE)
+# # sn_anno <- fread(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/author_barcode_annotations_MTG.csv"), data.table = FALSE)
 # # meanbysub <- lapply(unique(sn_anno$Cell_Type), \(subclass){
 # #   rowMeans(sn_expr[ ,colnames(sn_expr) %in% sn_anno$Cell_ID[sn_anno$Cell_Type == subclass]])
 # # }) |> do.call(what = "cbind")
@@ -55,7 +55,7 @@ cts <- unique(cell_anno_pb[[1]]$Cell_Type)
 gene_means_log <- qread(file = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_s2/v1/jorstad_gene_means_log.qs"))
 
 # Calculate means over all genes for sanity (gabitto)
-# sn_expr <- qread("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/gabitto_2024/expr_UMI_notADsamples.qs")
+# sn_expr <- qread(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/gabitto_2024/expr_UMI_notADsamples.qs"))
 # gene_means <- apply(sn_expr, 1, mean)
 # gene_means_log <- log(gene_means + 1)
 # rm(sn_expr)
@@ -722,12 +722,12 @@ cts <- intersect(cts1, cts2)
 # # - Lamp5 Lhx6_1 -> Lamp5_Lhx6_1
 # # - Micro-PVM -> Micro/PVM
 # # What is overlap of supertype in lein vs sea
-# laa <- fread("/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/author_barcode_annotations_MTG.csv", data.table = FALSE)
+# laa <- fread(file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/10x/author_barcode_annotations_MTG.csv"), data.table = FALSE)
 saa <- fread(data.table=F,file=file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "datasets/SN_RNAseq/sea_ad_2024/RNAseq/SEAAD_A9_RNAseq_final-nuclei_metadata.2024-02-13.csv"))
 # lu <- unique(laa$Cluster)
 # su <- unique(saa$Supertype)
 # # lein table s3
-# ts3 <- fread(data.table = F, file = "/home/gugene/bdata/@shared/scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/Table_S3_within_area_cluster_vs_all_markers_by_region_rev.csv")
+# ts3 <- fread(data.table = F, file = file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824655/Table_S3_within_area_cluster_vs_all_markers_by_region_rev.csv"))
 # tsc <- unique(ts3$cluster)
 bla <- saa |> dplyr::filter(`Overall AD neuropathological Change` == "Not AD")
 

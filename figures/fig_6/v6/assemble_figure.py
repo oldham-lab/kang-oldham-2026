@@ -1,226 +1,217 @@
 #!/usr/bin/env python3
 """
-Figure assembly for Fig. 6 (v6), modeled on fig_4/v6/assemble_figure.py.
+Assemble Figure 6 (v6) from its panels into PDF, PNG and PPTX -- de novo.
 
-Source layout = the hand-laid-out fig_6/v5/v5.pptx (panel positions, sizes, panel
-letters, slide title). This script copies that pptx verbatim, swaps ONLY the
-embedded panel media for the current fig_6/v6 panel SVGs (each panel is stored as
-an SVG plus a PNG raster fallback), aspect-fits each swapped picture's box so a
-regenerated panel isn't stretched, and writes the result to a NEW v6 deliverable
-(the v5 template is never modified).
+Replaces the media-swap assembler, which copied the hand-laid-out fig_6/v5/v5.pptx
+and substituted its embedded images. That made a superseded version directory a
+build input, and the template was never tracked, so the figure could not be
+rebuilt from a clone. fig_6/v5 held nothing else, so it retires with this change.
 
-The v5 layout has three panels:
-  * a  (top banner, full width) -- the dCoPA schematic
-  * left column                 -- one module snapshot (expr / GSEA / projection /
-                                   boxplots), sub-lettered b/d/f/h
-  * right column                -- a second module snapshot, sub-lettered c/e/g/i
+Same house pattern as fig_1/v3 and fig_3/v4: compute placements once, emit the
+PDF as vector, the PNG as a 300-dpi raster of it, and the PPTX with panels
+rasterised at 300 dpi and the text live. The placements below ARE the layout --
+they were read out of the v6 deliverable the old script produced (v5's boxes plus
+the title respan and the 0.16 in panel-A nudge it applied at build time), so no
+template is consulted.
 
-For v6 the schematic is decopa_schematic_final.svg, and the two columns are the
-fig6_specific_modules.R outputs for modules 83 (left) and 147 (right). The module
-snapshots are ggsaved at 6x14 in, matching the v5 column boxes (3.12x7.28 in), so
-the aspect-fit is effectively a no-op but is kept for robustness.
+The old path exported the PDF by way of LibreOffice from a raster-only copy of
+the pptx, so every panel arrived rasterised; here the panels stay vector.
+
+Layout (US Letter portrait, 612 x 792 pt):
+  a        decopa_schematic_final.svg              dCoPA schematic, full-width banner
+  b/d/f/h  83_MTC_allAD_Con_bulk_megaset.svg       left column
+  c/e/g/i  147_MTC_allAD_Con_bulk_megaset.svg      right column
+
+Each module column is ONE image carrying four stacked sub-panels; its four letters
+are drawn here, at the sub-panel boundaries.
+
+NB the filenames and the panel titles disagree: fig6_specific_modules.R is run
+with target_mods = c(83, 147) and names its outputs after those ids, but the
+panels it draws are titled "Module 77" and "Module 139". Pre-existing, and left
+alone here -- this script only places whatever those files contain.
 """
-import os
-import zipfile, os, re, shutil, subprocess
-import xml.etree.ElementTree as ET
+import os, subprocess, tempfile
 
-TEMPLATE = os.path.join(os.environ.get("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_6/v5/v5.pptx")  # source layout (read-only)
-OUT      = os.path.join(os.environ.get("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_6/v6/Kang_Figure_6_v6.pptx")
-V6       = os.path.dirname(OUT)        # fig_6/v6 = canonical panel sources
-STAGE    = "/tmp/fig6_assets"          # staging dir for placed assets (gitignored)
+import numpy as np
+import fitz  # PyMuPDF
+from pptx import Presentation
+from pptx.util import Pt
 
-TITLE_NEW = ("Fig. 6 | Differential CoPA (dCoPA) identifies gene coexpression modules that "
-             "are significantly and uniformly dysregulated in specific cell types in disease")
+V6 = os.path.dirname(os.path.abspath(__file__))
+BASE = os.path.join(V6, "Kang_Figure_6_v6")
+OUT_PDF, OUT_PNG, OUT_PPTX = BASE + ".pdf", BASE + ".png", BASE + ".pptx"
 
-# template media (svg vector, png fallback) -> source SVG in V6.
-PANELS = [
-    ("image2.svg", "image1.png", "decopa_schematic_final.svg"),        # a: dCoPA schematic
-    ("image4.svg", "image3.png", "83_MTC_allAD_Con_bulk_megaset.svg"),  # left column: module 83
-    ("image6.svg", "image5.png", "147_MTC_allAD_Con_bulk_megaset.svg"), # right column: module 147
-]
+# --- page geometry (points; US Letter portrait) -------------------------------
+PW, PH = 612.0, 792.0
 
-def _sh(cmd): subprocess.run(cmd, shell=True, check=True, capture_output=True)
+TITLE = ("Fig. 6 | Differential CoPA (dCoPA) identifies gene coexpression modules "
+         "that are significantly and uniformly dysregulated in specific cell types "
+         "in disease")
+TITLE_BOX = (7.2, 5.33, 597.6, 50.4)   # x, y, w, h -- spans the page, wraps to 2 lines
+TITLE_FS, LET_FS = 12.0, 14.0
 
-# Stage each panel SVG from the v6 outputs and rasterize a matching PNG fallback.
-def stage_assets():
-    os.makedirs(STAGE, exist_ok=True)
-    for _, _, src in PANELS:
-        key = os.path.splitext(src)[0]
-        shutil.copy(f"{V6}/{src}", f"{STAGE}/{key}.svg")
-        # Rasterize with Inkscape, not rsvg-convert: rsvg mis-renders the panel A
-        # schematic (decopa_schematic_final.svg) -- its colored boxplots and legend
-        # swatches come out solid black -- whereas Inkscape renders it faithfully
-        # (matching PowerPoint / manual LibreOffice export). See fig_3/v4.
-        _sh(f"inkscape {STAGE}/{key}.svg --export-type=png --export-filename={STAGE}/{key}.png "
-            f"--export-dpi=300 --export-background=white --export-background-opacity=1")
-        # Inkscape still writes an alpha channel; strip it so the embedded raster is
-        # fully opaque. A transparent PNG becomes a PDF soft-mask that some viewers
-        # render as a black box, so flatten onto white and drop alpha entirely.
-        _sh(f"convert {STAGE}/{key}.png -background white -alpha remove -alpha off {STAGE}/{key}.png")
+# PowerPoint insets its shape text; the coordinates here are shape origins, so the
+# same offsets fig_1/v3 and fig_3/v4 needed apply. Measured against the old
+# LibreOffice-rendered deliverable: title +7.09/+5.88, letters +7.05/+6.28.
+INSET_X, INSET_Y_BOX, INSET_Y_LETTER = 7.2, 5.0, 6.25
 
-stage_assets()
+SRC = {
+    "A":    "decopa_schematic_final.svg",
+    "L83":  "83_MTC_allAD_Con_bulk_megaset.svg",
+    "R147": "147_MTC_allAD_Con_bulk_megaset.svg",
+}
 
-# template media path -> staged file to embed in its place
-MEDIA_MAP = {}
-for svg_media, png_media, src in PANELS:
-    key = os.path.splitext(src)[0]
-    MEDIA_MAP[f"ppt/media/{svg_media}"] = f"{key}.svg"
-    MEDIA_MAP[f"ppt/media/{png_media}"] = f"{key}.png"
+# Placement cells (x, y, w, h). Panel A already carries the 0.16 in downward nudge
+# the old script applied so the schematic clears the two-line title.
+CELLS = {
+    "A":    ( 42.49,  44.76, 524.07, 163.81),
+    "L83":  ( 61.20, 221.75, 224.64, 524.15),
+    "R147": (344.90, 221.75, 224.64, 524.15),
+}
 
-# svg media basename -> panel key; aspect (w/h) read from each staged SVG.
-SVG_PANEL = {svg_media: os.path.splitext(src)[0] for svg_media, _, src in PANELS}
-def _svg_aspect(path):
-    s = open(path, encoding="utf-8", errors="ignore").read(2000)
-    w = float(re.search(r'width=["\']([\d.]+)', s).group(1))
-    h = float(re.search(r'height=["\']([\d.]+)', s).group(1))
-    return w / h
-ASPECT = {os.path.splitext(src)[0]: _svg_aspect(f"{STAGE}/{os.path.splitext(src)[0]}.svg")
-          for _, _, src in PANELS}
+# Panel letters. a labels the schematic; the rest label sub-panels inside the two
+# module columns, so their y values are sub-panel boundaries, not cell tops.
+LETTERS = {
+    "a": ( 33.85,  45.22),
+    "b": ( 34.02, 215.15), "c": (317.48, 215.15),
+    "d": ( 34.02, 331.37), "e": (317.51, 331.37),
+    "f": ( 34.02, 393.73), "g": (317.48, 393.73),
+    "h": ( 34.02, 589.32), "i": (317.48, 589.32),
+}
 
-NS = {"a":"http://schemas.openxmlformats.org/drawingml/2006/main",
-      "p":"http://schemas.openxmlformats.org/presentationml/2006/main",
-      "r":"http://schemas.openxmlformats.org/officeDocument/2006/relationships",
-      "asvg":"http://schemas.microsoft.com/office/drawing/2016/SVG/main",
-      "mc":"http://schemas.openxmlformats.org/markup-compatibility/2006",
-      "p14":"http://schemas.microsoft.com/office/powerpoint/2010/main",
-      "p15":"http://schemas.microsoft.com/office/powerpoint/2012/main"}
-for k,v in NS.items(): ET.register_namespace(k, v)
 
-z = zipfile.ZipFile(TEMPLATE)
+def stage(tmp):
+    """Panel SVG -> PDF. Inkscape rather than rsvg: rsvg renders the schematic's
+    coloured boxplots and legend swatches solid black (same trap as fig_3/v4)."""
+    out = {}
+    for k, name in SRC.items():
+        p = os.path.join(tmp, f"{k}.pdf")
+        subprocess.run(["inkscape", os.path.join(V6, name), "--export-type=pdf",
+                        f"--export-filename={p}"], check=True, capture_output=True)
+        out[k] = p
+    return out
 
-# rId -> media basename (from slide rels)
-rels = {}
-for rel in ET.fromstring(z.read("ppt/slides/_rels/slide1.xml.rels")):
-    rels[rel.get("Id")] = rel.get("Target").split("/")[-1]
 
-slide = ET.fromstring(z.read("ppt/slides/slide1.xml"))
+def content_bbox(src_pdf):
+    page = fitz.open(src_pdf)[0]
+    r = fitz.Rect(1e9, 1e9, -1e9, -1e9)
+    for b in page.get_text("blocks"):
+        r |= fitz.Rect(b[:4])
+    for d in page.get_drawings():
+        r |= d["rect"]
 
-# slide width (EMU), for spanning the title across the top
-SLIDE_W = int(ET.fromstring(z.read("ppt/presentation.xml")).find("p:sldSz", NS).get("cx"))
-MARGIN  = 91440  # 0.1 in
+    # get_drawings() does not descend into Form XObjects, and Inkscape puts content
+    # inside them -- fig_4/v6's panel S had its whole column dendrogram clipped away
+    # by trimming to the under-reported box. Union with a raster ink scan, which sees
+    # whatever the page actually paints; the union can only grow the box, never crop.
+    # Applied as a SAFETY NET, not a co-equal source: the scan rounds outward by up
+    # to a pixel and antialiasing bleeds past the true vector edge, so taking it
+    # verbatim would nudge every box by a fraction of a point and shift figures that
+    # are already published. Only genuinely missed content -- beyond SCAN_TOL -- wins.
+    SCAN_DPI, SCAN_TOL = 144, 1.0
+    pm = page.get_pixmap(dpi=SCAN_DPI)
+    a = np.frombuffer(pm.samples, dtype=np.uint8).reshape(pm.height, pm.width, pm.n)[:, :, :3]
+    ys, xs = np.where((a < 250).any(2))
+    if len(ys):
+        k = 72.0 / SCAN_DPI
+        ink = fitz.Rect(page.rect.x0 + xs.min() * k, page.rect.y0 + ys.min() * k,
+                        page.rect.x0 + (xs.max() + 1) * k, page.rect.y0 + (ys.max() + 1) * k)
+        if ink.x0 < r.x0 - SCAN_TOL: r.x0 = ink.x0
+        if ink.y0 < r.y0 - SCAN_TOL: r.y0 = ink.y0
+        if ink.x1 > r.x1 + SCAN_TOL: r.x1 = ink.x1
+        if ink.y1 > r.y1 + SCAN_TOL: r.y1 = ink.y1
 
-# (1) Rewrite the slide title and span it across the full top of the slide: pin the
-# box to the left margin, stretch it to the right margin, shrink the font so the long
-# caption fits, and force word-wrap (the v5 box is wrap="none", a single overflowing
-# line). The box is top-anchored, so the extra height never pushes text onto panel a.
-TITLE_PT = 1200   # 12 pt in centipoints (v5 template default was 16 pt)
-title_done = False
-for sp in slide.iter("{%s}sp" % NS["p"]):
-    ts = sp.findall(".//a:t", NS)
-    if ts and "".join(t.text or "" for t in ts).strip().startswith("Fig. 6"):
-        ts[0].text = TITLE_NEW
-        for t in ts[1:]: t.text = ""
-        for rpr in sp.findall(".//a:rPr", NS) + sp.findall(".//a:endParaRPr", NS):
-            rpr.set("sz", str(TITLE_PT))
-        bodyPr = sp.find(".//a:bodyPr", NS)
-        if bodyPr is not None:
-            bodyPr.set("wrap", "square")
-        xfrm = sp.find(".//a:xfrm", NS)
-        off, ext = xfrm.find("a:off", NS), xfrm.find("a:ext", NS)
-        off.set("x", str(MARGIN))
-        ext.set("cx", str(SLIDE_W - 2 * MARGIN))
-        ext.set("cy", str(640080))   # ~0.7 in (room for the caption to wrap)
-        title_done = True
-        break
+    if r.is_empty or r.x1 < r.x0:
+        return page.rect
+    return r & page.rect
 
-# (2) Aspect-fit each swapped <p:pic> box to its new asset, centered in its box.
-fitted = []
-for pic in slide.iter("{%s}pic" % NS["p"]):
-    svgblip = pic.find(".//asvg:svgBlip", NS)
-    if svgblip is None:
-        continue
-    rid = svgblip.get("{%s}embed" % NS["r"])
-    panel = SVG_PANEL.get(rels.get(rid, ""))
-    if panel is None:
-        continue
-    xfrm = pic.find(".//a:xfrm", NS)
-    off, ext = xfrm.find("a:off", NS), xfrm.find("a:ext", NS)
-    ox, oy = int(off.get("x")), int(off.get("y"))
-    cx, cy = int(ext.get("cx")), int(ext.get("cy"))
-    asp, box = ASPECT[panel], cx/cy
-    if asp > box:            # too wide for box -> limit by width
-        ncx, ncy = cx, round(cx/asp)
-    else:                    # too tall for box -> limit by height
-        ncy, ncx = cy, round(cy*asp)
-    nox, noy = ox + (cx - ncx)//2, oy + (cy - ncy)//2
-    off.set("x", str(nox)); off.set("y", str(noy))
-    ext.set("cx", str(ncx)); ext.set("cy", str(ncy))
-    fitted.append(f"{panel}: {cx}x{cy} -> {ncx}x{ncy} (centered)")
 
-# (2b) The 2-line spanning title needs more vertical room than the v5 1-line title,
-# so nudge panel A (schematic picture + its "a" letter) down to clear it. Panel A's
-# bottom stays well above the two module columns (y=3.08 in), so nothing else moves.
-PANEL_A_DY = round(0.16 * 914400)   # 0.16 in down
-for pic in slide.iter("{%s}pic" % NS["p"]):
-    svgblip = pic.find(".//asvg:svgBlip", NS)
-    if svgblip is None:
-        continue
-    if SVG_PANEL.get(rels.get(svgblip.get("{%s}embed" % NS["r"]), "")) == "decopa_schematic_final":
-        off = pic.find(".//a:xfrm/a:off", NS)
-        off.set("y", str(int(off.get("y")) + PANEL_A_DY))
-for sp in slide.iter("{%s}sp" % NS["p"]):
-    if "".join(t.text or "" for t in sp.findall(".//a:t", NS)).strip() == "a":
-        off = sp.find(".//a:xfrm/a:off", NS)
-        if off is not None:
-            off.set("y", str(int(off.get("y")) + PANEL_A_DY))
+def fit(bb, cx, cy, cw, ch):
+    """Aspect-preserving fit, centred in the cell -- matching the old script, which
+    centred each swapped picture in its box."""
+    s = min(cw / bb.width, ch / bb.height)
+    dw, dh = bb.width * s, bb.height * s
+    return fitz.Rect(cx + (cw - dw) / 2, cy + (ch - dh) / 2,
+                     cx + (cw - dw) / 2 + dw, cy + (ch - dh) / 2 + dh)
 
-# (3) Panel-letter labels (a..i) must paint on top of the panel images: the PNG
-# fallbacks are opaque white, so a letter sitting behind a picture box would be
-# covered. Move each single-character label to the end of the shape tree (topmost).
-spTree = slide.find(".//p:spTree", NS)
-raised = 0
-for sp in list(spTree.findall("p:sp", NS)):
-    txt = "".join(t.text or "" for t in sp.findall(".//a:t", NS)).strip()
-    if len(txt) == 1 and txt.isalpha():
-        spTree.remove(sp); spTree.append(sp); raised += 1
 
-slide_xml = (b'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n'
-             + ET.tostring(slide, encoding="unicode").encode("utf-8"))
+def compute_layout(pdf):
+    panels = []
+    for k, cell in CELLS.items():
+        bb = content_bbox(pdf[k])
+        panels.append((k, pdf[k], bb, fit(bb, *cell)))
+    return {"panels": panels}
 
-# Write the new pptx: copy everything from the template, replace the panel media
-# and the edited slide XML. OUT != TEMPLATE, so the v5 source is untouched.
-os.makedirs(os.path.dirname(OUT), exist_ok=True)
-tmp = OUT + ".tmp"
-with zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as out:
-    for item in z.infolist():
-        name = item.filename
-        if name in MEDIA_MAP:
-            data = open(f"{STAGE}/{MEDIA_MAP[name]}", "rb").read()
-        elif name == "ppt/slides/slide1.xml":
-            data = slide_xml
-        else:
-            data = z.read(name)
-        out.writestr(item, data)
-z.close()
-os.replace(tmp, OUT)
 
-print("wrote:", OUT)
-print("title set:", title_done, "->", TITLE_NEW)
-print("panel-letter labels raised to top of z-order:", raised)
-print("aspect-fit per panel:")
-for f in fitted: print("  ", f)
+def render_pdf(lay):
+    doc = fitz.open()
+    page = doc.new_page(width=PW, height=PH)
+    x, y, w, h = TITLE_BOX
+    page.insert_textbox(fitz.Rect(x + INSET_X, y + INSET_Y_BOX, x + w, y + INSET_Y_BOX + h),
+                        TITLE, fontname="hebo", fontsize=TITLE_FS,
+                        align=fitz.TEXT_ALIGN_LEFT, lineheight=1.15)
+    for _, src, bb, rect in lay["panels"]:
+        page.show_pdf_page(rect, fitz.open(src), 0, clip=bb)
+    for ch, (lx, ly) in LETTERS.items():
+        page.insert_text((lx + INSET_X, ly + INSET_Y_LETTER + LET_FS), ch,
+                         fontname="hebo", fontsize=LET_FS)
+    doc.save(OUT_PDF, deflate=True)
+    return doc
 
-# (4) Reproducible PDF + PNG deliverables. LibreOffice's headless SVG importer
-# mis-renders embedded panel SVGs (black boxes / spurious frames), so convert from
-# a raster-only copy of the pptx: strip the <asvg:svgBlip> extension from each blip
-# so the primary <a:blip> (the rsvg-rendered PNG fallback) is used. The SVG-based
-# OUT pptx is the PowerPoint deliverable and is left untouched.
-_SVGEXT = re.compile(r'<a:extLst>\s*<a:ext uri="\{96DAC541[^}]*\}">\s*'
-                     r'<asvg:svgBlip\b[^>]*/>\s*</a:ext>\s*</a:extLst>')
-base   = os.path.splitext(OUT)[0]
-raster = base + ".raster.pptx"
-zin = zipfile.ZipFile(OUT)
-with zipfile.ZipFile(raster, "w", zipfile.ZIP_DEFLATED) as zo:
-    for it in zin.infolist():
-        d = zin.read(it.filename)
-        if re.match(r"ppt/slides/slide\d+\.xml$", it.filename):
-            d = _SVGEXT.sub("", d.decode("utf-8")).encode("utf-8")
-        zo.writestr(it, d)
-zin.close()
-prof = "file://" + os.path.join(STAGE, "lo_profile")
-_sh(f"soffice -env:UserInstallation={prof} --headless --convert-to pdf "
-    f"--outdir {os.path.dirname(OUT)} {raster}")
-os.replace(base + ".raster.pdf", base + ".pdf")
-_sh(f"pdftoppm -png -singlefile -r 300 {base}.pdf {base}")
-os.remove(raster)
-print("wrote:", base + ".pdf", "and", base + ".png")
+
+def render_png(doc):
+    doc[0].get_pixmap(dpi=300).save(OUT_PNG)
+
+
+def _box(slide, x, y, w, h):
+    tb = slide.shapes.add_textbox(Pt(x), Pt(y), Pt(w), Pt(h))
+    tf = tb.text_frame
+    tf.word_wrap = True
+    tf.margin_left = tf.margin_right = tf.margin_top = tf.margin_bottom = 0
+    return tf
+
+
+def _run(p, text, size, bold=False):
+    r = p.add_run()
+    r.text = text
+    r.font.name = "Arial"
+    r.font.size = Pt(size)
+    r.font.bold = bold
+    return r
+
+
+def render_pptx(lay, tmp):
+    prs = Presentation()
+    prs.slide_width, prs.slide_height = Pt(PW), Pt(PH)
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+
+    for key, src, bb, rect in lay["panels"]:
+        png = os.path.join(tmp, f"{key}_raster.png")
+        fitz.open(src)[0].get_pixmap(matrix=fitz.Matrix(300 / 72, 300 / 72),
+                                     clip=bb).save(png)
+        slide.shapes.add_picture(png, Pt(rect.x0), Pt(rect.y0),
+                                 Pt(rect.width), Pt(rect.height))
+
+    x, y, w, h = TITLE_BOX
+    _run(_box(slide, x + INSET_X, y + INSET_Y_BOX, w, h).paragraphs[0],
+         TITLE, TITLE_FS, bold=True)
+    for ch, (lx, ly) in LETTERS.items():
+        _run(_box(slide, lx + INSET_X, ly + INSET_Y_BOX, 24.0,
+                  LET_FS * 1.7).paragraphs[0], ch, LET_FS, bold=True)
+
+    prs.save(OUT_PPTX)
+
+
+def main():
+    with tempfile.TemporaryDirectory() as tmp:
+        pdf = stage(tmp)
+        lay = compute_layout(pdf)
+        doc = render_pdf(lay)
+        render_png(doc)
+        render_pptx(lay, tmp)
+    for p in (OUT_PDF, OUT_PNG, OUT_PPTX):
+        print(f"wrote {p}  ({os.path.getsize(p)/1e6:.2f} MB)")
+
+
+if __name__ == "__main__":
+    main()

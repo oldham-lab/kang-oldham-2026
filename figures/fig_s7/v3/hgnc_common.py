@@ -8,6 +8,7 @@ dataset's symbols to current HGNC before intersecting recovers genes that would
 otherwise be dropped as spurious mismatches. This mirrors the logic in
 fig_1/full_DE_pipeline_optimized_v2.4.R (canonicalize_symbols).
 """
+import os
 from pathlib import Path
 
 import pandas as pd

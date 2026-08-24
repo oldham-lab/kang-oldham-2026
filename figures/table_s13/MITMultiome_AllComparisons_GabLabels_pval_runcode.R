@@ -9,27 +9,24 @@ library(CoPA)
 plan(multisession, workers = 8)
 
 # ── Run options ────────────────────────────────────────────────────────────────
-# All possible combinations (region x label x mod_type):
-# list(list(region = "CMC",           label = "SZ_vs_Con", mod_type = "bulk_megaset"),
-#      list(region = "CMC",           label = "SZ_vs_Con", mod_type = "brainseq_scz"),
-#      list(region = "SZBDMulti-Seq", label = "SZ_vs_Con", mod_type = "bulk_megaset"),
-#      list(region = "SZBDMulti-Seq", label = "SZ_vs_Con", mod_type = "brainseq_scz"))
-
+#run_only <- list(list(region = "PFC", label = "allAD_vs_Con", mod_type = "bulk_megaset"))
+                  # set to a list of combinations to run, e.g.:
+                  # list(list(region = "PFC", label = "allAD_vs_Con", mod_type = "bulk_megaset"))
+                  # NULL runs all combinations
 run_only <- NULL
-# NULL runs all combinations
 
+#save_randinds_for <- list(region = "PFC", label = "allAD_vs_Con", mod_type = "bulk_megaset")  # set to NULL to disable
 save_randinds_for <- NULL
-# NULL disables saving for all runs
 
 # ── Configuration ──────────────────────────────────────────────────────────────
-regions  <- c("CMC",
-              "SZBDMulti-Seq")
+regions  <- c("PFC",
+              "MTC")
 
-base_dir <- file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/brainSCOPE/brainscope_means_SE_output")
+base_dir <- file.path(Sys.getenv("SHARED_DATA_DIR", "/mnt/bdata/@shared"), "scsn.expr_data/human_expr/postnatal/MIT_AD_Multiomic_Multiregion/gabitto_metacell_labels_means_SE_output")
 
 mod_configs <- list(
   bulk_megaset = file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "data/greedy_march_pipeline_output/finalNonNorm_minsize10_unmerged/SEAAD2024_AllADVsCon_DFC"),
-  brainseq_scz = file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "data/greedy_march_pipeline_output/Brainseq_SCZ/")
+  rosmap       = file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "data/greedy_march_pipeline_output/rosmap_AD/rosmap_AD_SEAAD2024_AllADVsCon_DFC")
 )
 
 expr       <- fread(file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "datasets/RNAseq/combined_mats/combined_FCX_final_SampleNetworks/1_10-35-00/combined_FCX_final_1_1518_ComBat.csv"), data.table = F)
@@ -50,13 +47,17 @@ mod_filters <- lapply(mod_configs, function(mod_dir) {
 load_means <- function(group) {
   out <- fread(data.table = F, file = file.path(means_dir, paste0("genomewide_means_", group, ".csv")))
   out <- tibble::column_to_rownames(out, names(out)[1])
-  out[is.na(out)] <- 0
+  out[is.na(out)] <- 0 # for cell types that have zero cells (see APOE44 and Sst Chodl)
   return(out)
 }
 
-# ── Run definitions ────────────────────────────────────────────────────────────
+
+# ── Run definitions: 4 comparisons x 2 module types = 8 runs ──────────────────
 runs <- list(
-  list(case = "Schizophrenia", control = "control", label = "Schizophrenia_vs_control")
+  list(case = "allAD",   control = "Con",     label = "allAD_vs_Con")#,
+  #list(case = "earlyAD", control = "Con",     label = "earlyAD_vs_Con"),
+  #list(case = "lateAD",  control = "earlyAD", label = "lateAD_vs_earlyAD"),
+  #list(case = "APOE44",  control = "APOE33",  label = "APOE44_vs_APOE33")
 )
 
 mod_types <- names(mod_configs)
@@ -66,8 +67,8 @@ source(file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"
 
 # ── Main loop ──────────────────────────────────────────────────────────────────
 for (region in regions) {
-  means_dir    <- file.path(base_dir, region, "DFC", "means")
-  modmeans_dir <- file.path(base_dir, region, "DFC", "mod_means", "log_native")
+  means_dir    <- file.path(base_dir, region, "means")
+  modmeans_dir <- file.path(base_dir, region, "mod_means", "log_native")
 
   for (run in runs) {
     for (mod_type in mod_types) {
@@ -81,6 +82,7 @@ for (region in regions) {
         sigcount_bonf <- fread(data.table = F, file = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "analyses/bulk_module_significance/bulk_cors_sigcount_bonf_1158.csv"))
         these_mods <- these_mods[!these_mods %in% which(sigcount_bonf$vals < 2)]
       }
+
 
       cat(sprintf("\n%s\nRun: %s | %s | region: %s\n%s\n",
                   strrep("=", 60), run$label, mod_type, region, strrep("=", 60)))
@@ -117,19 +119,19 @@ for (region in regions) {
         return(out)
       })
 
-      # Output saved to: {base_dir}/{region}/euclidean_distances/{label}_{mod_type}_output_table.csv
+      # Output saved to: {script_dir}/MIT_{region}_{label}_{mod_type}_projdistpvalindiv.csv
       project_rand_and_calculate_pval(
         module_output_dir = module_output_dir,
         filter_under      = filter_under,
         do_log            = TRUE,
         bulk_genes        = bulk_genes,
-        save_dir1         = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/table_s13/v2"),
+        save_dir1         = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/table_s13/projdistpvalindiv"),
         sn_objs           = sn_objs,
         proj_all          = proj_all,
         rand_n            = 10000,
         seed              = 26,
-        out_prefix        = paste0("brainSCOPE_", region, "_", run$label, "_", mod_type, "_"),
-        save_randinds     = !is.null(save_randinds_for) && any(sapply(save_randinds_for, \(x) region == x$region && run$label == x$label && mod_type == x$mod_type))
+        out_prefix        = paste0("MIT_", region, "_", run$label, "_", mod_type, "_"),
+        save_randinds     = !is.null(save_randinds_for) && region == save_randinds_for$region && run$label == save_randinds_for$label && mod_type == save_randinds_for$mod_type
       )
     }
   }

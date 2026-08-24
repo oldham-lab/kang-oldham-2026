@@ -29,9 +29,9 @@ leinsifreg <- list.files(file.path(Sys.getenv("SHARED_DIR", "/home/shared"), "sc
 leinsifreg <- leinsifreg[grep("author_barcode_annotations",leinsifreg)]
 leinsifreg <- gsub("author_barcode_annotations_","",leinsifreg)
 leinsifreg <- gsub(".csv","",leinsifreg)
-#leinMTG <- readRDS("~/root_dir/home/shared/scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824638/expression_data.rds")
+#leinMTG <- readRDS(file.path(Sys.getenv("SHARED_DIR", "/home/shared"), "scsn.expr_data/human_expr/postnatal/jorstad_2023_PMID_37824638/expression_data.rds"))
 #leinsifMTG <- leinMTG@meta.data
-#fwrite(leinsifMTG,file="~/data/lein_mtg/metadata_from_seurat_obj.csv")
+#fwrite(leinsifMTG,file=file.path(Sys.getenv("HOME_DATA_DIR", "/home/gugene/data"), "lein_mtg/metadata_from_seurat_obj.csv"))
 leinsifMTG <- fread(data.table=F,file=file.path(Sys.getenv("HOME_DATA_DIR", "/home/gugene/data"), "lein_mtg/metadata_from_seurat_obj.csv"))
 leinsifMTG <- leinsifMTG %>% filter(assay=="10x 3' v3")
 leinsifMTG <- c(table(leinsifMTG$Subclass))

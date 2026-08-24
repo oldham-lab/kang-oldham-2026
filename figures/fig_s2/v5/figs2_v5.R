@@ -533,25 +533,54 @@ mk_ef_combined <- function(m, cls) {
     row_names_gp = gpar(fontfamily = "sans", fontsize = 10.5),       # slightly smaller than grid default 12
     column_names_gp = gpar(fontfamily = "sans", fontsize = 10.5))
 }
-hEc <- mk_ef_combined(.efE_cor, .efE_cls)
-hFc <- mk_ef_combined(.efF_cor, .efF_cls)
-gE <- grid::grid.grabExpr(draw(hEc, merge_legend = TRUE,
-        show_heatmap_legend = FALSE, show_annotation_legend = FALSE,
-        padding = unit(c(2, 2, 2, 2), "mm")))
-gF <- grid::grid.grabExpr(draw(hFc, merge_legend = TRUE, heatmap_legend_side = "right",
-        padding = unit(c(2, 2, 2, 2), "mm")))
-svglite::svglite(file.path(save_dir, "panel_EF_combined.svg"), width = 12.5, height = 5.2, bg = "white")
-gridExtra::grid.arrange(gE, gF, ncol = 2, widths = c(1, 1.35))  # F wider to hold its legend
-dev.off()
+##########
+# Per-class mean correlation, annotated onto the canonical E+F panel: the mean r within each
+# cell class (colored by class) and across all neuronal classes (black), each placed near the
+# dendrogram node that spans that class's columns with a leader back to it. Replaces the eight
+# labels that used to be typed into the slide by hand — those had gone stale against the data
+# (they carry v2's values; v3 gives 0.93 / 0.69 for panel F's GABAergic / Non-neuronal).
+#
+# UNIT TRAP: the panels are captured by grid.grabExpr() on grid's DEFAULT 7x7in device and
+# replayed by grid.arrange() into cells of 5.32in (E) and 7.18in (F). Native units rescale on
+# replay; mm/pt do NOT. Laying labels out in mm therefore mis-places every anchor by that
+# panel's grab/replay ratio (1.32 in E, 0.98 in F). So the layout below is done entirely in
+# NATIVE units, and the one absolute quantity that has to cross over — the text's own size — is
+# converted with a factor MEASURED at replay scale: pass 1 drops two sentinel dots at the
+# dendrogram viewport's scale corners, their spacing is read back out of the SVG, and pass 2
+# lays out with it. (Grabbing at the final cell size instead would change the panel's
+# appearance, since fonts are absolute and everything else is relative. Decorating after
+# grid.arrange is not possible either — the heatmap viewports do not survive the replay.)
+##########
+LAB_FS   <- 9     # pt
+LEAD_PAD <- 0.6   # mm, gap between leader end and the text box
+DX       <- 6.5   # mm, horizontal offset from node apex to the label box
+DY       <- 4.5   # mm, the label sits this far above its node apex
+ROW_GAP  <- 0.5   # mm, extra clearance when a label is raised onto a new row
+BOX_PAD  <- 0.4   # mm, padding on the opaque backing box behind each label
+MARGIN   <- 0.5   # mm, clearance a label keeps from dendrogram segments and other labels
+# Leader line. R measures lty dash/gap lengths in multiples of lwd, so "12" (1 on, 2 off) stays
+# denser than the "13" of lty="dotted" as the line thickens. The SVG is scaled ~0.44 into the
+# page, so lwd 1.4 here lands at ~0.6 pt on the assembled figure.
+LEAD_LWD <- 1.4
+LEAD_LTY <- "12"
+# Manual nudges, in mm, applied to the computed placement: NUDGE[[panel]][[class]] =
+# c(dx, dy), dy positive = up. The automatic layout keeps labels off the dendrogram
+# and off each other, but it has no opinion about a label sitting where a
+# neighbour's leader begins, and it cannot lift one past the canvas edge. These are
+# taste corrections on top of it, not positions -- the anchors stay data-derived, so
+# a regenerated panel still moves its labels with the tree.
+NUDGE <- list(
+  E = list(Glutamatergic = c(0, 0), GABAergic = c(0, 0), `Non-neuronal` = c(0, 0), neuronal = c(0, 0)),
+  F = list(Glutamatergic = c(0, 0), GABAergic = c(0, 0), `Non-neuronal` = c(0, 0), neuronal = c(0, 0))
+)
+SENTINEL <- c(E = "#010203", F = "#040506")   # calibration marks, pass 1 only
+PT_MM    <- 2.834646
+.vpscale <- list()   # each panel's dendrogram viewport scales, stashed for read_calib()
 
-##########
-# REFERENCE-ONLY combined E + F: per-class mean correlation placed DIRECTLY at the dendrogram
-# node that spans that class's columns (colored by cell class; black = all-neuronal). No leader
-# lines, no repel. Writes panel_EF_combined_annotated.svg — NOT consumed by assemble_figure.py.
-##########
-# walk a column dendrogram -> table of every node's leaf span, size, height, apex x
+# walk a column dendrogram -> table of every node's leaf span, size, height, apex x, plus the
+# segments the tree actually draws (one horizontal connector per node, one riser per child)
 dend_node_table <- function(dend) {
-  tab <- list(); cnt <- new.env(); cnt$i <- 0L
+  tab <- list(); segs <- list(); cnt <- new.env(); cnt$i <- 0L
   rec <- function(node) {
     if (is.leaf(node)) {
       cnt$i <- cnt$i + 1L
@@ -560,25 +589,38 @@ dend_node_table <- function(dend) {
       tab[[length(tab) + 1L]] <<- info; return(info)
     }
     kids <- lapply(node, rec)
+    kx <- vapply(kids, `[[`, numeric(1), "x"); kh <- vapply(kids, `[[`, numeric(1), "height")
+    h  <- attr(node, "height")
+    segs[[length(segs) + 1L]] <<- data.frame(x0 = min(kx), x1 = max(kx), y0 = h, y1 = h)
+    for (j in seq_along(kids))
+      segs[[length(segs) + 1L]] <<- data.frame(x0 = kx[j], x1 = kx[j], y0 = kh[j], y1 = h)
     info <- list(posmin = min(vapply(kids, `[[`, numeric(1), "posmin")),
                  posmax = max(vapply(kids, `[[`, numeric(1), "posmax")),
                  size   = sum(vapply(kids, `[[`, integer(1), "size")),
-                 height = attr(node, "height"),
-                 x      = mean(vapply(kids, `[[`, numeric(1), "x")), label = NA_character_)
+                 height = h, x = mean(kx), label = NA_character_)
     tab[[length(tab) + 1L]] <<- info; info
   }
   rec(dend)
   leaves <- Filter(function(e) e$size == 1L, tab)
   list(nodes = do.call(rbind, lapply(tab, function(e)
          data.frame(posmin = e$posmin, posmax = e$posmax, size = e$size, height = e$height, x = e$x))),
+       segs = do.call(rbind, segs),
        leaf_labels = vapply(leaves, `[[`, character(1), "label")[
          order(vapply(leaves, `[[`, numeric(1), "posmin"))])
 }
-# smallest node whose leaf span covers all of P  (= MRCA of those leaves)
-mrca_node <- function(nodes, P) {
-  cand <- nodes[nodes$posmin <= min(P) & nodes$posmax >= max(P), ]; cand[which.min(cand$size), ]
+# The class's dominant subtree: the LARGEST node whose leaf span lies entirely
+# within P. For a monophyletic class this is exactly its MRCA, but a class need not
+# be a clade -- in the MTG panel OPC clusters with the neurons, so the non-neuronal
+# leaves have no common ancestor below the root, and anchoring on the MRCA pointed
+# the label at the whole tree instead of at its own block. The value is still the
+# mean over every member of the class; only the leader's target changes.
+class_node <- function(nodes, P) {
+  inside <- mapply(function(a, b) all(seq(a, b) %in% P), nodes$posmin, nodes$posmax)
+  cand <- nodes[inside, , drop = FALSE]
+  cand[which.max(cand$size), ]
 }
-draw_ef_annotated <- function(ht, cor_mat, cls, legend_side = "right", show_legend = TRUE) {
+draw_ef_annotated <- function(ht, cor_mat, cls, legend_side = "right", show_legend = TRUE,
+                              panel = "E", calib = NULL) {
   htd <- draw(ht, merge_legend = TRUE, heatmap_legend_side = legend_side,
               show_heatmap_legend = show_legend, show_annotation_legend = show_legend,
               padding = unit(c(2, 2, 2, 2), "mm"))
@@ -589,20 +631,122 @@ draw_ef_annotated <- function(ht, cor_mat, cls, legend_side = "right", show_lege
   dt  <- dend_node_table(column_dend(htd)); nodes <- dt$nodes
   ord <- setNames(cls, colnames(cor_mat))[dt$leaf_labels]   # class per drawn leaf position
   items <- lapply(classes, function(cl) {
-    nd <- mrca_node(nodes, which(ord == cl)); list(x = nd$x, y = nd$height, v = classmean[cl], col = ccc[[cl]]) })
-  ndN <- mrca_node(nodes, which(ord != "Non-neuronal"))
-  items[[length(items) + 1L]] <- list(x = ndN$x, y = ndN$height, v = neuronal_mean, col = "#000000")
+    nd <- class_node(nodes, which(ord == cl))
+    list(x = nd$x, y = nd$height, v = classmean[cl], col = ccc[[cl]], key = cl) })
+  ndN <- class_node(nodes, which(ord != "Non-neuronal"))
+  items[[length(items) + 1L]] <- list(x = ndN$x, y = ndN$height, v = neuronal_mean,
+                                      col = "#000000", key = "neuronal")
   decorate_column_dend("Pearson cor", {
-    for (it in items)
-      grid.text(sprintf("%.2f", it$v), x = unit(it$x, "native"), y = unit(it$y, "native"),
-                gp = gpar(col = it$col, fontface = "bold", fontsize = 9))
+    vp <- current.viewport(); xs <- vp$xscale; ys <- vp$yscale
+    .vpscale[[panel]] <<- list(xs = xs, ys = ys)
+    if (is.null(calib)) {
+      grid.points(unit(xs, "native"), unit(ys, "native"), pch = 16, size = unit(0.4, "mm"),
+                  gp = gpar(col = SENTINEL[[panel]]))
+    } else {
+      nx <- function(mm) mm / calib$mm_per_nx      # mm -> native x
+      ny <- function(mm) mm / calib$mm_per_ny      # mm -> native y
+      lab <- vapply(items, function(it) sprintf("r = %.2f", it$v), character(1))
+      lw <- nx(convertWidth(grobWidth(textGrob(lab[1], gp = gpar(fontsize = LAB_FS))), "mm", TRUE))
+      lh <- ny(convertHeight(grobHeight(textGrob(lab[1], gp = gpar(fontsize = LAB_FS))), "mm", TRUE))
+      ax <- vapply(items, `[[`, numeric(1), "x"); ay <- vapply(items, `[[`, numeric(1), "y")
+      # Free-slot search: the tree's own segments are obstacles (axis-aligned, so a segment hits
+      # a label box exactly when their bounding boxes overlap), as are the labels already placed
+      # and the panel edges. Each label takes the lowest free slot on a ladder rising from its
+      # node, preferring the left side; the highest node goes first so it gets first claim on
+      # the open space above the tree.
+      segs <- dt$segs
+      mx <- nx(MARGIN); my <- ny(MARGIN)
+      # Ceiling: the ladder rises out of the dendrogram viewport into the canvas margin above
+      # it, and without a bound a label runs off the top of the SVG and its glyphs are shaved
+      # (Fig. S2's red label overshot by 0.83 pt). calib$head_mm is that margin, measured off
+      # the same pass-1 sentinels, so the cap is in native units like everything else.
+      ycap <- ys[2] + (calib$head_mm - MARGIN) / calib$mm_per_ny
+      free <- function(bx0, by, placed) {
+        bx1 <- bx0 + lw; by0 <- by - lh / 2; by1 <- by + lh / 2
+        if (bx0 < xs[1] - mx || bx1 > xs[2] + mx || by1 > ycap) return(FALSE)
+        if (any(segs$x0 <= bx1 + mx & segs$x1 >= bx0 - mx &
+                segs$y0 <= by1 + my & segs$y1 >= by0 - my)) return(FALSE)
+        for (p in placed)
+          if (bx0 < p$x1 + mx && bx1 > p$x0 - mx && by0 < p$y1 + my && by1 > p$y0 - my) return(FALSE)
+        TRUE
+      }
+      x0 <- y <- numeric(length(items)); right <- logical(length(items)); placed <- list()
+      for (i in order(ay, decreasing = TRUE)) {
+        cand <- NULL
+        for (k in 0:14) {
+          yk <- ay[i] + ny(DY) + k * (lh + ny(ROW_GAP))
+          if (yk + lh / 2 > ycap) break                    # ladder has hit the ceiling
+          for (rt in c(FALSE, TRUE)) {
+            xk <- if (rt) ax[i] + nx(DX) else ax[i] - nx(DX) - lw
+            if (free(xk, yk, placed)) { cand <- list(x0 = xk, y = yk, right = rt); break }
+          }
+          if (!is.null(cand)) break
+        }
+        if (is.null(cand))   # no free slot under the ceiling: sit as close to the node as fits
+          cand <- list(x0 = ax[i] - nx(DX) - lw,
+                       y = min(ay[i] + ny(DY), ycap - lh / 2), right = FALSE)
+        x0[i] <- cand$x0; y[i] <- cand$y; right[i] <- cand$right
+        placed[[length(placed) + 1L]] <- list(x0 = cand$x0, x1 = cand$x0 + lw,
+                                              y0 = cand$y - lh / 2, y1 = cand$y + lh / 2)
+      }
+      # A nudge may use the last sliver of canvas that the automatic ceiling holds in
+      # reserve, but never more: HARD_CAP leaves 0.15 mm above the label box, so the
+      # glyph tops still cannot be shaved off the canvas edge.
+      hard_cap <- ys[2] + (calib$head_mm - 0.15) / calib$mm_per_ny
+      for (i in seq_along(items)) {
+        nu <- NUDGE[[panel]][[items[[i]]$key]]
+        if (!is.null(nu) && any(nu != 0)) {
+          x0[i] <- min(max(x0[i] + nx(nu[1]), xs[1]), xs[2] - lw)   # keep it on the panel
+          y[i]  <- min(y[i] + ny(nu[2]), hard_cap - lh / 2)
+        }
+      }
+
+      # leaders first, then the labels on opaque backing boxes
+      for (i in seq_along(items))
+        grid.segments(unit(ax[i], "native"), unit(ay[i], "native"),
+                      unit(if (right[i]) x0[i] - nx(LEAD_PAD) else x0[i] + lw + nx(LEAD_PAD), "native"),
+                      unit(y[i] - ny(LEAD_PAD), "native"),
+                      gp = gpar(col = items[[i]]$col, lty = LEAD_LTY, lwd = LEAD_LWD))
+      for (i in seq_along(items)) {
+        grid.rect(unit(x0[i] - nx(BOX_PAD), "native"), unit(y[i], "native"),
+                  unit(lw + 2 * nx(BOX_PAD), "native"), unit(lh + 2 * ny(BOX_PAD), "native"),
+                  just = c("left", "centre"), gp = gpar(fill = "white", col = NA))
+        grid.text(lab[i], x = unit(x0[i], "native"), y = unit(y[i], "native"),
+                  just = c("left", "centre"), gp = gpar(col = items[[i]]$col, fontsize = LAB_FS))
+      }
+    }
   })
 }
-gEa <- grid::grid.grabExpr(draw_ef_annotated(hEc, .efE_cor, .efE_cls, show_legend = FALSE))
-gFa <- grid::grid.grabExpr(draw_ef_annotated(hFc, .efF_cor, .efF_cls, legend_side = "right", show_legend = TRUE))
-svglite::svglite(file.path(save_dir, "panel_EF_combined_annotated.svg"), width = 12.5, height = 5.2, bg = "white")
-gridExtra::grid.arrange(gEa, gFa, ncol = 2, widths = c(1, 1.35))
-dev.off()
+# mm one native unit is worth after replay, measured off the pass-1 sentinels
+read_calib <- function(path, colour, xs, ys) {
+  s <- paste(readLines(path, warn = FALSE), collapse = "")
+  hits <- regmatches(s, gregexpr(sprintf("<circle[^>]*fill: %s[^>]*>", colour), s,
+                                 ignore.case = TRUE))[[1]]
+  if (length(hits) < 2) stop("calibration sentinel ", colour, " not found in ", path)
+  num <- function(h, a) as.numeric(sub(sprintf(".*%s='([-0-9.]+)'.*", a), "\\1", h))
+  cx <- vapply(hits, num, numeric(1), "cx"); cy <- vapply(hits, num, numeric(1), "cy")
+  list(mm_per_nx = (max(cx) - min(cx)) / diff(xs) / PT_MM,
+       mm_per_ny = (max(cy) - min(cy)) / diff(ys) / PT_MM,
+       head_mm   = min(cy) / PT_MM)   # canvas top edge -> top of the dendrogram viewport
+}
+
+hEc <- mk_ef_combined(.efE_cor, .efE_cls)
+hFc <- mk_ef_combined(.efF_cor, .efF_cls)
+render_ef <- function(path, calE = NULL, calF = NULL) {
+  gEa <- grid::grid.grabExpr(draw_ef_annotated(hEc, .efE_cor, .efE_cls, show_legend = FALSE,
+                                               panel = "E", calib = calE))
+  gFa <- grid::grid.grabExpr(draw_ef_annotated(hFc, .efF_cor, .efF_cls, legend_side = "right",
+                                               show_legend = TRUE, panel = "F", calib = calF))
+  svglite::svglite(path, width = 12.5, height = 5.2, bg = "white")
+  gridExtra::grid.arrange(gEa, gFa, ncol = 2, widths = c(1, 1.35))  # F wider to hold its legend
+  dev.off()
+}
+.ef_pass1 <- tempfile(fileext = ".svg")
+render_ef(.ef_pass1)
+render_ef(file.path(save_dir, "panel_EF_combined.svg"),
+          read_calib(.ef_pass1, SENTINEL[["E"]], .vpscale$E$xs, .vpscale$E$ys),
+          read_calib(.ef_pass1, SENTINEL[["F"]], .vpscale$F$xs, .vpscale$F$ys))
+unlink(.ef_pass1)
 
 # ##########
 # # Panel F (median)

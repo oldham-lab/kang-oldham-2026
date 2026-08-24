@@ -23,12 +23,18 @@ import os
 import random
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
-H5AD_PATH = os.path.join(os.environ.get("DATA_DIR", "/mnt/bdata/gugene"), "datasets/SN_RNAseq/sea_ad_2024/mtg/RNAseq/"
-                                                                  "SEAAD_MTG_RNAseq_final-nuclei.2024-02-13.h5ad")
-PB_CSV_PATH = os.path.join(os.environ.get("DATA_DIR", "/mnt/bdata/gugene"), "datasets/SN_RNAseq/sea_ad_2024/mtg/RNAseq/"
-                                                                  "mtg_data_pseudobulk/sea_mtg_pseudobulk.csv.gz")
-PB_ANNO_PATH = os.path.join(os.environ.get("DATA_DIR", "/mnt/bdata/gugene"), "datasets/SN_RNAseq/sea_ad_2024/mtg/RNAseq/"
-                                                                  "mtg_data_pseudobulk/sea_mtg_pseudobulk_annotations.csv")
+H5AD_PATH = (
+    os.path.join(os.environ.get("DATA_DIR", "/mnt/bdata/gugene"), "datasets/SN_RNAseq/sea_ad_2024/mtg/RNAseq/"
+    "SEAAD_MTG_RNAseq_final-nuclei.2024-02-13.h5ad")
+)
+PB_CSV_PATH = (
+    os.path.join(os.environ.get("DATA_DIR", "/mnt/bdata/gugene"), "datasets/SN_RNAseq/sea_ad_2024/mtg/RNAseq/"
+    "mtg_data_pseudobulk/sea_mtg_pseudobulk.csv.gz")
+)
+PB_ANNO_PATH = (
+    os.path.join(os.environ.get("DATA_DIR", "/mnt/bdata/gugene"), "datasets/SN_RNAseq/sea_ad_2024/mtg/RNAseq/"
+    "mtg_data_pseudobulk/sea_mtg_pseudobulk_annotations.csv")
+)
 
 # Must match what prepare_seaad_mtg_pseudobulk.py used
 RAW_LAYER    = "UMIs"

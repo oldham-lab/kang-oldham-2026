@@ -7,7 +7,7 @@ import os
 import json, csv, os, re
 HERE=os.path.dirname(os.path.abspath(__file__))
 V4=os.path.dirname(HERE)
-PREFILTER_CSV=os.path.join(os.environ.get("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_8/v1/scz_gene_databases_prefilter.csv")
+PREFILTER_CSV=os.path.join(os.environ.get("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_8/v4/scz_db_pipeline/scz_gene_databases_prefilter.csv")
 
 CATS={1:"Dopaminergic signaling dysfunction",2:"Glutamatergic / NMDA receptor hypofunction",
 3:"GABAergic interneuron dysfunction",4:"Synaptic vesicle cycling / neurotransmitter release",

@@ -402,7 +402,7 @@ cc_colors <- RColorBrewer::brewer.pal(3, "Set1")
 #     scale_size_continuous(breaks = scales::pretty_breaks(n = 3)) +
 #     facet_wrap(~comp, ncol = 2, scales = "free_y") 
 
-# ggsave(p, file = "~/test/test1.pdf", width = 7, height = 6)
+# ggsave(p, file = file.path(Sys.getenv("SCRATCH_DIR", "~/test"), "test1.pdf"), width = 7, height = 6)
 
 p2 <- mapply(\(x, y){
   x |>

@@ -4,7 +4,7 @@ library(openxlsx)
 # ============================================================
 # Paths
 # ============================================================
-AD_CSV  <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/v7.1/panel_B_dcopa_genelist.csv")
+AD_CSV  <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/v8/panel_B_dcopa_genelist.csv")
 SCZ_CSV <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_8/v4/panel_B_dcopa_genelist.csv")
 OUT_PATH <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/table_s14/v2/Kang_Table_S14_v2.xlsx")
 
