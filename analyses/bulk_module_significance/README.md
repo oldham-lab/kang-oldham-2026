@@ -2,7 +2,7 @@
 
 Small per-module significance counts derived from the bulk pairwise-correlation
 analysis, used as a **module pre-filter** across many figures (fig_3, fig_4,
-fig_6, fig_7, fig_7_sup) and the Shiny precalc: a module is kept when it has at
+fig_6, fig_7): a module is kept when it has at
 least 2 significant bulk correlations (`vals >= 2`).
 
 | File | Meaning |

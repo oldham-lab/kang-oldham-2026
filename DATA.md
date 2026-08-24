@@ -82,8 +82,8 @@ fig_1 followup sensitivity analysis), `BBMAP_DIR` (`bbduk.sh` + adapter FASTA fo
 read trimming), `HOME_DATA_DIR` (two one-off lein MTG / ABI cell-count CSVs),
 `PYTHON_BIN` (interpreter R invokes for SVG/PPTX rendering).
 
-`SHINYAPP_DIR` points at the CoPA Shiny app checkout and is only used by
-`figures/shiny_code/` snapshot generation — not by any figure.
+`SHINYAPP_DIR` points at the CoPA Shiny app checkout. It was used only by the
+Shiny snapshot generation, which is not part of this repo — no figure reads it.
 
 ## Tracked reproduction inputs (small)
 

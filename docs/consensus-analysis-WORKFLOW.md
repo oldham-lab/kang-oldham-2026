@@ -88,11 +88,11 @@ Run CoPA on **disease vs. control** strata (AD: SEA-AD, ROSMAP; SCZ: BrainSeq), 
 
 The figure sequence traces the narrative arc:
 
-- **Validate** modules = cell types: `fig_1`, `fig_2` (+`_related_analyses`), `fig_s2–s5`, `table_s6_7` — pseudobulk DE & per-donor modeling.
+- **Validate** modules = cell types: `fig_1`, `fig_2`, `fig_s2–s5`, `table_s6_7` — pseudobulk DE & per-donor modeling.
 - **Annotate** modules: `fig_3`, `fig_4`, `fig_5` (REI schematic + dendrograms), `fig_6` (all significant modules), `fig_s6–s8`, `table_s9/s10` (module membership).
-- **Disease**: `fig_7` (AD dCoPA), `fig_8` (SCZ dCoPA), `fig_AD`, `fig_SCZ_AD` (shared signatures), `fig_s9` + `table_s11` (permutation null), `table_s12` (dysregulated gene lists).
+- **Disease**: `fig_7` (AD dCoPA), `fig_8` (SCZ dCoPA), `fig_s9` + `table_s11` (permutation null), `table_s12` (dysregulated gene lists). The shared-signature exploration (`fig_AD`, `fig_SCZ_AD`) is upstream only.
 - **Cohort summary**: `fig_s1`, `table_s1`, `table_s8`.
-- **Delivery**: `shiny_code/` — interactive app with CoPA / dCoPA / gene-projection tabs, served from precomputed GSEA caches.
+- **Delivery**: the interactive app (CoPA / dCoPA / gene-projection tabs, served from precomputed GSEA caches) ships with the app itself, not this repo.
 - **Enrichment backbone** (cross-cutting): `gsea_func_optimized.R`, `generic_enrichment_function.r`.
 
 ---
