@@ -78,7 +78,10 @@ def content_bbox(src_pdf):
     for b in page.get_text("blocks"):
         r |= fitz.Rect(b[:4])
     for d in page.get_drawings():
-        r |= d["rect"]
+        # a stroked path extends half a line width beyond its own bbox; without this
+        # the clip shaves the outer edge (visibly flattens the legend size circles)
+        w = d["width"] / 2 if d["type"] in ("s", "fs") and d["width"] else 0
+        r |= d["rect"] + (-w, -w, w, w)
     if r.is_empty or r.x1 < r.x0:
         return page.rect
     return r & page.rect

@@ -42,9 +42,9 @@ annotate_region <- function(panel_b, overlaps, region, dis_modtype) {
 
 # ---- AD region sheet (unchanged columns from v1) ----
 build_ad <- function(region) {
-  s   <- fread(file.path(FIG7, "v7.2", paste0("ad_db_summary_table_", tolower(region), ".csv")), data.table = FALSE)
+  s   <- fread(file.path(FIG7, "v8", paste0("ad_db_summary_table_", tolower(region), ".csv")), data.table = FALSE)
   ann <- annotate_region(file.path(FIG7, "v8/panel_B_dcopa_genelist.csv"),
-                         file.path(FIG7, "v7.2", paste0(tolower(region), "_overlaps.csv")),
+                         file.path(FIG7, "v8", paste0(tolower(region), "_overlaps.csv")),
                          region, "ROSMAP AD")
   dropped <- setdiff(s$Gene, ann$Gene)
   if (length(dropped)) message("  AD ", region, ": dropping ", length(dropped), " non-reproducible: ",

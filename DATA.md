@@ -47,8 +47,8 @@ download scripts: `syn3157322`, `syn3270014`, `syn3275211`, `syn3346807`,
 - **Cell-type AD-vs-control DE results** (`fig_7`, ~140 MB of `.qs`/`.RDS`:
   `*_ADvsCon_by_celltype.{qs,RDS}` for MIT/SEA-AD × DFC/MTG). **Regenerate on
   demand — not tracked, not distributed.** Produced by
-  `figures/fig_7/v4/full_DE_pipeline_ADvsCon.R` (writes per-dataset DE objects),
-  then collated by `figures/fig_7/v4/DE/concat_DE_results.R`; downstream fig_7
+  `figures/fig_7/full_DE_pipeline_ADvsCon.R` (writes per-dataset DE objects),
+  then collated by `figures/fig_7/DE_ADvsCon/concat_DE_results.R`; downstream fig_7
   panels read them from `DE_DIR`. Set `DE_DIR` to the output location (default:
   `<REPO_DIR>/figures/fig_7/DE_old`, which is gitignored). Requires the
   single-nucleus inputs (SEA-AD, MIT Multiome) under `DATA_DIR`.
@@ -90,10 +90,13 @@ Shiny snapshot generation, which is not part of this repo — no figure reads it
 - `analyses/bulk_module_significance/bulk_cors_sigcount_bonf_*.csv` — module
   significance pre-filter used across figures (relocated from the archived
   `fig_3_old/bulk_cor_significance_analysis/`; see that folder's README.md).
-- `figures/fig_8/v1/scz_*.csv` + `scz_genes.txt` — curated SCZ gene database for
-  fig_8, product of a non-deterministic LLM-agent literature-review pipeline
-  (not cheaply regenerable). Tracked via a `.gitignore` exception; see
-  `figures/fig_8/v1/README_scz_db.md`.
+- `figures/fig_8/v4/scz_db_pipeline/` — curated SCZ gene database for fig_8,
+  product of a non-deterministic LLM-agent literature-review pipeline. The
+  classifications are tracked as JSON (`scz_classification*.json`,
+  `classify_input*.json`), so the non-reproducible step is captured; the summary
+  table `fig_8/v4/scz_db_summary_table_dfc.csv` that `fig8_panelA_bracket.R`
+  reads is regenerated from them deterministically by `assemble_scz_db.py`, and
+  is not itself tracked.
 
 ## Intermediate products
 

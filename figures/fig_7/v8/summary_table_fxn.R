@@ -2,6 +2,16 @@ library(gt)
 library(dplyr)
 source(file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/v8/gsea_func_optimized.R"))
 
+# gt pins the geneset column to a fixed width, but MSigDB set names are single
+# underscore-joined tokens with no break opportunity, so long ones overflow the
+# column and get clipped. Add a break opportunity after each underscore and keep
+# the p-value parenthetical from splitting at its exponent hyphen.
+wrap_geneset_html <- function(x) {
+  x <- gsub("_", "_<wbr>", x, fixed = TRUE)
+  gsub("\\((padj|p)=([^)]*)\\)",
+       "<span style=\"white-space:nowrap\">(\\1=\\2)</span>", x)
+}
+
 create_summary_table <- function(g_overlaps,
                                  ad_db,
                                  column_4_header = "AD-associated genes",
@@ -212,7 +222,7 @@ create_summary_table <- function(g_overlaps,
         data.frame(
             Celltype     = ct,
             N_genes      = n_genes,
-            Top_genesets = top_str,
+            Top_genesets = wrap_geneset_html(top_str),
             AD_genes     = ad_str,
             stringsAsFactors = FALSE
         )
@@ -323,7 +333,7 @@ create_summary_table <- function(g_overlaps,
     data.frame(
         Celltype     = ct,
         N_genes      = n_genes,
-        Top_genesets = top_str,
+        Top_genesets = wrap_geneset_html(top_str),
         AD_genes     = ad_str,
         stringsAsFactors = FALSE
     )

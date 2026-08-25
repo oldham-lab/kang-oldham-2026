@@ -18,6 +18,16 @@ if(!dir.exists(save_dir))
 
 source(file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/v8/ad_db.R"))
 
+# gt pins the geneset column to a fixed width, but MSigDB set names are single
+# underscore-joined tokens with no break opportunity, so long ones overflow the
+# column and get clipped. Add a break opportunity after each underscore and keep
+# the p-value parenthetical from splitting at its exponent hyphen.
+wrap_geneset_html <- function(x) {
+  x <- gsub("_", "_<wbr>", x, fixed = TRUE)
+  gsub("\\((padj|p)=([^)]*)\\)",
+       "<span style=\"white-space:nowrap\">(\\1=\\2)</span>", x)
+}
+
 ####### Start with DFC
 g_overlaps <- fread(data.table = F, file = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/v8/dfc_overlaps.csv"))
 
@@ -121,7 +131,7 @@ build_row <- function(ct) {
   data.frame(
     Celltype     = ct,
     N_genes      = n_genes,
-    Top_genesets = top_str,
+    Top_genesets = wrap_geneset_html(top_str),
     AD_genes     = ad_str,
     stringsAsFactors = FALSE
   )
@@ -230,7 +240,7 @@ build_row_fdr <- function(ct) {
   data.frame(
     Celltype     = ct,
     N_genes      = n_genes,
-    Top_genesets = top_str,
+    Top_genesets = wrap_geneset_html(top_str),
     AD_genes     = ad_str,
     stringsAsFactors = FALSE
   )
@@ -377,7 +387,7 @@ build_row <- function(ct) {
   data.frame(
     Celltype     = ct,
     N_genes      = n_genes,
-    Top_genesets = top_str,
+    Top_genesets = wrap_geneset_html(top_str),
     AD_genes     = ad_str,
     stringsAsFactors = FALSE
   )
@@ -486,7 +496,7 @@ build_row_fdr <- function(ct) {
   data.frame(
     Celltype     = ct,
     N_genes      = n_genes,
-    Top_genesets = top_str,
+    Top_genesets = wrap_geneset_html(top_str),
     AD_genes     = ad_str,
     stringsAsFactors = FALSE
   )

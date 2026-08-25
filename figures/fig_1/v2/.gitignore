@@ -1,4 +1,0 @@
-# Ignore all generated outputs in this folder; track only the script.
-*
-!.gitignore
-!fig1_v2.R
