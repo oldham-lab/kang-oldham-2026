@@ -5,7 +5,7 @@ figures and tables from a batch-corrected bulk human-cortex RNA-seq megaset and
 its projection onto single-nucleus datasets.
 
 > Placeholder repo name. Method code lives in the companion package
-> [**CoPA**](https://github.com/oldham-lab/COPA) (Co-expression Projection
+> [**CoPA**](https://github.com/oldham-lab/COPA/tree/dev) (Co-expression Projection
 > Analysis); this repo *uses* CoPA rather than re-implementing it.
 
 ## What it does
@@ -47,7 +47,9 @@ app pipeline (`shiny_code`), which lives with the app; the full history remains 
 
 ## Requirements
 
-- R (>= 4.1) with the **CoPA** package installed (`remotes::install_github("oldham-lab/COPA")`).
+- R (>= 4.1) with the **CoPA** package installed
+  (`remotes::install_github("oldham-lab/COPA@dev")`). The `dev` ref is required:
+  the repo's default branch holds the standalone engine scripts, not the package.
 - Python (>= 3.9) for the single-nucleus processing bundled in CoPA (`inst/python`).
 - See each figure directory for figure-specific dependencies.
 
@@ -66,7 +68,8 @@ and access models are documented in [`DATA.md`](DATA.md).
 ## Citation
 
 If you use this code, please cite the paper and this software release — see
-[`CITATION.cff`](CITATION.cff). The method package is [CoPA](https://github.com/oldham-lab/CoPA).
+[`CITATION.cff`](CITATION.cff). The method package is
+[CoPA](https://github.com/oldham-lab/COPA/tree/dev).
 
 ## License
 

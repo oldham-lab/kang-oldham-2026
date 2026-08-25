@@ -36,5 +36,5 @@ references:
   - type: software
     title: "CoPA: Co-expression Projection Analysis"
     notes: "Method package used by this analysis."
-    repository-code: "https://github.com/oldham-lab/CoPA"   # TODO: confirm
+    repository-code: "https://github.com/oldham-lab/COPA"   # package is on the dev branch
 # TODO: add the paper itself as a preferred-citation (doi/journal) once available.
