@@ -149,6 +149,18 @@ fig6_full_pipeline <- function(all_plots,
                         Consistency %in% c(0, 1)) |>
         dplyr::arrange(mod)
 
+    # NB this is DELIBERATELY broader than the CoPA app's module list, so expect
+    # snapshots here that the app never surfaces. The app's svg_map comes from
+    # fig_7/v8/fig7_v7.1.R (AD) and fig_8/v4/fig8_panelA_bracket.R (SCZ), and the
+    # SCZ one additionally drops the brainSCOPE cell types with the thinnest
+    # nucleus counts: filter(!Celltype %in% c("Immune", "PC", "SMC")). A module
+    # whose only shared cell type is one of those passes here but not there --
+    # as of 2026-09-01 that is module 169 (SCZvsCon_DFC_bulkmegaset, shared only
+    # via PC) and module 180 (..._Brainseq, likewise PC). Both are correct: this
+    # renders whatever is dCoPA-significant in both datasets, the app is stricter.
+    # The AD contexts show no such gap because Gabitto/Liu have no PC/SMC/Immune
+    # categories to drop, so their map matches this set exactly.
+    #
     # Restrict the per-module loop to user-specified modules (if provided).
     # Default (NULL) keeps original behaviour: all dCoPA-shared modules.
     loop_mods <- unique(dcopa_shared$mod)

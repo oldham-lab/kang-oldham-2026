@@ -38,18 +38,24 @@ source(file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"
 source(file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_6/fig6_fxns.R"))
 source(file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_6/full_pipeline.R"))
 
-# Patch make_expr_line_plots in memory: fig6_fxns.R titles the snapshot by the
-# loop index j (paste0("Module ", j)) rather than the true module ID, which
-# mislabels sparse module IDs (e.g. module 992 shows as "Module 891"). Fix the
-# title to the real ID here only — without editing the shared fig6_fxns.R.
-local({
-  .b   <- deparse(body(make_expr_line_plots))
-  .pat <- 'paste0\\("Module ", *j\\)'
-  if (!any(grepl(.pat, .b)))
-    stop("title-label patch failed: 'paste0(\"Module \", j)' not found in make_expr_line_plots")
-  .b <- gsub(.pat, 'paste0("Module ", these_mods[[j]])', .b)
-  body(make_expr_line_plots) <<- parse(text = paste(.b, collapse = "\n"))[[1]]
-})
+# MODULE NUMBERING. Three different numbers exist for the same module:
+#   topmodposbc id   the raw value in datkme[,3]. What target_mods selects by and
+#                    what the output SVG is named after. For the featured module: 992.
+#   plot position    its index in these_mods, which filters on module size only
+#                    (1023 modules). fig6_fxns.R titles by this: "Module 891".
+#   app index        its index after ALSO dropping modules that are not significant
+#                    in the bulk correlation analysis (1016 modules). This is what
+#                    the CoPA Shiny app calls "Module index" and displays, so it is
+#                    the only number a reader can look up: "Module 890".
+#
+# fig6_fxns.R's own title gives the plot position (891); an earlier patch here
+# replaced that with the raw id (992). Neither is a number a reader can resolve
+# against the app, so title by the app index instead.
+#
+# app_mods is used for LABELLING ONLY. mods/these_mods deliberately keep all 1023
+# size-filtered modules so the GSEA background and its FDR cutoff line are
+# unchanged from the published panel -- this fix must move the title and nothing else.
+# The labelling block itself lives with the module set below (see has_app_index).
 
 # -------------------- user parameters --------------------
 # Modules, key, and context. CLI args (if given) override these.
@@ -120,9 +126,50 @@ filter_under <- 3
 datkme <- fread(data.table = F, file = datkme_path)
 if(sum(duplicated(datkme[,2]))>0){datkme[,2] <- make.unique(datkme[,2])}
 mods <- tapply(datkme[,2], datkme[,3], list)
+n_mods_all <- length(mods)
 modulelengths <- unlist(lapply(mods,length))
 these_mods <- as.numeric(names(mods)[which(modulelengths>filter_under)])
 mods <- mods[these_mods]
+
+# Labelling set: these_mods minus bulk-non-significant modules, matching app.R:302
+# and this figure's own panel a (fig8_panelA_bracket.R:72). Position in app_mods is
+# the number the app shows. NOT used to subset mods -- see the note above.
+#
+# The table is indexed BY RAW MODULE ID and describes the 1158-module bulk-megaset
+# network only. SCZ_sczmods uses the Brainseq_SCZ network (1147 modules), which the
+# app does not serve, so applying it there would drop the wrong ids and shift every
+# label silently. Gate on the network, and keep the row-count check as a backstop
+# in case a context's kME table is ever repointed.
+has_app_index <- context %in% c("AD", "SCZ_ctrlmods")
+if(has_app_index){
+  sigcount_bonf <- fread(data.table = F, file = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "analyses/bulk_module_significance/bulk_cors_sigcount_bonf_1158.csv"))
+  if(nrow(sigcount_bonf) != n_mods_all)
+    stop("Significance table has ", nrow(sigcount_bonf), " rows but the module set has ",
+         n_mods_all, " modules; they are not the same network. Refusing to label.")
+  app_mods <- these_mods[!these_mods %in% which(sigcount_bonf$vals < 2)]
+
+  unlabellable <- setdiff(target_mods, app_mods)
+  if(length(unlabellable) > 0)
+    stop("Requested module(s) are not in the app's module set, so they have no ",
+         "displayable module index: ", paste(unlabellable, collapse = ", "))
+
+  local({
+    .b   <- deparse(body(make_expr_line_plots))
+    .pat <- 'paste0\\("Module ", *j\\)'
+    if (!any(grepl(.pat, .b)))
+      stop("title-label patch failed: 'paste0(\"Module \", j)' not found in make_expr_line_plots")
+    # match() yields NA for the 7 modules absent from app_mods; harmless, since only
+    # the target module's panel is written out.
+    .b <- gsub(.pat, 'paste0("Module ", match(these_mods[[j]], app_mods))', .b)
+    body(make_expr_line_plots) <<- parse(text = paste(.b, collapse = "\n"))[[1]]
+  })
+  cat("Module index (as shown in the CoPA app):",
+      paste(sprintf("topmodposbc %s -> Module %s", target_mods, match(target_mods, app_mods)),
+            collapse = "; "), "\n")
+} else {
+  cat("Context '", context, "' uses a network the CoPA app does not serve; ",
+      "titling by plot position.\n", sep = "")
+}
 
 # Warn about any requested module not present in the module set
 missing_in_set <- setdiff(target_mods, these_mods)

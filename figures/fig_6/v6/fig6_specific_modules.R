@@ -107,8 +107,65 @@ datkme <- fread(data.table = F, file = datkme_path)
 if(sum(duplicated(datkme[,2]))>0){datkme[,2] <- make.unique(datkme[,2])}
 mods <- tapply(datkme[,2], datkme[,3], list)
 modulelengths <- unlist(lapply(mods,length))
+n_mods_all <- length(mods)
 these_mods <- as.numeric(names(mods)[which(modulelengths>filter_under)])
 mods <- mods[these_mods]
+
+# MODULE NUMBERING. Three numbers exist for the same module:
+#   topmodposbc id   the raw value in datkme[,3]. What target_mods selects by and
+#                    what the output SVG is named after (e.g. 83, 147).
+#   plot position    its index in these_mods, which filters on size only. This is
+#                    what fig6_fxns.R titles by: paste0("Module ", j).
+#   app index        its index after ALSO dropping bulk-non-significant modules.
+#                    This is what the CoPA Shiny app calls "Module index" and
+#                    displays, so it is the only number a reader can look up.
+#
+# For fig_6's current modules the last two coincide -- the significance filter only
+# removes ids 934+, so positions below 844 are unshifted, and 83/147 sit at 77/139
+# either way. That is luck of position, not correctness: a featured module past
+# position 844 would be mislabelled with nothing to flag it, which is exactly what
+# happened to fig_8 (topmodposbc 992 titled "Module 891" instead of 890). Label by
+# the app index explicitly so it is right by construction.
+#
+# app_mods is for LABELLING ONLY -- mods/these_mods keep every size-filtered module
+# so the GSEA background and its FDR cutoff line are unchanged.
+#
+# The significance table is indexed BY RAW MODULE ID and is specific to the 1158-
+# module bulk-megaset network, so it applies only to contexts built from that kME
+# table. SCZ_sczmods uses the Brainseq_SCZ network (a different module set that the
+# app does not serve), so it keeps the plot-position title and gets no app index.
+has_app_index <- context %in% c("AD", "SCZ_ctrlmods")
+if(has_app_index){
+  sigcount_bonf <- fread(data.table = F, file = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "analyses/bulk_module_significance/bulk_cors_sigcount_bonf_1158.csv"))
+  # vals is positional: row i describes module id i. A length mismatch would
+  # silently drop the wrong modules and shift every label, so refuse to guess.
+  if(nrow(sigcount_bonf) != n_mods_all)
+    stop("Significance table has ", nrow(sigcount_bonf), " rows but the module set has ",
+         n_mods_all, " modules; they are not the same network. Refusing to label.")
+  app_mods <- these_mods[!these_mods %in% which(sigcount_bonf$vals < 2)]
+
+  unlabellable <- setdiff(target_mods, app_mods)
+  if(length(unlabellable) > 0)
+    stop("Requested module(s) are not in the app's module set, so they have no ",
+         "displayable module index: ", paste(unlabellable, collapse = ", "))
+
+  local({
+    .b   <- deparse(body(make_expr_line_plots))
+    .pat <- 'paste0\\("Module ", *j\\)'
+    if (!any(grepl(.pat, .b)))
+      stop("title-label patch failed: 'paste0(\"Module \", j)' not found in make_expr_line_plots")
+    # match() yields NA for modules absent from app_mods; harmless, since only the
+    # target modules' panels are written out.
+    .b <- gsub(.pat, 'paste0("Module ", match(these_mods[[j]], app_mods))', .b)
+    body(make_expr_line_plots) <<- parse(text = paste(.b, collapse = "\n"))[[1]]
+  })
+  cat("Module index (as shown in the CoPA app):",
+      paste(sprintf("topmodposbc %s -> Module %s", target_mods, match(target_mods, app_mods)),
+            collapse = "; "), "\n")
+} else {
+  cat("Context '", context, "' uses a network the CoPA app does not serve; ",
+      "titling by plot position.\n", sep = "")
+}
 
 # Warn about any requested module not present in the module set
 missing_in_set <- setdiff(target_mods, these_mods)

@@ -261,9 +261,12 @@ dcopa_shared_overlaps_save <- lapply(dcopa_shared_overlaps, \(x){
   ))
   return(out)
 })
-# (v3 panel-a-only run: shared fig_7 writes disabled to avoid clobbering)
-# fwrite(dcopa_shared_overlaps_save[[1]], file = ".../fig_7/dcopa_svg_map_path/scz_dfc.csv")
-# fwrite(dcopa_shared_overlaps_save[[2]], file = ".../fig_7/dcopa_svg_map_path/scz_dfc_sczmods.csv")
+# Shared fig_7 svg_map writes. These were disabled for a v3 panel-a-only run to
+# avoid clobbering; the guard outlived its purpose and left the app's SCZ maps at
+# their May 2026 (pre-HGNC) vintage while the AD maps were regenerated 2026-07-20.
+# Re-enabled 2026-09-01 so the SCZ half of the app's dCoPA tab matches this figure.
+fwrite(dcopa_shared_overlaps_save[[1]], file = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/dcopa_svg_map_path/scz_dfc.csv"))
+fwrite(dcopa_shared_overlaps_save[[2]], file = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/dcopa_svg_map_path/scz_dfc_sczmods.csv"))
 
 #dcopa_shared_overlaps[[3]] <- find_output_overlap2(dcopa_shared_overlaps[[1]], dcopa_shared_overlaps[[2]]) # Gabitto/Liu DFC/MTG
 
@@ -333,11 +336,11 @@ plotlist_save_create <- function(df, comp_var, overlap_df){
   return(out)
 }
 
-# (v3 panel-a-only run: shared fig_7 dot-data writes disabled)
-# fwrite(plotlist_save_create(plotlist[[1]], "CTRL modules | CMC + SZBDMultiseq SN", dcopa_shared_overlaps_save[[1]]),
-#        file = ".../fig_7/dcopa_dot_data_path/scz_dfc.csv") # DFC ctrl mods
-# fwrite(plotlist_save_create(plotlist[[1]], "SCZ modules | CMC + SZBDMultiseq SN", dcopa_shared_overlaps_save[[2]]),
-#        file = ".../fig_7/dcopa_dot_data_path/scz_dfc_sczmods.csv") # DFC SCZ mods
+# Shared fig_7 dot-data writes -- re-enabled 2026-09-01, see the svg_map note above.
+fwrite(plotlist_save_create(plotlist[[1]], "CTRL modules | CMC + SZBDMultiseq SN", dcopa_shared_overlaps_save[[1]]),
+       file = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/dcopa_dot_data_path/scz_dfc.csv")) # DFC ctrl mods
+fwrite(plotlist_save_create(plotlist[[1]], "SCZ modules | CMC + SZBDMultiseq SN", dcopa_shared_overlaps_save[[2]]),
+       file = file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/dcopa_dot_data_path/scz_dfc_sczmods.csv")) # DFC SCZ mods
 
 # Set size range for dot legend
 limit_vec = c(1, max(c(plotlist[[1]]$num_sig), na.rm = T))

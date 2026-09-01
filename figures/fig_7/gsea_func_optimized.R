@@ -156,6 +156,55 @@ run_gsea_for_proj_optimized <- function(allModules,
                               broad     = TRUE,
                               n_cores   = detectCores() - 1L) {
 
+  # ── result cache ────────────────────────────────────────────────────────────
+  # GSEA here is a pure function of the module set and the geneset sources, but
+  # the Broad pass alone parses a 201 MB MSigDB XML and runs across ~1000 modules.
+  # fig_6/v6 and fig_8/v4 build IDENTICAL module sets (same kME table, same
+  # filter_under = 3), so uncached, each pays that cost in full -- even when the
+  # only thing changing is a panel title. Key on the module contents plus the
+  # size+mtime of every geneset source that feeds the chosen branch, so edits to
+  # any input miss the cache rather than silently returning stale results.
+  # Escape hatch: GSEA_CACHE=0 in the environment bypasses read and write.
+  .cache_dir <- file.path(Sys.getenv("REPO_DIR", "/home/gugene/code/git/kang-oldham-2026"), "figures/fig_7/gsea_cache")
+  .p <- list(
+    combat  = file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "datasets/RNAseq/combined_mats/combined_FCX_final_SampleNetworks/1_10-35-00/combined_FCX_final_1_1518_ComBat.csv"),
+    msigdb  = Sys.getenv("MSIGDB_XML", "/home/gugene/code/git/CoPA/data-raw/msigdb_v7.4.xml"),
+    projset = system.file("extdata", "proj_sets.qs", package = "CoPA"),
+    setdir  = system.file("extdata", "GeneSets_consensus", package = "CoPA")
+  )
+  .use_cache  <- !identical(Sys.getenv("GSEA_CACHE"), "0")
+  .cache_file <- NULL
+  if (.use_cache) {
+    .stamp <- function(f) {
+      i <- file.info(f)
+      paste(f, i$size, format(i$mtime, "%Y%m%d%H%M%S"), sep = "|")
+    }
+    # Only the sources the chosen branch actually reads: set_list/proj_sets are
+    # unused when broad = TRUE, so including them would fragment the cache.
+    .src <- .p$combat
+    if (broad) {
+      .src <- c(.src, .p$msigdb)
+    } else {
+      .src <- c(.src, .p$projset,
+                if (is.null(set_list)) sort(list.files(.p$setdir, full.names = TRUE)) else character(0))
+    }
+    .key <- digest::digest(list(
+      modules  = lapply(allModules[order(names(allModules))], function(g) sort(as.character(g))),
+      modnames = sort(names(allModules)),
+      broad    = broad,
+      setlist  = if (broad || is.null(set_list)) NULL
+                 else lapply(set_list, function(x) sort(as.character(unlist(x)))),
+      filedesc = if (broad) NULL else file_desc,
+      sources  = vapply(.src, .stamp, character(1), USE.NAMES = FALSE)
+    ), algo = "xxhash64")
+    .cache_file <- file.path(.cache_dir, paste0("gsea_",
+                             if (broad) "broad" else "userInput", "_", .key, ".qs"))
+    if (file.exists(.cache_file)) {
+      cat("GSEA cache hit:", basename(.cache_file), "\n")
+      return(qs::qread(.cache_file))
+    }
+  }
+
   allgenes <- fread(
     file.path(Sys.getenv("DATA_DIR", "/mnt/bdata/gugene"), "datasets/RNAseq/combined_mats/combined_FCX_final_SampleNetworks/1_10-35-00/combined_FCX_final_1_1518_ComBat.csv"),
     data.table = FALSE
@@ -181,8 +230,8 @@ run_gsea_for_proj_optimized <- function(allModules,
   set_list_sn <- qread(system.file("extdata", "proj_sets.qs", package = "CoPA"))
   file_desc_sn <- names(set_list_sn)
 
-  if (broad) {
-    broadSets <- getBroadSets(Sys.getenv("MSIGDB_XML", "/home/gugene/code/git/CoPA/data-raw/msigdb_v7.4.xml"))
+  .res <- if (broad) {
+    broadSets <- getBroadSets(.p$msigdb)
     cat("Running GSEA using Broad genesets...\n")
     BroadGSHG(
       allModules = allModules,
@@ -202,4 +251,11 @@ run_gsea_for_proj_optimized <- function(allModules,
       n_cores    = n_cores
     )
   }
+
+  if (.use_cache) {
+    dir.create(.cache_dir, showWarnings = FALSE, recursive = TRUE)
+    qs::qsave(.res, .cache_file)
+    cat("GSEA cached:", basename(.cache_file), "\n")
+  }
+  .res
 }
