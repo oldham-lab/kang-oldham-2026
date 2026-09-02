@@ -4,10 +4,17 @@ make_expr_line_plots <- function(expr,
                                  mods,
                                  these_mods,
                                  datkme,
-                                 highlight_genes = NULL # gene names to colour red in the legend
-                                 #seed = 23
+                                 highlight_genes = NULL, # gene names to colour red in the legend
+                                 seed = 23
                                  ){
-  #set.seed(seed)
+  # The 100-sample draw below (and its zero-variance retry) is illustrative, but it
+  # was unseeded, so every regeneration silently redrew the traces of every panel
+  # and the previous ones could not be recovered. That churned Fig. 6, Fig. 8 and
+  # the app's dCoPA snapshots on each re-render. Seeded so a rebuild reproduces the
+  # panels it replaces. NB this does NOT recover any draw made before 2026-09-01 --
+  # the RNG state that produced those is gone; the first render after this commit
+  # changes the traces one last time, and is stable from then on.
+  set.seed(seed)
   num_of_genes <- 10 # number of genes to plot
   cols2 <- RColorBrewer::brewer.pal(10, "Spectral")
 
